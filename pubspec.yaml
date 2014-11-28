@@ -1,0 +1,16 @@
+name: tekartik_idb_provider
+description: Provider pattern on top of indexeddb
+dependencies:
+  tekartik_core:
+    git: git://github.com/alextekartik/tekartik_core.dart
+  idb_shim: any
+  collection: any
+dev_dependencies:
+  unittest: any
+  tekartik_test:
+    git: git://github.com/alextekartik/tekartik_test.dart
+dependency_overrides: 
+#  tekartik_test:
+#    path: ../tekartik_test.dart
+#  tekartik_core:
+#    path: ../tekartik_core.dart
