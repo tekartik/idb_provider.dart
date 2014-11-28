@@ -135,7 +135,15 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction with Provid
   ProviderStoreTransactionBase(Provider provider, String storeName, [bool readWrite = false]) {
     _mode = readWrite ? IDB_MODE_READ_WRITE : IDB_MODE_READ_ONLY;
 
-    _transaction = provider.db._database.transaction(storeName, _mode);
+    try {
+      _transaction = provider.db._database.transaction(storeName, _mode);
+    } catch (e) {
+      // typically db might have been closed so add some debug information
+      if (provider.isClosed) {
+        print("database has been closed");
+      }
+      rethrow;
+    }
     _store = new ProviderStore(_transaction.objectStore(storeName));
   }
 

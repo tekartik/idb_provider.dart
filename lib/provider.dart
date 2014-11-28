@@ -123,6 +123,16 @@ abstract class Provider {
       _readyCompleter = null;
     }
   }
+  
+  // delete content
+  Future clear() {
+    return delete().then((_) {
+      return ready;
+    });
+  }
+  
+  // check if database is still opened
+  bool get isClosed => (_db == null) && (_ready == null);
 
   // to implement
   void onUpdateDatabase(VersionChangeEvent e);

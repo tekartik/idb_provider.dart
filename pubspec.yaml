@@ -1,4 +1,5 @@
 name: tekartik_idb_provider
+version: 0.0.1
 description: Provider pattern on top of indexeddb
 dependencies:
   tekartik_core:
