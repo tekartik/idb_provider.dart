@@ -72,7 +72,7 @@ class ProviderDb {
   }
 
   int get version => meta.version;
-  
+
   void close() {
     database.close();
     _database = null;
@@ -108,9 +108,11 @@ class ProviderStoreMeta {
   final String name;
   final String keyPath;
   final bool autoIncrement;
-  ProviderStoreMeta(this.name, {this.keyPath, bool autoIncrement, List<ProviderIndexMeta> indecies}) //
+  ProviderStoreMeta(this.name, {this.keyPath, bool autoIncrement, List<ProviderIndexMeta> indecies})
+      //
       : autoIncrement = (autoIncrement == true) //
-      , indecies = (indecies == null) ? [] : indecies;
+      ,
+        indecies = (indecies == null) ? [] : indecies;
   final List<ProviderIndexMeta> indecies;
 
   ProviderStoreMeta overrideIndecies(List<ProviderIndexMeta> indecies) {

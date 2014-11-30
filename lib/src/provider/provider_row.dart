@@ -20,7 +20,7 @@ abstract class _BaseRow<K, V> {
     }
     return false;
   }
- 
+
 }
 
 abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
@@ -35,9 +35,9 @@ abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
     }
     return false;
   }
-  
-   operator [](String key) => value[key];
-  
+
+  operator [](String key) => value[key];
+
 }
 
 class StringMapRow extends _BaseMapRow<String> {
@@ -49,9 +49,9 @@ class IntMapRow extends _BaseMapRow<int> {
 }
 
 abstract class ProviderRowFactory<T extends _BaseRow<K, V>, K, V> {
-  
+
   T newRow(K key, V value);
-  
+
   T cursorWithValueRow(CursorWithValue cwv) => newRow(cwv.primaryKey, cwv.value);
 }
 

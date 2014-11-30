@@ -38,17 +38,19 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-     test('int_map', () {
+      test('int_map', () {
         provider.addStore(new ProviderStoreMeta("store", autoIncrement: true));
         return provider.ready.then((Provider readyProvider) {
           ProviderStoreTransaction txn = provider.storeTransaction("store", true);
           // for cleanup
           transaction = txn;
-          
-          return txn.put({"test": 1}).then((key) {
+
+          return txn.put({
+            "test": 1
+          }).then((key) {
             return txn.get(key).then((value) {
               IntMapRow row = intMapProviderRawFactory.newRow(key, value);
-              
+
               // Cursor
               txn.openCursor().listen((cwv) {
                 IntMapRow cursorRow = intMapProviderRawFactory.cursorWithValueRow(cwv);

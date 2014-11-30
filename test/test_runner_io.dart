@@ -5,5 +5,5 @@ import 'package:idb_shim/idb_console.dart';
 main() {
   useVMConfiguration();
   all_common.testMain(idbMemoryFactory);
-  
+
 }
