@@ -127,7 +127,8 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction with Provid
 
   ProviderStore _store;
 
-  @deprecated
+  // not recommended though
+  //@deprecated
   ProviderStore get store => _store;
 
   ProviderStoreTransactionBase._();
