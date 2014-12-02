@@ -199,6 +199,18 @@ void testMain(IdbFactory idbFactory) {
       });
     });
 
+    test('put/clear/get', () {
+
+      return provider.putName("test").then((int key) {
+        expect(key, 1);
+        return provider.clear().then((_) {
+          return provider.getName(key).then((String name) {
+            expect(name, isNull);
+          });
+        });
+      });
+    });
+
 
 
   });

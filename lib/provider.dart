@@ -126,8 +126,15 @@ abstract class Provider {
 
   // delete content
   Future clear() {
-    return delete().then((_) {
-      return ready;
+    List<String> storeNames = db.database.objectStoreNames.toList(growable: false);
+    var globalTrans = new ProviderTransactionList(this, storeNames, true);
+    List<Future> futures = [];
+    for (String storeName in storeNames) {
+      var trans = globalTrans.store(storeName);
+      futures.add(trans.clear());
+    }
+    return Future.wait(futures).then((_) {
+      return globalTrans.completed;
     });
   }
 

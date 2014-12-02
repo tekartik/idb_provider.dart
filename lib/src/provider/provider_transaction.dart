@@ -3,7 +3,7 @@ part of tekartik_provider;
 class ProviderIndexTransaction<K, V> extends Object implements ProviderSourceTransaction<K, V> {
 
   Future get completed => _store.completed;
-  
+
   ProviderStoreTransaction _store;
   ProviderStoreTransaction get store => _store;
 
@@ -167,17 +167,13 @@ abstract class ProviderStoreTransactionMixin<K, V> {
 
   Future get(var key) => store.get(key);
 
-  Future<K> add(V value, [K key]) {
-    return store.add(value, key);
-  }
+  Future<K> add(V value, [K key]) => store.add(value, key);
 
-  Future<K> put(V value, [K key]) {
-    return store.put(value, key);
-  }
+  Future<K> put(V value, [K key]) => store.put(value, key);
 
-  delete(K key) {
-    return store.delete(key);
-  }
+  delete(K key) => store.delete(key);
+
+  Future clear() => store.clear();
 
   Stream<CursorWithValue> openCursor({bool reverse: false, int limit, int offset}) {
     StreamController<CursorWithValue> ctlr = new StreamController(sync: true);

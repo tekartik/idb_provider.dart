@@ -178,6 +178,7 @@ class ProviderStore {
   Future put(var value, [var key]) => objectStore.put(value, key);
   Future add(var value, [var key]) => objectStore.add(value, key);
   Future delete(var key) => objectStore.delete(key);
+  Future clear() => objectStore.clear();
 
   List<String> get indexNames => objectStore.indexNames;
 
