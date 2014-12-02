@@ -44,7 +44,13 @@ void testMain(IdbFactory idbFactory) {
     });
 
 
+
     test('store_index', () {
+      ProviderIndexTransaction txn = provider.indexTransaction(STORE_NAME, INDEX_NAME);
+      transaction = txn.store;
+      return txn.openCursor().listen((CursorWithValue cwv) {
+
+      }).asFuture();
 
 //      ProviderStoreTransaction txn = provider.storeTransaction(STORE_NAME);
 //      Index index = txn.index(INDEX_NAME);

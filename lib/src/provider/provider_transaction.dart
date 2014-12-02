@@ -2,8 +2,10 @@ part of tekartik_provider;
 
 class ProviderIndexTransaction<K, V> extends Object implements ProviderSourceTransaction<K, V> {
 
-  ProviderStoreTransactionMixin _store;
-  ProviderStoreTransactionMixin get store => _store;
+  Future get completed => _store.completed;
+  
+  ProviderStoreTransaction _store;
+  ProviderStoreTransaction get store => _store;
 
   ProviderIndexTransaction.fromStoreTransaction(this._store, String indexName) {
     _index = _store.store.index(indexName);

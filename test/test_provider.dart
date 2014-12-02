@@ -48,16 +48,20 @@ class TestProvider extends Provider {
     }).asFuture().then((_) {
       return names;
     });
-//    AppProviderStoreTransaction trans = new AppProviderStoreTransaction.withStore(this, ITEMS_STORE);
-//          int count = 0;
-//          return trans.openCursor().listen((CursorWithValue cwv) {
-//
-////          return trans.store.openCursor(//
-////          direction: IDB_DIRECTION_NEXT, autoAdvance: false).listen((CursorWithValue cwv) {
-//            count++;
-//          }).asFuture().then((_) {
-//            return count;
-//          });
+  }
+
+  Future<List<String>> getOrderedNames({int limit, int offset}) {
+    var trans = new ProviderIndexTransaction(this, ITEMS_STORE, NAME_INDEX);
+
+    List<String> names = [];
+    return trans.openCursor(limit: limit, offset: offset).listen((CursorWithValue cwv) {
+      names.add((cwv.value as Map)[NAME_FIELD]);
+
+    }).asFuture().then((_) {
+      return trans.completed;
+    }).then((_) {
+      return names;
+    });
   }
 
   Future<int> putName(String name) {

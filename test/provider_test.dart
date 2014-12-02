@@ -191,6 +191,11 @@ void testMain(IdbFactory idbFactory) {
           expect(list, [C1, A2]);
           //expect(list.first, C1);
         });
+      }).then((_) {
+        return provider.getOrderedNames().then((var list) {
+          expect(list, [A2, B3, C1]);
+          //expect(list.first, C1);
+        });
       });
     });
 
