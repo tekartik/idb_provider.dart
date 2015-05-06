@@ -21,7 +21,7 @@ class TestProvider extends Provider {
       // delete stuff
     }
     var objectStore = database.createObjectStore(ITEMS_STORE, autoIncrement: true);
-    Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: false);
+    objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: false);
   }
 
   Future delete() {

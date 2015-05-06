@@ -6,7 +6,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 
 void main() {
-  testMain(new IdbMemoryFactory());
+  testMain(idbMemoryFactory);
 }
 
 testMain(IdbFactory idbFactory) {

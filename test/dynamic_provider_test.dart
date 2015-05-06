@@ -4,27 +4,25 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:tekartik_idb_provider/provider.dart';
 
-import 'package:tekartik_test/test_utils.dart';
+import 'package:test/test.dart';
 import 'dart:async';
 
 void main() {
-  testMain(new IdbMemoryFactory());
+  testMain(idbMemoryFactory);
 }
 
 void testMain(IdbFactory idbFactory) {
-
   group('provider_dynamic', () {
-
     group('raw', () {
 
-
-      DynamicProvider provider;
-
+      //DynamicProvider provider;
 
       test('database', () {
-        DynamicProvider provider = new DynamicProvider(idbFactory, new ProviderDbMeta("test"));
+        DynamicProvider provider =
+            new DynamicProvider(idbFactory, new ProviderDbMeta("test"));
 
-        return provider.delete().then((_) => provider.ready.then((Provider readyProvider) {
+        return provider.delete().then((_) => provider.ready
+            .then((Provider readyProvider) {
           expect(provider, readyProvider);
           expect(provider.db.meta.name, "test");
           expect(provider.db.meta.version, 1);
@@ -34,9 +32,11 @@ void testMain(IdbFactory idbFactory) {
       });
 
       test('database name version', () {
-        DynamicProvider provider = new DynamicProvider(idbFactory, new ProviderDbMeta("test2", 2));
+        DynamicProvider provider =
+            new DynamicProvider(idbFactory, new ProviderDbMeta("test2", 2));
 
-        return provider.delete().then((_) => provider.ready.then((Provider readyProvider) {
+        return provider.delete().then((_) => provider.ready
+            .then((Provider readyProvider) {
           expect(provider, readyProvider);
           expect(provider.db.meta.name, "test2");
           expect(provider.db.meta.version, 2);
@@ -47,24 +47,22 @@ void testMain(IdbFactory idbFactory) {
     });
   });
   group('more', () {
-
     String PROVIDER_NAME = "test";
 
     DynamicProvider provider;
     ProviderTransaction transaction;
 
     setUp(() {
-      provider = new DynamicProvider(idbFactory, new ProviderDbMeta(PROVIDER_NAME));
+      transaction = null;
+      provider =
+          new DynamicProvider(idbFactory, new ProviderDbMeta(PROVIDER_NAME));
       return provider.delete();
     });
-    tearDown(() {
-      return new Future(() {
-        if (transaction != null) {
-          return transaction.completed;
-        }
-      }).then((_) {
-        provider.close();
-      });
+    tearDown(() async {
+      if (transaction != null) {
+        await transaction.completed;
+      }
+      provider.close();
     });
 
     test('one_store', () {
@@ -79,16 +77,16 @@ void testMain(IdbFactory idbFactory) {
 
         // for cleanup
         transaction = txn;
-
-
       });
     });
 
     test('multiple_store', () {
-      provider.addStore(new ProviderStoreMeta("store", keyPath: "key", autoIncrement: true));
+      provider.addStore(
+          new ProviderStoreMeta("store", keyPath: "key", autoIncrement: true));
       provider.addStore(new ProviderStoreMeta("store2"));
       return provider.ready.then((Provider readyProvider) {
-        ProviderTransactionList txn = provider.transactionList(["store", "store2"]);
+        ProviderTransactionList txn =
+            provider.transactionList(["store", "store2"]);
         ProviderStoreTransactionMixin txn1 = txn.store("store");
         expect(txn1.store.meta.name, "store");
         expect(txn1.store.meta.keyPath, "key");
@@ -105,7 +103,6 @@ void testMain(IdbFactory idbFactory) {
 
 // for cleanup
         transaction = txn;
-
       });
     });
 
@@ -122,16 +119,9 @@ void testMain(IdbFactory idbFactory) {
 
         // for cleanup
         transaction = txn;
-
-
       });
     });
-
-
   });
-
-
-
 }
 //class TestApp extends ConsoleApp {
 //

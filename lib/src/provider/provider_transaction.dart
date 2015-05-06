@@ -219,10 +219,10 @@ abstract class ProviderStoreTransactionMixin<K, V> {
   }
 }
 
-class _ProviderStoreInTransactionList extends Object with ProviderStoreTransactionMixin {
-  final ProviderStore store;
-  _ProviderStoreInTransactionList(this.store);
-}
+//class _ProviderStoreInTransactionList extends Object with ProviderStoreTransactionMixin {
+//  final ProviderStore store;
+//  _ProviderStoreInTransactionList(this.store);
+//}
 
 class ProviderTransactionList extends ProviderTransaction {
 
@@ -244,7 +244,7 @@ class ProviderTransactionList extends ProviderTransaction {
 
 }
 class ProviderTransaction {
-  Provider _provider;
+  //Provider _provider;
   Transaction _transaction;
   String _mode;
 

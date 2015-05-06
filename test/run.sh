@@ -1,5 +1,7 @@
-#/bin/sh
+#/bin/bash
 
-_DIR=$(dirname $BASH_SOURCE)
+_DIR=$(dirname $(dirname $BASH_SOURCE))
 
-dart ${_DIR}/test_runner_io.dart
+pushd ${_DIR}
+pub run test -j 1 -r expanded
+popd

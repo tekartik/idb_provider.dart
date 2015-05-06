@@ -4,16 +4,16 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:tekartik_idb_provider/provider.dart';
 
-import 'package:tekartik_test/test_utils.dart';
+import 'package:test/test.dart';
 import 'dart:async';
 
 void main() {
-  testMain(new IdbMemoryFactory());
+  testMain(idbMemoryFactory);
 }
 
 void testMain(IdbFactory idbFactory) {
 
-  devWarning;
+  //devWarning;
   // TODO Add store transaction test
   group('transaction', () {
 

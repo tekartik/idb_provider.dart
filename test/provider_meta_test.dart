@@ -4,48 +4,64 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:tekartik_idb_provider/provider.dart';
 
-import 'package:tekartik_test/test_utils.dart';
+import 'package:test/test.dart';
 import 'dart:async';
 
 void main() {
-  testMain(new IdbMemoryFactory());
+  testMain(idbMemoryFactory);
 }
 
 void testMain(IdbFactory idbFactory) {
-
   group('meta', () {
     group('raw', () {
-
       test('index', () {
         ProviderIndexMeta indexMeta = new ProviderIndexMeta("idx", "my_key");
         ProviderIndexMeta indexMeta2 = new ProviderIndexMeta("idx", "my_key");
         expect(indexMeta, indexMeta2);
-        expect(indexMeta, new ProviderIndexMeta("idx", "my_key", unique: false, multiEntry: false));
-        expect(indexMeta, isNot(new ProviderIndexMeta("idx", "my_key", unique: false, multiEntry: true)));
-        expect(indexMeta, isNot(new ProviderIndexMeta("idx", "my_key", unique: true, multiEntry: false)));
-        expect(indexMeta, isNot(new ProviderIndexMeta("idx", "my_key2", unique: false, multiEntry: false)));
-        expect(indexMeta, isNot(new ProviderIndexMeta("idx2", "my_key", unique: false, multiEntry: false)));
+        expect(indexMeta, new ProviderIndexMeta("idx", "my_key",
+            unique: false, multiEntry: false));
+        expect(indexMeta, isNot(new ProviderIndexMeta("idx", "my_key",
+            unique: false, multiEntry: true)));
+        expect(indexMeta, isNot(new ProviderIndexMeta("idx", "my_key",
+            unique: true, multiEntry: false)));
+        expect(indexMeta, isNot(new ProviderIndexMeta("idx", "my_key2",
+            unique: false, multiEntry: false)));
+        expect(indexMeta, isNot(new ProviderIndexMeta("idx2", "my_key",
+            unique: false, multiEntry: false)));
       });
 
       test('store', () {
         ProviderStoreMeta storeMeta = new ProviderStoreMeta("str");
         expect(storeMeta, new ProviderStoreMeta("str"));
         expect(storeMeta, isNot(new ProviderStoreMeta("str2")));
-        expect(storeMeta, new ProviderStoreMeta("str", keyPath: null, autoIncrement: false));
-        expect(storeMeta, isNot(new ProviderStoreMeta("str", keyPath: null, autoIncrement: true)));
-        expect(storeMeta, isNot(new ProviderStoreMeta("str", keyPath: "some", autoIncrement: false)));
-        expect(storeMeta, isNot(new ProviderStoreMeta("str2", keyPath: null, autoIncrement: false)));
+        expect(storeMeta,
+            new ProviderStoreMeta("str", keyPath: null, autoIncrement: false));
+        expect(storeMeta, isNot(
+            new ProviderStoreMeta("str", keyPath: null, autoIncrement: true)));
+        expect(storeMeta, isNot(new ProviderStoreMeta("str",
+            keyPath: "some", autoIncrement: false)));
+        expect(storeMeta, isNot(new ProviderStoreMeta("str2",
+            keyPath: null, autoIncrement: false)));
 
-        storeMeta = new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true);
-        ProviderStoreMeta storeMeta2 = new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true);
+        storeMeta =
+            new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true);
+        ProviderStoreMeta storeMeta2 =
+            new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true);
         expect(storeMeta, storeMeta2);
         ProviderIndexMeta indexMeta = new ProviderIndexMeta("idx", "my_key");
         ProviderIndexMeta indexMeta2 = new ProviderIndexMeta("idx", "my_key");
 
-        storeMeta = new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true, indecies: [indexMeta]);
+        storeMeta = new ProviderStoreMeta("str",
+            keyPath: "some", autoIncrement: true, indecies: [indexMeta]);
         expect(storeMeta, isNot(storeMeta2));
-        storeMeta = new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true, indecies: [indexMeta, indexMeta2]);
-        storeMeta2 = new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true, indecies: [indexMeta2, indexMeta]);
+        storeMeta = new ProviderStoreMeta("str",
+            keyPath: "some",
+            autoIncrement: true,
+            indecies: [indexMeta, indexMeta2]);
+        storeMeta2 = new ProviderStoreMeta("str",
+            keyPath: "some",
+            autoIncrement: true,
+            indecies: [indexMeta2, indexMeta]);
         expect(storeMeta, storeMeta2);
       });
 
@@ -65,31 +81,24 @@ void testMain(IdbFactory idbFactory) {
         storesMeta2 = new ProviderStoresMeta([storeMeta2, storeMeta]);
         expect(storesMeta, storesMeta2);
       });
-
-
     });
     group('provider', () {
-
-
       group('more', () {
-
         String PROVIDER_NAME = "test";
 
         DynamicProvider provider;
         ProviderTransaction transaction;
 
         setUp(() {
-          provider = new DynamicProvider(idbFactory, new ProviderDbMeta(PROVIDER_NAME));
+          provider = new DynamicProvider(
+              idbFactory, new ProviderDbMeta(PROVIDER_NAME));
           return provider.delete();
         });
-        tearDown(() {
-          return new Future.value(() {
-            if (transaction != null) {
-              return transaction.completed;
-            }
-          }).then((_) {
-            provider.close();
-          });
+        tearDown(() async {
+          if (transaction != null) {
+            await transaction.completed;
+          }
+          provider.close();
         });
 
         _roundCircle(ProviderStoresMeta storesMeta) {
@@ -99,54 +108,51 @@ void testMain(IdbFactory idbFactory) {
               expect(metas, storesMeta);
               expect(metas, isNot(same(storesMeta)));
             });
-
-
-
           });
         }
+        
         test('one_store', () {
           provider.addStore(new ProviderStoreMeta("store"));
           return provider.ready.then((Provider readyProvider) {
             return provider.storesMeta.then((metas) {
-              expect(metas, new ProviderStoresMeta([new ProviderStoreMeta("store")]));
+              expect(metas,
+                  new ProviderStoresMeta([new ProviderStoreMeta("store")]));
             });
-
-
-
           });
         });
 
         test('one_store round_cirle', () {
-          ProviderStoresMeta meta = new ProviderStoresMeta([ //)
-            new ProviderStoreMeta("store")]);
+          ProviderStoresMeta meta = new ProviderStoresMeta([
+            //)
+            new ProviderStoreMeta("store")
+          ]);
           return _roundCircle(meta);
-
         });
         test('two_stores', () {
           provider.addStore(new ProviderStoreMeta("store"));
           provider.addStore(new ProviderStoreMeta("store1"));
           return provider.ready.then((Provider readyProvider) {
             return provider.storesMeta.then((metas) {
-              expect(metas, new ProviderStoresMeta([new ProviderStoreMeta("store"), new ProviderStoreMeta("store1")]));
+              expect(metas, new ProviderStoresMeta([
+                new ProviderStoreMeta("store"),
+                new ProviderStoreMeta("store1")
+              ]));
             });
-
-
-
           });
         });
 
         test('one_index', () {
-          ProviderStoresMeta meta = new ProviderStoresMeta([ //)
+          ProviderStoresMeta meta = new ProviderStoresMeta([
+            //)
             new ProviderStoreMeta("store", indecies: //
-            [new ProviderIndexMeta("idx", "my_key")] //
-            )]);
+                [new ProviderIndexMeta("idx", "my_key")] //
+                )
+          ]);
           return _roundCircle(meta);
-
         });
       });
     });
   });
-
 }
 //class TestApp extends ConsoleApp {
 //

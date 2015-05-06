@@ -4,13 +4,13 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:tekartik_idb_provider/provider.dart';
 
-import 'package:tekartik_test/test_utils.dart';
+import 'package:test/test.dart';
 import 'dart:async';
 
 import 'test_provider.dart';
 
 void main() {
-  testMain(new IdbMemoryFactory());
+  testMain(idbMemoryFactory);
 }
 
 void testMain(IdbFactory idbFactory) {
@@ -159,14 +159,16 @@ void testMain(IdbFactory idbFactory) {
       String C1 = "C1";
       String A2 = "A2";
       String B3 = "B3";
+      /*
       int c1;
       int a2;
       int b3;
+      */
       return provider.getNames().then((var list) {
         expect(list, isEmpty);
       }).then((_) {
         return provider.putName(C1).then((int key) {
-          c1 = key;
+          //c1 = key;
         });
       }).then((_) {
         return provider.getNames().then((var list) {
@@ -175,11 +177,11 @@ void testMain(IdbFactory idbFactory) {
         });
       }).then((_) {
         return provider.putName(A2).then((int key) {
-          a2 = key;
+          //a2 = key;
         });
       }).then((_) {
         return provider.putName(B3).then((int key) {
-          b3 = key;
+          //b3 = key;
         });
       }).then((_) {
         return provider.getNames().then((var list) {

@@ -17,7 +17,7 @@ class DynamicProvider extends Provider {
     for (var meta in _storeMetas) {
       var store = db.createStore(meta);
       for (var indexMeta in meta.indecies) {
-        var index = store.createIndex(indexMeta);
+        store.createIndex(indexMeta);
       }
     }
   }
