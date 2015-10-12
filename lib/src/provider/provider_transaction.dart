@@ -1,7 +1,7 @@
 part of tekartik_provider;
 
-class ProviderIndexTransaction<K, V> extends Object with ProviderSourceTransactionMixin<K, V> {
-
+class ProviderIndexTransaction<K, V> extends Object
+    with ProviderSourceTransactionMixin<K, V> {
   Future get completed => _store.completed;
 
   ProviderStoreTransaction _store;
@@ -24,7 +24,9 @@ class ProviderIndexTransaction<K, V> extends Object with ProviderSourceTransacti
   }
 
   ProviderIndex _index;
-  ProviderIndexTransaction(Provider provider, String storeName, String indexName, [bool readWrite = false]) //
+  ProviderIndexTransaction(
+      Provider provider, String storeName, String indexName,
+      [bool readWrite = false]) //
   {
     _store = new ProviderStoreTransaction(provider, storeName, readWrite);
     _index = _store.store.index(indexName);
@@ -35,40 +37,46 @@ class ProviderIndexTransaction<K, V> extends Object with ProviderSourceTransacti
 
   @override
   Stream<CursorWithValue> openRawCursor({K key, String direction}) {
-    return _index.index.openCursor( //
-    key: key, direction: direction);
+    return _index.index.openCursor(
+        //
+        key: key,
+        direction: direction);
   }
 
   Stream<CursorWithValue> openRawKeyCursor({K key, String direction}) {
-    return _index.index.openKeyCursor( //
-        key: key, direction: direction);
+    return _index.index.openKeyCursor(
+        //
+        key: key,
+        direction: direction);
   }
 
-  Stream<Cursor> openKeyCursor({K key, bool reverse: false, int limit, int offset}) {
+  Stream<Cursor> openKeyCursor(
+      {K key, bool reverse: false, int limit, int offset}) {
     String direction = reverse ? idbDirectionPrev : null;
-    Stream<Cursor> stream = openRawKeyCursor( key: key, direction: direction);
+    Stream<Cursor> stream = openRawKeyCursor(key: key, direction: direction);
     return _limitOffsetStream(stream, limit: limit, offset: offset);
   }
 
   @override
-  Stream<CursorWithValue> openCursor({K key, bool reverse: false, int limit, int offset}) {
+  Stream<CursorWithValue> openCursor(
+      {K key, bool reverse: false, int limit, int offset}) {
     String direction = reverse ? idbDirectionPrev : null;
-    Stream<CursorWithValue> stream = openRawCursor( key: key, direction: direction);
+    Stream<CursorWithValue> stream =
+        openRawCursor(key: key, direction: direction);
     return _limitOffsetStream(stream, limit: limit, offset: offset);
   }
 }
 
-class ProviderStoreTransaction<K, V> extends ProviderStoreTransactionBase<K, V> {
-  ProviderStoreTransaction(Provider provider, String storeName, [bool readWrite = false])
-      : super(provider, storeName, readWrite) {
-  }
+class ProviderStoreTransaction<K, V>
+    extends ProviderStoreTransactionBase<K, V> {
+  ProviderStoreTransaction(Provider provider, String storeName,
+      [bool readWrite = false])
+      : super(provider, storeName, readWrite) {}
   // for creating from list
   ProviderStoreTransaction._() : super._();
 }
 
-class WriteTransactionMixin {
-
-}
+class WriteTransactionMixin {}
 
 abstract class ProviderWritableSourceTransactionMixin<K, V> {
   ProviderStore _store;
@@ -87,11 +95,9 @@ abstract class ProviderWritableSourceTransactionMixin<K, V> {
 }
 
 abstract class ProviderSourceTransactionMixin<K, V> {
-
   Future<V> get(K key);
   Future<int> count();
   Stream<CursorWithValue> openRawCursor({String direction});
-
 
   Stream _limitOffsetStream(Stream rawStream, {int limit, int offset}) {
     StreamController<Cursor> ctlr = new StreamController(sync: true);
@@ -130,14 +136,13 @@ abstract class ProviderSourceTransactionMixin<K, V> {
 }
 
 abstract class ProviderWritableSourceTransaction<K, V> {
-
   Future<K> add(V value, [K key]);
   Future<K> put(V value, [K key]);
   Future<V> get(K key);
 }
 
-class ProviderStoreTransactionBase<K, V> extends ProviderTransaction with ProviderStoreTransactionMixin, ProviderSourceTransactionMixin {
-
+class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
+    with ProviderStoreTransactionMixin, ProviderSourceTransactionMixin {
   ProviderStore _store;
 
   // not recommended though
@@ -146,7 +151,8 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction with Provid
 
   ProviderStoreTransactionBase._();
 
-  ProviderStoreTransactionBase(Provider provider, String storeName, [bool readWrite = false]) {
+  ProviderStoreTransactionBase(Provider provider, String storeName,
+      [bool readWrite = false]) {
     _mode = readWrite ? IDB_MODE_READ_WRITE : IDB_MODE_READ_ONLY;
 
     try {
@@ -162,23 +168,24 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction with Provid
   }
 
   Stream<CursorWithValue> openRawCursor({String direction}) {
-    return store.objectStore.openCursor( //
+    return store.objectStore.openCursor(
+        //
         direction: direction);
   }
-  Stream<CursorWithValue> openCursor({bool reverse: false, int limit, int offset}) {
+
+  Stream<CursorWithValue> openCursor(
+      {bool reverse: false, int limit, int offset}) {
     String direction = reverse ? idbDirectionPrev : null;
     Stream<CursorWithValue> stream = openRawCursor(direction: direction);
     return _limitOffsetStream(stream, limit: limit, offset: offset);
   }
-
 }
 
 abstract class ProviderStoreTransactionMixin<K, V> {
   ProviderStore get store;
 
-
-
-  ProviderIndexTransaction index(String name) => new ProviderIndexTransaction.fromStoreTransaction(this, name);
+  ProviderIndexTransaction index(String name) =>
+      new ProviderIndexTransaction.fromStoreTransaction(this, name);
 
   Future count() => store.count();
 
@@ -191,8 +198,6 @@ abstract class ProviderStoreTransactionMixin<K, V> {
   delete(K key) => store.delete(key);
 
   Future clear() => store.clear();
-
-
 }
 
 //class _ProviderStoreInTransactionList extends Object with ProviderStoreTransactionMixin {
@@ -201,30 +206,27 @@ abstract class ProviderStoreTransactionMixin<K, V> {
 //}
 
 class ProviderTransactionList extends ProviderTransaction {
-
-  ProviderTransactionList(Provider provider, Iterable<String> storeNames, [bool readWrite = false]) {
+  ProviderTransactionList(Provider provider, Iterable<String> storeNames,
+      [bool readWrite = false]) {
     _mode = readWrite ? IDB_MODE_READ_WRITE : IDB_MODE_READ_ONLY;
     _transaction = provider.db._database.transactionList(storeNames, _mode);
   }
   ProviderStoreTransaction store(String storeName) {
-
     var store = new ProviderStore(_transaction.objectStore(storeName));
     return new ProviderStoreTransaction._()
-        .._mode = this._mode
-        .._store = store
-        .._transaction = this._transaction;
-
+      .._mode = this._mode
+      .._store = store
+      .._transaction = this._transaction;
   }
 
-  ProviderIndexTransaction index(String storeName, String indexName) => store(storeName).index(indexName);
-
+  ProviderIndexTransaction index(String storeName, String indexName) =>
+      store(storeName).index(indexName);
 }
+
 class ProviderTransaction {
   //Provider _provider;
   Transaction _transaction;
   String _mode;
-
-
 
   Future get completed => _transaction.completed;
 
@@ -247,8 +249,5 @@ class ProviderTransaction {
 //    // should crash then
 //    return null;
 //  }
-
-
-
 
 }

@@ -18,16 +18,26 @@ void testMain(IdbFactory idbFactory) {
         ProviderIndexMeta indexMeta = new ProviderIndexMeta("idx", "my_key");
         ProviderIndexMeta indexMeta2 = new ProviderIndexMeta("idx", "my_key");
         expect(indexMeta, indexMeta2);
-        expect(indexMeta, new ProviderIndexMeta("idx", "my_key",
-            unique: false, multiEntry: false));
-        expect(indexMeta, isNot(new ProviderIndexMeta("idx", "my_key",
-            unique: false, multiEntry: true)));
-        expect(indexMeta, isNot(new ProviderIndexMeta("idx", "my_key",
-            unique: true, multiEntry: false)));
-        expect(indexMeta, isNot(new ProviderIndexMeta("idx", "my_key2",
-            unique: false, multiEntry: false)));
-        expect(indexMeta, isNot(new ProviderIndexMeta("idx2", "my_key",
-            unique: false, multiEntry: false)));
+        expect(
+            indexMeta,
+            new ProviderIndexMeta("idx", "my_key",
+                unique: false, multiEntry: false));
+        expect(
+            indexMeta,
+            isNot(new ProviderIndexMeta("idx", "my_key",
+                unique: false, multiEntry: true)));
+        expect(
+            indexMeta,
+            isNot(new ProviderIndexMeta("idx", "my_key",
+                unique: true, multiEntry: false)));
+        expect(
+            indexMeta,
+            isNot(new ProviderIndexMeta("idx", "my_key2",
+                unique: false, multiEntry: false)));
+        expect(
+            indexMeta,
+            isNot(new ProviderIndexMeta("idx2", "my_key",
+                unique: false, multiEntry: false)));
       });
 
       test('store', () {
@@ -36,12 +46,18 @@ void testMain(IdbFactory idbFactory) {
         expect(storeMeta, isNot(new ProviderStoreMeta("str2")));
         expect(storeMeta,
             new ProviderStoreMeta("str", keyPath: null, autoIncrement: false));
-        expect(storeMeta, isNot(
-            new ProviderStoreMeta("str", keyPath: null, autoIncrement: true)));
-        expect(storeMeta, isNot(new ProviderStoreMeta("str",
-            keyPath: "some", autoIncrement: false)));
-        expect(storeMeta, isNot(new ProviderStoreMeta("str2",
-            keyPath: null, autoIncrement: false)));
+        expect(
+            storeMeta,
+            isNot(new ProviderStoreMeta("str",
+                keyPath: null, autoIncrement: true)));
+        expect(
+            storeMeta,
+            isNot(new ProviderStoreMeta("str",
+                keyPath: "some", autoIncrement: false)));
+        expect(
+            storeMeta,
+            isNot(new ProviderStoreMeta("str2",
+                keyPath: null, autoIncrement: false)));
 
         storeMeta =
             new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true);
@@ -110,7 +126,7 @@ void testMain(IdbFactory idbFactory) {
             });
           });
         }
-        
+
         test('one_store', () {
           provider.addStore(new ProviderStoreMeta("store"));
           return provider.ready.then((Provider readyProvider) {
@@ -133,10 +149,12 @@ void testMain(IdbFactory idbFactory) {
           provider.addStore(new ProviderStoreMeta("store1"));
           return provider.ready.then((Provider readyProvider) {
             return provider.storesMeta.then((metas) {
-              expect(metas, new ProviderStoresMeta([
-                new ProviderStoreMeta("store"),
-                new ProviderStoreMeta("store1")
-              ]));
+              expect(
+                  metas,
+                  new ProviderStoresMeta([
+                    new ProviderStoreMeta("store"),
+                    new ProviderStoreMeta("store1")
+                  ]));
             });
           });
         });
@@ -145,7 +163,7 @@ void testMain(IdbFactory idbFactory) {
           ProviderStoresMeta meta = new ProviderStoresMeta([
             //)
             new ProviderStoreMeta("store", indecies: //
-                [new ProviderIndexMeta("idx", "my_key")] //
+                    [new ProviderIndexMeta("idx", "my_key")] //
                 )
           ]);
           return _roundCircle(meta);

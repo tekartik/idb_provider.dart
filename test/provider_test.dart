@@ -14,18 +14,16 @@ void main() {
 }
 
 void testMain(IdbFactory idbFactory) {
-
   group('provider', () {
-
     group('row', () {
-
       String PROVIDER_NAME = "test";
 
       DynamicProvider provider;
       ProviderTransaction transaction;
 
       setUp(() {
-        provider = new DynamicProvider(idbFactory, new ProviderDbMeta(PROVIDER_NAME));
+        provider =
+            new DynamicProvider(idbFactory, new ProviderDbMeta(PROVIDER_NAME));
         return provider.delete();
       });
       tearDown(() {
@@ -41,19 +39,19 @@ void testMain(IdbFactory idbFactory) {
       test('int_map', () {
         provider.addStore(new ProviderStoreMeta("store", autoIncrement: true));
         return provider.ready.then((Provider readyProvider) {
-          ProviderStoreTransaction txn = provider.storeTransaction("store", true);
+          ProviderStoreTransaction txn =
+              provider.storeTransaction("store", true);
           // for cleanup
           transaction = txn;
 
-          return txn.put({
-            "test": 1
-          }).then((key) {
+          return txn.put({"test": 1}).then((key) {
             return txn.get(key).then((value) {
               IntMapRow row = intMapProviderRawFactory.newRow(key, value);
 
               // Cursor
               txn.openCursor().listen((cwv) {
-                IntMapRow cursorRow = intMapProviderRawFactory.cursorWithValueRow(cwv);
+                IntMapRow cursorRow =
+                    intMapProviderRawFactory.cursorWithValueRow(cwv);
                 expect(cursorRow, row);
               });
             });
@@ -71,7 +69,6 @@ void testMain(IdbFactory idbFactory) {
         expect(provider.isReady, isFalse);
         Future done = provider.ready.then((readyProvider) {
           expect(readyProvider, provider);
-
         });
         // not ready yet when opening the db
         expect(provider.isReady, isFalse);
@@ -83,7 +80,6 @@ void testMain(IdbFactory idbFactory) {
         expect(provider2.isReady, isTrue);
         Future done = provider2.ready.then((readyProvider2) {
           expect(readyProvider2, provider2);
-
         });
         return done;
       }).then((_) {
@@ -112,7 +108,6 @@ void testMain(IdbFactory idbFactory) {
     });
 
     test('put/get', () {
-
       return provider.putName("test").then((int key) {
         expect(key, 1);
         return provider.getName(key).then((String name) {
@@ -135,20 +130,22 @@ void testMain(IdbFactory idbFactory) {
           });
         });
       });
-
     });
 
     Future<int> slowCount() {
-      ProviderStoreTransaction trans = new ProviderStoreTransaction(provider, ITEMS_STORE);
+      ProviderStoreTransaction trans =
+          new ProviderStoreTransaction(provider, ITEMS_STORE);
       int count = 0;
-      return trans.store.objectStore.openCursor(//
-      direction: IDB_DIRECTION_NEXT, autoAdvance: false).listen((CursorWithValue cwv) {
+      return trans.store.objectStore
+          .openCursor(
+              //
+              direction: IDB_DIRECTION_NEXT,
+              autoAdvance: false)
+          .listen((CursorWithValue cwv) {
         count++;
       }).asFuture().then((_) {
         return count;
       });
-
-
     }
     test('cursor count', () {
       slowCount().then((int count) {
@@ -202,7 +199,6 @@ void testMain(IdbFactory idbFactory) {
     });
 
     test('put/clear/get', () {
-
       return provider.putName("test").then((int key) {
         expect(key, 1);
         return provider.clear().then((_) {
@@ -212,12 +208,7 @@ void testMain(IdbFactory idbFactory) {
         });
       });
     });
-
-
-
   });
-
-
 }
 //class TestApp extends ConsoleApp {
 //

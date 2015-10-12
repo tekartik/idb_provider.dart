@@ -14,35 +14,36 @@ void main() {
 void testMain(IdbFactory idbFactory) {
   group('provider_dynamic', () {
     group('raw', () {
-
       //DynamicProvider provider;
 
       test('database', () {
         DynamicProvider provider =
             new DynamicProvider(idbFactory, new ProviderDbMeta("test"));
 
-        return provider.delete().then((_) => provider.ready
-            .then((Provider readyProvider) {
-          expect(provider, readyProvider);
-          expect(provider.db.meta.name, "test");
-          expect(provider.db.meta.version, 1);
-          expect(provider.db.storeNames, []);
-          provider.close();
-        }));
+        return provider
+            .delete()
+            .then((_) => provider.ready.then((Provider readyProvider) {
+                  expect(provider, readyProvider);
+                  expect(provider.db.meta.name, "test");
+                  expect(provider.db.meta.version, 1);
+                  expect(provider.db.storeNames, []);
+                  provider.close();
+                }));
       });
 
       test('database name version', () {
         DynamicProvider provider =
             new DynamicProvider(idbFactory, new ProviderDbMeta("test2", 2));
 
-        return provider.delete().then((_) => provider.ready
-            .then((Provider readyProvider) {
-          expect(provider, readyProvider);
-          expect(provider.db.meta.name, "test2");
-          expect(provider.db.meta.version, 2);
-          expect(provider.db.storeNames, []);
-          provider.close();
-        }));
+        return provider
+            .delete()
+            .then((_) => provider.ready.then((Provider readyProvider) {
+                  expect(provider, readyProvider);
+                  expect(provider.db.meta.name, "test2");
+                  expect(provider.db.meta.version, 2);
+                  expect(provider.db.storeNames, []);
+                  provider.close();
+                }));
       });
     });
   });

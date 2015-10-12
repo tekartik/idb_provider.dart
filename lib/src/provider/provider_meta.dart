@@ -3,9 +3,8 @@ part of tekartik_provider;
 class ProviderDbMeta {
   final String name;
   final int version;
-  ProviderDbMeta(this.name, [int version]) : version = version != null ? version : 1 {
-
-  }
+  ProviderDbMeta(this.name, [int version])
+      : version = version != null ? version : 1 {}
 
   ProviderDbMeta overrideMeta({String name, int version}) {
     if (name == null) {
@@ -45,7 +44,8 @@ class ProviderDb {
   ProviderDb(this._database);
 
   ProviderStore createStore(ProviderStoreMeta meta) {
-    ObjectStore objectStore = database.createObjectStore(meta.name, keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
+    ObjectStore objectStore = database.createObjectStore(meta.name,
+        keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
     return new ProviderStore(objectStore);
   }
 
@@ -59,6 +59,7 @@ class ProviderDb {
     }
     return false;
   }
+
   Iterable<String> get storeNames {
     return database.objectStoreNames;
   }
@@ -81,16 +82,15 @@ class ProviderDb {
   IdbFactory get factory => _database.factory;
 }
 
-class StoreRow<K, V> {
-
-}
+class StoreRow<K, V> {}
 
 class ProviderStoresMeta {
   final Iterable<ProviderStoreMeta> stores;
   ProviderStoresMeta(this.stores);
 
   @override
-  int get hashCode => stores.length * 17 + (stores.isEmpty ? 0 : safeHashCode(stores.first.hashCode));
+  int get hashCode => stores.length * 17 +
+      (stores.isEmpty ? 0 : safeHashCode(stores.first.hashCode));
 
   @override
   bool operator ==(other) {
@@ -108,16 +108,19 @@ class ProviderStoreMeta {
   final String name;
   final String keyPath;
   final bool autoIncrement;
-  ProviderStoreMeta(this.name, {this.keyPath, bool autoIncrement, List<ProviderIndexMeta> indecies})
+  ProviderStoreMeta(this.name,
+      {this.keyPath, bool autoIncrement, List<ProviderIndexMeta> indecies})
       //
       : autoIncrement = (autoIncrement == true) //
-      ,
+        ,
         indecies = (indecies == null) ? [] : indecies;
   final List<ProviderIndexMeta> indecies;
 
   ProviderStoreMeta overrideIndecies(List<ProviderIndexMeta> indecies) {
-    return new ProviderStoreMeta(name, keyPath: keyPath, autoIncrement: autoIncrement, indecies: indecies);
+    return new ProviderStoreMeta(name,
+        keyPath: keyPath, autoIncrement: autoIncrement, indecies: indecies);
   }
+
   @override
   int get hashCode {
     return safeHashCode(name);
@@ -136,7 +139,8 @@ class ProviderStoreMeta {
         return false;
       }
       // order not important for index
-      if (!(const UnorderedIterableEquality().equals(indecies, other.indecies))) {
+      if (!(const UnorderedIterableEquality()
+          .equals(indecies, other.indecies))) {
         return false;
       }
       return true;
@@ -145,7 +149,8 @@ class ProviderStoreMeta {
   }
 
   @override
-  String toString() => "${name}(${keyPath}${autoIncrement ? " auto" : ""}) ${indecies}";
+  String toString() =>
+      "${name}(${keyPath}${autoIncrement ? " auto" : ""}) ${indecies}";
 }
 
 class ProviderStore {
@@ -157,16 +162,22 @@ class ProviderStore {
         ProviderIndex index = this.index(indexName);
         indecies.add(index.meta);
       }
-      _meta = new ProviderStoreMeta(objectStore.name, keyPath: objectStore.keyPath, autoIncrement: objectStore.autoIncrement, indecies: indecies);
+      _meta = new ProviderStoreMeta(objectStore.name,
+          keyPath: objectStore.keyPath,
+          autoIncrement: objectStore.autoIncrement,
+          indecies: indecies);
     }
     return _meta;
   }
+
   final ObjectStore objectStore;
   ProviderStore(this.objectStore);
   ProviderIndex createIndex(ProviderIndexMeta meta) {
-    Index index = objectStore.createIndex(meta.name, meta.keyPath, unique: meta.unique, multiEntry: meta.multiEntry);
+    Index index = objectStore.createIndex(meta.name, meta.keyPath,
+        unique: meta.unique, multiEntry: meta.multiEntry);
     return new ProviderIndex(index);
   }
+
   Future<int> count() => objectStore.count();
 
   ProviderIndex index(String name) {
@@ -181,7 +192,6 @@ class ProviderStore {
   Future clear() => objectStore.clear();
 
   List<String> get indexNames => objectStore.indexNames;
-
 }
 
 class ProviderIndexMeta {
@@ -193,7 +203,6 @@ class ProviderIndexMeta {
       //
       : unique = (unique == true),
         multiEntry = (multiEntry == true);
-
 
   @override
   int get hashCode {
@@ -222,17 +231,20 @@ class ProviderIndexMeta {
   }
 
   @override
-  String toString() => "${name} ${keyPath}${unique ? "unique" : ""}${multiEntry ? "multi" : ""}";
+  String toString() =>
+      "${name} ${keyPath}${unique ? "unique" : ""}${multiEntry ? "multi" : ""}";
 }
 
 class ProviderIndex {
   ProviderIndexMeta _meta;
   ProviderIndexMeta get meta {
     if (_meta == null) {
-      _meta = new ProviderIndexMeta(index.name, index.keyPath, unique: index.unique, multiEntry: index.multiEntry);
+      _meta = new ProviderIndexMeta(index.name, index.keyPath,
+          unique: index.unique, multiEntry: index.multiEntry);
     }
     return _meta;
   }
+
   final Index index;
   ProviderIndex(this.index);
   Future<int> count() => index.count();

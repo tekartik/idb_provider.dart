@@ -11,7 +11,6 @@ String ITEMS_STORE = "items";
 String NAME_INDEX = "name";
 String NAME_FIELD = "name";
 
-
 class TestProvider extends Provider {
   TestProvider(IdbFactory idbFactory) {
     init(idbFactory, DB_NAME, DB_VERSION);
@@ -20,14 +19,14 @@ class TestProvider extends Provider {
     if (e.oldVersion < DB_VERSION) {
       // delete stuff
     }
-    var objectStore = database.createObjectStore(ITEMS_STORE, autoIncrement: true);
+    var objectStore =
+        database.createObjectStore(ITEMS_STORE, autoIncrement: true);
     objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: false);
   }
 
   Future delete() {
     return idbFactory.deleteDatabase(DB_NAME);
   }
-
 
   Future count() {
     var trans = new ProviderStoreTransaction(this, ITEMS_STORE);
@@ -36,15 +35,15 @@ class TestProvider extends Provider {
         return count;
       });
     });
-
   }
 
   Future<List<String>> getNames({int limit, int offset}) {
     var trans = new ProviderStoreTransaction(this, ITEMS_STORE);
     List<String> names = [];
-    return trans.openCursor(limit: limit, offset: offset).listen((CursorWithValue cwv) {
+    return trans
+        .openCursor(limit: limit, offset: offset)
+        .listen((CursorWithValue cwv) {
       names.add((cwv.value as Map)[NAME_FIELD]);
-
     }).asFuture().then((_) {
       return names;
     });
@@ -54,9 +53,10 @@ class TestProvider extends Provider {
     var trans = new ProviderIndexTransaction(this, ITEMS_STORE, NAME_INDEX);
 
     List<String> names = [];
-    return trans.openCursor(limit: limit, offset: offset).listen((CursorWithValue cwv) {
+    return trans
+        .openCursor(limit: limit, offset: offset)
+        .listen((CursorWithValue cwv) {
       names.add((cwv.value as Map)[NAME_FIELD]);
-
     }).asFuture().then((_) {
       return trans.completed;
     }).then((_) {
@@ -75,7 +75,6 @@ class TestProvider extends Provider {
         return key;
       });
     });
-
   }
 
   // null if not found
@@ -90,7 +89,6 @@ class TestProvider extends Provider {
         return data[NAME_FIELD];
       });
     });
-
   }
 
   Future<int> get(int key) {
@@ -100,7 +98,5 @@ class TestProvider extends Provider {
         return key;
       });
     });
-
   }
-
 }

@@ -12,11 +12,9 @@ void main() {
 }
 
 void testMain(IdbFactory idbFactory) {
-
   //devWarning;
   // TODO Add store transaction test
   group('transaction', () {
-
     String providerName = "test";
     String storeName = "store";
     String indexName = "index";
@@ -26,10 +24,13 @@ void testMain(IdbFactory idbFactory) {
     ProviderTransaction transaction;
 
     setUp(() {
-      provider = new DynamicProvider(idbFactory, new ProviderDbMeta(providerName));
+      provider =
+          new DynamicProvider(idbFactory, new ProviderDbMeta(providerName));
       return provider.delete().then((_) {
-        ProviderIndexMeta indexMeta = new ProviderIndexMeta(indexName, indexKey);
-        provider.addStore(new ProviderStoreMeta(storeName, indecies: [indexMeta], autoIncrement: true));
+        ProviderIndexMeta indexMeta =
+            new ProviderIndexMeta(indexName, indexKey);
+        provider.addStore(new ProviderStoreMeta(storeName,
+            indecies: [indexMeta], autoIncrement: true));
         return provider.ready;
       });
     });
@@ -43,17 +44,16 @@ void testMain(IdbFactory idbFactory) {
       });
     });
 
-
-
     solo_test('store_cursor', () async {
-
-      ProviderStoreTransaction storeTxn = provider.storeTransaction(storeName, true);
+      ProviderStoreTransaction storeTxn =
+          provider.storeTransaction(storeName, true);
       // put one with a key one without
       storeTxn.put({"value": "value1"});
       storeTxn.put({"value": "value2"});
       await storeTxn.completed;
 
-      ProviderStoreTransaction txn = provider.storeTransaction(storeName, false);
+      ProviderStoreTransaction txn =
+          provider.storeTransaction(storeName, false);
       List<Map> data = [];
       List<String> keyData = [];
       txn.openCursor().listen((CursorWithValue cwv) {
@@ -62,12 +62,15 @@ void testMain(IdbFactory idbFactory) {
 
       // listed last
       await txn.completed;
-      expect(data, [{"value": "value1"},{"value": "value2"}]);
+      expect(data, [
+        {"value": "value1"},
+        {"value": "value2"}
+      ]);
     });
 
     solo_test('store_index', () async {
-
-      ProviderStoreTransaction storeTxn = provider.storeTransaction(storeName, true);
+      ProviderStoreTransaction storeTxn =
+          provider.storeTransaction(storeName, true);
       // put one with a key one without
       storeTxn.put({"value": "value1"});
       storeTxn.put({"my_key": 2, "value": "value2"});
@@ -75,7 +78,8 @@ void testMain(IdbFactory idbFactory) {
       storeTxn.put({"my_key": 1, "value": "value4"});
       await storeTxn.completed;
 
-      ProviderIndexTransaction txn = provider.indexTransaction(storeName, indexName);
+      ProviderIndexTransaction txn =
+          provider.indexTransaction(storeName, indexName);
       List<Map> data = [];
       List<String> keyData = [];
       txn.openCursor().listen((CursorWithValue cwv) {
@@ -94,10 +98,7 @@ void testMain(IdbFactory idbFactory) {
       expect(keyData[2], 1);
       expect(keyData[3], 2);
     });
-
-
   });
-
 }
 //class TestApp extends ConsoleApp {
 //

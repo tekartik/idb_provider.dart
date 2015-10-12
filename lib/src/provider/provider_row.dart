@@ -20,7 +20,6 @@ abstract class _BaseRow<K, V> {
     }
     return false;
   }
-
 }
 
 abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
@@ -37,7 +36,6 @@ abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
   }
 
   operator [](String key) => value[key];
-
 }
 
 class StringMapRow extends _BaseMapRow<String> {
@@ -49,10 +47,10 @@ class IntMapRow extends _BaseMapRow<int> {
 }
 
 abstract class ProviderRowFactory<T extends _BaseRow<K, V>, K, V> {
-
   T newRow(K key, V value);
 
-  T cursorWithValueRow(CursorWithValue cwv) => newRow(cwv.primaryKey, cwv.value);
+  T cursorWithValueRow(CursorWithValue cwv) =>
+      newRow(cwv.primaryKey, cwv.value);
 }
 
 class IntMapProviderRowFactory extends ProviderRowFactory<IntMapRow, int, Map> {
@@ -60,9 +58,12 @@ class IntMapProviderRowFactory extends ProviderRowFactory<IntMapRow, int, Map> {
     return new IntMapRow.from(key, value);
   }
 }
-final IntMapProviderRowFactory intMapProviderRawFactory = new IntMapProviderRowFactory();
 
-class StringMapProviderRowFactory extends ProviderRowFactory<StringMapRow, String, Map> {
+final IntMapProviderRowFactory intMapProviderRawFactory =
+    new IntMapProviderRowFactory();
+
+class StringMapProviderRowFactory
+    extends ProviderRowFactory<StringMapRow, String, Map> {
   StringMapRow newRow(String key, Map value) {
     return new StringMapRow.from(key, value);
   }

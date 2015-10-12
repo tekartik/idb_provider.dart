@@ -10,7 +10,6 @@ part 'src/provider/provider_row.dart';
 part 'src/provider/provider_meta.dart';
 
 class DynamicProvider extends Provider {
-
   final List<ProviderStoreMeta> _storeMetas = [];
 
   void onUpdateDatabase(VersionChangeEvent e) {
@@ -72,7 +71,6 @@ abstract class Provider {
       _ready = null;
       _readyCompleter = null;
     } else {
-
       if (_ready != null) {
         throw "ready should not have been called before setting the db";
       } else {
@@ -86,6 +84,7 @@ abstract class Provider {
       }
     }
   }
+
   Database get database => db.database;
 
   // must be set before being ready
@@ -96,7 +95,6 @@ abstract class Provider {
       _ready = null;
       _readyCompleter = null;
     } else {
-
       if (_ready != null) {
         throw "ready should not have been called before setting the db";
       } else {
@@ -113,8 +111,6 @@ abstract class Provider {
 
   // during onUpdateOnly
 
-
-
   close() {
     if (db != null) {
       db.close();
@@ -126,7 +122,8 @@ abstract class Provider {
 
   // delete content
   Future clear() {
-    List<String> storeNames = db.database.objectStoreNames.toList(growable: false);
+    List<String> storeNames =
+        db.database.objectStoreNames.toList(growable: false);
     var globalTrans = new ProviderTransactionList(this, storeNames, true);
     List<Future> futures = [];
     for (String storeName in storeNames) {
@@ -167,7 +164,6 @@ abstract class Provider {
       });
     }
     return _storesMeta;
-
   }
 
 //      Database db = e.database;
@@ -200,12 +196,10 @@ abstract class Provider {
 //      }).asFuture(list);
 //    }
 
-
   Future delete() {
     close();
     return idbFactory.deleteDatabase(_databaseMeta.name);
   }
-
 
   Future<Provider> _ready;
   Completer _readyCompleter;
@@ -217,7 +211,11 @@ abstract class Provider {
       _ready = _readyCompleter.future;
 
       runZoned(() {
-        return _idbFactory.open(_databaseMeta.name, version: _databaseMeta.version, onUpgradeNeeded: _onUpdateDatabase).then((Database db) {
+        return _idbFactory
+            .open(_databaseMeta.name,
+                version: _databaseMeta.version,
+                onUpgradeNeeded: _onUpdateDatabase)
+            .then((Database db) {
           _setDatabase(db);
           _readyCompleter.complete(this);
         });
@@ -227,24 +225,24 @@ abstract class Provider {
         print(st);
         _readyCompleter.completeError(e, st);
       });
-
     }
     return _ready;
   }
 
 // default read-only
-  ProviderStoreTransaction storeTransaction(String storeName, [bool readWrite = false]) {
+  ProviderStoreTransaction storeTransaction(String storeName,
+      [bool readWrite = false]) {
     return new ProviderStoreTransaction(this, storeName, readWrite);
   }
 
   // default read-only
-  ProviderIndexTransaction indexTransaction(String storeName, String indexName, [bool readWrite = false]) {
+  ProviderIndexTransaction indexTransaction(String storeName, String indexName,
+      [bool readWrite = false]) {
     return new ProviderIndexTransaction(this, storeName, indexName, readWrite);
   }
 
-  ProviderTransactionList transactionList(List<String> storeNames, [bool readWrite = false]) {
+  ProviderTransactionList transactionList(List<String> storeNames,
+      [bool readWrite = false]) {
     return new ProviderTransactionList(this, storeNames, readWrite);
   }
-
-
 }
