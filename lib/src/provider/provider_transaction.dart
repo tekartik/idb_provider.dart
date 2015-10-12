@@ -1,6 +1,6 @@
 part of tekartik_provider;
 
-class ProviderIndexTransaction<K, V> extends Object implements ProviderSourceTransaction<K, V> {
+class ProviderIndexTransaction<K, V> extends Object with ProviderSourceTransactionMixin<K, V> {
 
   Future get completed => _store.completed;
 
@@ -39,47 +39,22 @@ class ProviderIndexTransaction<K, V> extends Object implements ProviderSourceTra
     key: key, direction: direction);
   }
 
+  Stream<CursorWithValue> openRawKeyCursor({K key, String direction}) {
+    return _index.index.openKeyCursor( //
+        key: key, direction: direction);
+  }
+
+  Stream<Cursor> openKeyCursor({K key, bool reverse: false, int limit, int offset}) {
+    String direction = reverse ? idbDirectionPrev : null;
+    Stream<Cursor> stream = openRawKeyCursor( key: key, direction: direction);
+    return _limitOffsetStream(stream, limit: limit, offset: offset);
+  }
+
+  @override
   Stream<CursorWithValue> openCursor({K key, bool reverse: false, int limit, int offset}) {
-    StreamController<CursorWithValue> ctlr = new StreamController(sync: true);
-
-    int count = 0;
-
-    close() {
-      if (!ctlr.isClosed) {
-        ctlr.close();
-      }
-    }
-    onCursorValue(CursorWithValue cwv) {
-      if (offset != null && offset > 0) {
-        cwv.advance(offset);
-      } else {
-        if (limit != null) {
-          if (count >= limit) {
-            // stop here
-            close();
-            return;
-          }
-        }
-        ctlr.add(cwv);
-        count++;
-        cwv.next();
-      }
-    }
-
-    Stream<CursorWithValue> all;
-    String direction = reverse ? IDB_DIRECTION_PREV : null;
-
-    all = openRawCursor( //
-    key: key, direction: direction);
-
-
-    // all.listen(//onCursorValue)
-    all.listen(onCursorValue, onDone: () {
-      close();
-    });
-
-    //}).asFuture() {
-    return ctlr.stream;
+    String direction = reverse ? idbDirectionPrev : null;
+    Stream<CursorWithValue> stream = openRawCursor( key: key, direction: direction);
+    return _limitOffsetStream(stream, limit: limit, offset: offset);
   }
 }
 
@@ -111,11 +86,47 @@ abstract class ProviderWritableSourceTransactionMixin<K, V> {
   }
 }
 
-abstract class ProviderSourceTransaction<K, V> {
+abstract class ProviderSourceTransactionMixin<K, V> {
 
   Future<V> get(K key);
   Future<int> count();
   Stream<CursorWithValue> openRawCursor({String direction});
+
+
+  Stream _limitOffsetStream(Stream rawStream, {int limit, int offset}) {
+    StreamController<Cursor> ctlr = new StreamController(sync: true);
+
+    int count = 0;
+
+    close() {
+      if (!ctlr.isClosed) {
+        ctlr.close();
+      }
+    }
+    onCursorValue(Cursor c) {
+      if (offset != null && offset > 0) {
+        c.advance(offset);
+      } else {
+        if (limit != null) {
+          if (count >= limit) {
+            // stop here
+            close();
+            return;
+          }
+        }
+        ctlr.add(c);
+        count++;
+        c.next();
+      }
+    }
+
+    rawStream.listen(onCursorValue, onDone: () {
+      close();
+    });
+
+    //}).asFuture() {
+    return ctlr.stream;
+  }
 }
 
 abstract class ProviderWritableSourceTransaction<K, V> {
@@ -125,7 +136,7 @@ abstract class ProviderWritableSourceTransaction<K, V> {
   Future<V> get(K key);
 }
 
-class ProviderStoreTransactionBase<K, V> extends ProviderTransaction with ProviderStoreTransactionMixin {
+class ProviderStoreTransactionBase<K, V> extends ProviderTransaction with ProviderStoreTransactionMixin, ProviderSourceTransactionMixin {
 
   ProviderStore _store;
 
@@ -150,16 +161,22 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction with Provid
     _store = new ProviderStore(_transaction.objectStore(storeName));
   }
 
+  Stream<CursorWithValue> openRawCursor({String direction}) {
+    return store.objectStore.openCursor( //
+        direction: direction);
+  }
+  Stream<CursorWithValue> openCursor({bool reverse: false, int limit, int offset}) {
+    String direction = reverse ? idbDirectionPrev : null;
+    Stream<CursorWithValue> stream = openRawCursor(direction: direction);
+    return _limitOffsetStream(stream, limit: limit, offset: offset);
+  }
 
 }
 
 abstract class ProviderStoreTransactionMixin<K, V> {
   ProviderStore get store;
 
-  Stream<CursorWithValue> openRawCursor({String direction}) {
-    return store.objectStore.openCursor( //
-    direction: direction);
-  }
+
 
   ProviderIndexTransaction index(String name) => new ProviderIndexTransaction.fromStoreTransaction(this, name);
 
@@ -175,48 +192,7 @@ abstract class ProviderStoreTransactionMixin<K, V> {
 
   Future clear() => store.clear();
 
-  Stream<CursorWithValue> openCursor({bool reverse: false, int limit, int offset}) {
-    StreamController<CursorWithValue> ctlr = new StreamController(sync: true);
 
-    int count = 0;
-
-    close() {
-      if (!ctlr.isClosed) {
-        ctlr.close();
-      }
-    }
-    onCursorValue(CursorWithValue cwv) {
-      if (offset != null && offset > 0) {
-        cwv.advance(offset);
-      } else {
-        if (limit != null) {
-          if (count >= limit) {
-            // stop here
-            close();
-            return;
-          }
-        }
-        ctlr.add(cwv);
-        count++;
-        cwv.next();
-      }
-    }
-
-    Stream<CursorWithValue> all;
-    String direction = reverse ? IDB_DIRECTION_PREV : null;
-
-    all = openRawCursor( //
-    direction: direction);
-
-
-    // all.listen(//onCursorValue)
-    all.listen(onCursorValue, onDone: () {
-      close();
-    });
-
-    //}).asFuture() {
-    return ctlr.stream;
-  }
 }
 
 //class _ProviderStoreInTransactionList extends Object with ProviderStoreTransactionMixin {
