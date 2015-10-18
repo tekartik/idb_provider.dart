@@ -1,17 +1,15 @@
 library tekartik_dynamic_provider_test;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/idb_client_memory.dart';
 import 'package:tekartik_idb_provider/provider.dart';
-
-import 'package:test/test.dart';
-import 'dart:async';
+import 'test_common.dart';
 
 void main() {
-  testMain(idbMemoryFactory);
+  testMain(idbMemoryContext);
 }
 
-void testMain(IdbFactory idbFactory) {
+void testMain(TestContext context) {
+  IdbFactory idbFactory = context.factory;
   group('provider_dynamic', () {
     group('raw', () {
       //DynamicProvider provider;

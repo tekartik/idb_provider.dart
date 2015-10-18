@@ -33,6 +33,9 @@ class DynamicProvider extends Provider {
     }
   }
 
+  DynamicProvider.noMeta(IdbFactory idbFactory) {
+    _idbFactory = idbFactory;
+  }
   DynamicProvider(IdbFactory idbFactory, [ProviderDbMeta meta]) {
     _idbFactory = idbFactory;
     _databaseMeta = meta;

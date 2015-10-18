@@ -1,21 +1,20 @@
 library tekartik_app_transaction_test;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/idb_client_memory.dart';
 import 'package:tekartik_idb_provider/provider.dart';
 
-import 'package:dev_test/test.dart';
-import 'dart:async';
+import 'test_common.dart';
 
 void main() {
-  testMain(idbMemoryFactory);
+  testMain(idbMemoryContext);
 }
 
-void testMain(IdbFactory idbFactory) {
+void testMain(TestContext context) {
+  IdbFactory idbFactory = context.factory;
   //devWarning;
   // TODO Add store transaction test
   group('transaction', () {
-    String providerName = "test";
+    //String providerName = "test";
     String storeName = "store";
     String indexName = "index";
     String indexKey = "my_key";
@@ -23,9 +22,9 @@ void testMain(IdbFactory idbFactory) {
     DynamicProvider provider;
     ProviderTransaction transaction;
 
-    setUp(() {
+    _setUp() {
       provider =
-          new DynamicProvider(idbFactory, new ProviderDbMeta(providerName));
+          new DynamicProvider(idbFactory, new ProviderDbMeta(context.dbName));
       return provider.delete().then((_) {
         ProviderIndexMeta indexMeta =
             new ProviderIndexMeta(indexName, indexKey);
@@ -33,7 +32,7 @@ void testMain(IdbFactory idbFactory) {
             indecies: [indexMeta], autoIncrement: true));
         return provider.ready;
       });
-    });
+    }
     tearDown(() {
       return new Future.value(() {
         if (transaction != null) {
@@ -44,7 +43,8 @@ void testMain(IdbFactory idbFactory) {
       });
     });
 
-    solo_test('store_cursor', () async {
+    test('store_cursor', () async {
+      await _setUp();
       ProviderStoreTransaction storeTxn =
           provider.storeTransaction(storeName, true);
       // put one with a key one without
@@ -55,7 +55,7 @@ void testMain(IdbFactory idbFactory) {
       ProviderStoreTransaction txn =
           provider.storeTransaction(storeName, false);
       List<Map> data = [];
-      List<String> keyData = [];
+      //List<String> keyData = [];
       txn.openCursor().listen((CursorWithValue cwv) {
         data.add(cwv.value);
       });
@@ -68,7 +68,8 @@ void testMain(IdbFactory idbFactory) {
       ]);
     });
 
-    solo_test('store_index', () async {
+    test('store_index', () async {
+      await _setUp();
       ProviderStoreTransaction storeTxn =
           provider.storeTransaction(storeName, true);
       // put one with a key one without
@@ -91,12 +92,12 @@ void testMain(IdbFactory idbFactory) {
 
       // listed last
       await txn.completed;
-      expect(data.length, 4);
-      expect(data[2], {"my_key": 1, "value": "value4"});
-      expect(data[3], {"my_key": 2, "value": "value2"});
-      expect(keyData.length, 4);
-      expect(keyData[2], 1);
-      expect(keyData[3], 2);
+      expect(data.length, 2);
+      expect(data[0], {"my_key": 1, "value": "value4"});
+      expect(data[1], {"my_key": 2, "value": "value2"});
+      expect(keyData.length, 2);
+      expect(keyData[0], 1);
+      expect(keyData[1], 2);
     });
   });
 }

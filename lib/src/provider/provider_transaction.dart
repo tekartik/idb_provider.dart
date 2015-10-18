@@ -57,7 +57,7 @@ class ProviderIndexTransaction<K, V> extends Object
     return _limitOffsetStream(stream, limit: limit, offset: offset);
   }
 
-  @override
+  //@override
   Stream<CursorWithValue> openCursor(
       {K key, bool reverse: false, int limit, int offset}) {
     String direction = reverse ? idbDirectionPrev : null;
@@ -74,6 +74,14 @@ class ProviderStoreTransaction<K, V>
       : super(provider, storeName, readWrite) {}
   // for creating from list
   ProviderStoreTransaction._() : super._();
+
+  ProviderStoreTransaction.fromList(
+      ProviderTransactionList list, String storeName)
+      : super._() {
+    _transaction = list._transaction;
+    _mode = list._mode;
+    _store = new ProviderStore(_transaction.objectStore(storeName));
+  }
 }
 
 class WriteTransactionMixin {}
@@ -212,11 +220,7 @@ class ProviderTransactionList extends ProviderTransaction {
     _transaction = provider.db._database.transactionList(storeNames, _mode);
   }
   ProviderStoreTransaction store(String storeName) {
-    var store = new ProviderStore(_transaction.objectStore(storeName));
-    return new ProviderStoreTransaction._()
-      .._mode = this._mode
-      .._store = store
-      .._transaction = this._transaction;
+    return new ProviderStoreTransaction.fromList(this, storeName);
   }
 
   ProviderIndexTransaction index(String storeName, String indexName) =>
@@ -228,6 +232,8 @@ class ProviderTransaction {
   Transaction _transaction;
   String _mode;
 
+  bool get readWrite => _mode == idbModeReadWrite;
+  bool get readOnly => _mode == idbModeReadOnly;
   Future get completed => _transaction.completed;
 
 //
