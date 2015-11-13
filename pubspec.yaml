@@ -9,10 +9,6 @@ dependencies:
 dev_dependencies:
   test: any
   dev_test: any
-#  tekartik_test:
-#    git: git://github.com/alextekartik/tekartik_test.dart
-dependency_overrides: 
-#  tekartik_test:
-#    path: ../tekartik_test.dart
-#  tekartik_core:
-#    path: ../tekartik_core.dart
+dependency_overrides:
+#  idb_shim:
+#    git: https://github.com/alextekartik/idb_shim.dart
