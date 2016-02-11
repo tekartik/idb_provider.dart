@@ -2,7 +2,7 @@ library tekartik_provider;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:tekartik_core/hash_code_utils.dart';
-import 'package:collection/equality.dart';
+import 'package:collection/collection.dart';
 import 'dart:async';
 
 part 'src/provider/provider_transaction.dart';
