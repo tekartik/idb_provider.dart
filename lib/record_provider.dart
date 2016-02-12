@@ -3,7 +3,7 @@ library tekartik_idb_provider.record_provider;
 import 'package:tekartik_idb_provider/provider.dart';
 import 'package:idb_shim/idb_client.dart' as idb;
 import 'dart:async';
-import 'package:collection/equality.dart';
+import 'package:collection/collection.dart';
 
 abstract class DbField {
   static const String syncVersion = "syncVersion";
@@ -276,6 +276,11 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
 
   String get store;
 
+  DbRecordProviderReadTransaction get storeReadTransaction =>
+      new DbRecordProviderReadTransaction(this, store);
+  DbRecordProviderWriteTransaction get storeWriteTransaction =>
+      new DbRecordProviderWriteTransaction(this, store);
+
   DbRecordProviderTransaction storeTransaction(bool readWrite) =>
       new DbRecordProviderTransaction(this, store, readWrite);
 
@@ -293,6 +298,11 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
       return fromEntry(entry, id);
     });
   }
+
+  // transaction from a transaction list
+  DbRecordProviderReadTransaction storeListReadTransaction(
+          DbRecordProviderReadTransactionList txnList) =>
+      new DbRecordProviderReadTransaction.fromList(this, txnList, store);
 
   // Listener
   final List<StreamController> _onChangeCtlrs = [];
@@ -490,6 +500,8 @@ abstract class DbRecordProviderTransactionList extends ProviderTransactionList {
     }
   }
 
+//  DbRecordBaseProvider getRecordProvider(String storeName) =>      _provider.getRecordProvider(storeName);
+
   DbRecordProviderTransactionList._(
       DbRecordProvidersMixin provider, List<String> storeNames,
       [bool readWrite = false])
@@ -521,7 +533,30 @@ class DbRecordProviderWriteTransactionList
   }
 }
 
+abstract class DbRecordProvidersMapMixin {
+  Map<String, DbRecordBaseProvider> providerMap;
+  DbRecordBaseProvider getRecordProvider(String storeName) =>
+      providerMap[storeName];
+
+  closeAll() {
+    for (DbRecordBaseProvider recordProvider in recordProviders) {
+      recordProvider.close();
+    }
+  }
+
+  Iterable<DbRecordBaseProvider> get recordProviders => providerMap.values;
+}
+
 abstract class DbRecordProvidersMixin {
+  DbRecordProviderReadTransactionList dbRecordProviderReadTransactionList(
+          List<String> storeNames) =>
+      new DbRecordProviderReadTransactionList(this, storeNames);
+
+  DbRecordProviderWriteTransactionList dbRecordProviderWriteTransactionList(
+          List<String> storeNames) =>
+      new DbRecordProviderWriteTransactionList(this, storeNames);
+
+  @deprecated // 2016-02-12
   DbRecordProviderTransactionList dbRecordProviderTransactionList(
       List<String> storeNames,
       [bool readWrite = false]) {

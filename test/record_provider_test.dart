@@ -2,6 +2,8 @@ import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:dev_test/test.dart';
 import 'package:tekartik_idb_provider/record_provider.dart';
+import 'package:tekartik_idb_provider/provider.dart';
+//import 'dart:async';
 
 IdbFactory idbFactory;
 
@@ -11,17 +13,19 @@ void main() {
   defineTests();
 }
 
+const String dbFieldName = "name";
+
 abstract class DbBasicRecordMixin {
   var id;
   String name;
 
   fillFromDbEntry(Map entry) {
-    name = entry["name"];
+    name = entry[dbFieldName];
   }
 
   fillDbEntry(Map entry) {
     if (name != null) {
-      entry['name'] = name;
+      entry[dbFieldName] = name;
     }
   }
 }
@@ -53,6 +57,84 @@ class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
     DbBasicRecord record = new DbBasicRecord()..id = id;
     record.fillFromDbEntry(entry);
     return record;
+  }
+}
+
+class DbBasicRecordProvider extends DbRecordProvider<DbBasicRecord, String> {
+  String get store => DbBasicAppProvider.basicStore;
+  DbBasicRecord fromEntry(Map entry, String id) =>
+      new DbBasicRecord.fromDbEntry(entry, id);
+}
+
+class DbBasicAppProvider extends DynamicProvider
+    with DbRecordProvidersMixin, DbRecordProvidersMapMixin {
+  DbBasicRecordProvider basic = new DbBasicRecordProvider();
+
+  // version 1 - initial
+  static const int dbVersion = 1;
+
+  static const String basicStore = "basic";
+
+  static const String defaultDbName =
+      'com.tekartik.tekartik_idb_provider.record_test.db';
+
+  //static const String currentIndex = dbFieldCurrent;
+
+  DbBasicAppProvider(IdbFactory idbFactory, [String dbName])
+      : super.noMeta(idbFactory) {
+    basic.provider = this;
+    init(idbFactory, dbName == null ? defaultDbName : dbName, dbVersion);
+
+    providerMap = {basicStore: basic,};
+  }
+
+  @override
+  close() {
+    closeAll();
+    super.close();
+  }
+
+  /*
+  Future<ProjectProvider> getCurrentProjectProvider() async {
+    var txn = project.storeTransaction(true);
+    var index = txn.index(currentIndex);
+    DbProject dbProject = await index.get(true);
+    await txn.completed;
+    ProjectProvider projectProvider;
+    if (dbProject != null) {
+      projectProvider =
+      new ProjectProvider(idbFactory, "${appPackage}-${dbProject.id}.db");
+    }
+    return projectProvider;
+  }
+  */
+  void onUpdateDatabase(VersionChangeEvent e) {
+    //Database db = e.database;
+    //int version = e.oldVersion;
+
+//    if (e.oldVersion == 1) {
+//      // add index
+//      // e.transaction
+//
+//    }
+    if (e.oldVersion < 2) {
+      //db.deleteObjectStore(ENTRIES_STORE);
+
+      // default erase everything, we don't care we sync
+      db.deleteStore(basicStore);
+
+      ProviderIndexMeta nameIndexMeta =
+          new ProviderIndexMeta(dbFieldName, dbFieldName);
+
+      ProviderStoreMeta basicStoreMeta = new ProviderStoreMeta(basicStore,
+          autoIncrement: true, indecies: [nameIndexMeta]);
+
+      // ProviderIndex fileIndex = entriesStore.createIndex(indexMeta);
+
+      addStores(new ProviderStoresMeta([basicStoreMeta]));
+    }
+
+    super.onUpdateDatabase(e);
   }
 }
 
@@ -103,6 +185,46 @@ defineTests() {
 
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
+      });
+    });
+
+    group('access', () {
+      test('open', () async {
+        DbBasicAppProvider appProvider = new DbBasicAppProvider(idbFactory);
+        await appProvider.ready;
+
+        var txn = appProvider.basic.storeReadTransaction;
+        expect(await txn.get(1), isNull);
+        await txn.completed;
+
+        DbBasicRecord record = new DbBasicRecord();
+        record.name = "test";
+        record.id = "_1";
+        txn = appProvider.basic.storeWriteTransaction;
+        var key = (await txn.putRecord(record)).id;
+        expect(key, "_1");
+        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        await txn.completed;
+
+        txn = appProvider.basic.storeReadTransaction;
+        var stream = txn.openCursor(limit: 1);
+        await stream.listen((CursorWithValue cwv) {
+          DbBasicRecord record =
+              new DbBasicRecord.fromDbEntry(cwv.value, cwv.primaryKey);
+          expect(record.id, "_1");
+        }).asFuture();
+
+        await txn.completed;
+
+        DbRecordProviderReadTransactionList allStoreTransaction = appProvider
+            .dbRecordProviderReadTransactionList(
+                [DbBasicAppProvider.basicStore]);
+        txn = appProvider.basic.storeListReadTransaction(allStoreTransaction);
+        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+
+        await allStoreTransaction.completed;
+        //var txn = basicRecordProvider.store;
+        //basicRecordProvider.get()
       });
     });
   });

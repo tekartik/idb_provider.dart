@@ -89,7 +89,8 @@ class ProviderStoresMeta {
   ProviderStoresMeta(this.stores);
 
   @override
-  int get hashCode => stores.length * 17 +
+  int get hashCode =>
+      stores.length * 17 +
       (stores.isEmpty ? 0 : safeHashCode(stores.first.hashCode));
 
   @override

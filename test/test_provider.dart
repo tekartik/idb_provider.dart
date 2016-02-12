@@ -43,10 +43,12 @@ class TestProvider extends Provider {
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
-      names.add((cwv.value as Map)[NAME_FIELD]);
-    }).asFuture().then((_) {
-      return names;
-    });
+          names.add((cwv.value as Map)[NAME_FIELD]);
+        })
+        .asFuture()
+        .then((_) {
+          return names;
+        });
   }
 
   Future<List<String>> getOrderedNames({int limit, int offset}) {
@@ -56,12 +58,15 @@ class TestProvider extends Provider {
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
-      names.add((cwv.value as Map)[NAME_FIELD]);
-    }).asFuture().then((_) {
-      return trans.completed;
-    }).then((_) {
-      return names;
-    });
+          names.add((cwv.value as Map)[NAME_FIELD]);
+        })
+        .asFuture()
+        .then((_) {
+          return trans.completed;
+        })
+        .then((_) {
+          return names;
+        });
   }
 
   Future<int> putName(String name) {

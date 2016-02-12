@@ -143,10 +143,12 @@ void testMain(TestContext context) {
               direction: IDB_DIRECTION_NEXT,
               autoAdvance: false)
           .listen((CursorWithValue cwv) {
-        count++;
-      }).asFuture().then((_) {
-        return count;
-      });
+            count++;
+          })
+          .asFuture()
+          .then((_) {
+            return count;
+          });
     }
     test('cursor count', () {
       slowCount().then((int count) {
