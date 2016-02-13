@@ -171,6 +171,9 @@ abstract class DbRecordProviderTransaction<K>
     }
   }
 
+  @deprecated // discouraged
+  Future<Map> get(K key) => super.get(key);
+
   DbRecordProviderTransaction._fromList(
       this._provider, ProviderTransactionList list, String storeName)
       : super.fromList(list, storeName) {}
@@ -181,7 +184,8 @@ abstract class DbRecordProviderTransaction<K>
         _provider = provider;
 }
 
-class DbRecordProviderReadTransaction extends DbRecordProviderTransaction {
+class DbRecordProviderReadTransaction<T extends DbRecordBase, K>
+    extends DbRecordProviderTransaction<K> {
   DbRecordProviderReadTransaction(
       DbRecordBaseProvider provider, String storeName)
       : super._(provider, storeName, false) {}
@@ -276,10 +280,14 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
 
   String get store;
 
-  DbRecordProviderReadTransaction get storeReadTransaction =>
+  DbRecordProviderReadTransaction get readTransaction =>
       new DbRecordProviderReadTransaction(this, store);
-  DbRecordProviderWriteTransaction get storeWriteTransaction =>
+  DbRecordProviderWriteTransaction get writeTransaction =>
       new DbRecordProviderWriteTransaction(this, store);
+  DbRecordProviderReadTransaction get storeReadTransaction => readTransaction;
+
+  DbRecordProviderWriteTransaction get storeWriteTransaction =>
+      writeTransaction;
 
   DbRecordProviderTransaction storeTransaction(bool readWrite) =>
       new DbRecordProviderTransaction(this, store, readWrite);
@@ -299,10 +307,22 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
     });
   }
 
+  Future<T> indexGet(ProviderIndexTransaction txn, dynamic id) {
+    return txn.get(id).then((Map entry) {
+      return txn.getKey(id).then((K primaryId) {
+        return fromEntry(entry, primaryId);
+      });
+    });
+  }
+
   // transaction from a transaction list
-  DbRecordProviderReadTransaction storeListReadTransaction(
-          DbRecordProviderReadTransactionList txnList) =>
+  DbRecordProviderReadTransaction txnListReadTransaction(
+          DbRecordProviderTransactionList txnList) =>
       new DbRecordProviderReadTransaction.fromList(this, txnList, store);
+
+  DbRecordProviderWriteTransaction txnListWriteTransaction(
+          DbRecordProviderWriteTransactionList txnList) =>
+      new DbRecordProviderWriteTransaction.fromList(this, txnList, store);
 
   // Listener
   final List<StreamController> _onChangeCtlrs = [];
@@ -342,6 +362,15 @@ abstract class DbRecordProvider<T extends DbRecord, K>
 
   Future txnDelete(DbRecordProviderWriteTransaction txn, K key) =>
       txn.deleteRecord(key);
+
+  Future clear() async {
+    var txn = storeTransaction(true);
+    await txnClear(txn);
+    return txn.completed;
+  }
+
+  // Future txnClear(DbRecordProviderWriteTransaction txn) async { await txn.clearRecords(); }
+  Future txnClear(DbRecordProviderWriteTransaction txn) => txn.clearRecords();
 }
 
 abstract class DbSyncedRecordProvider<T extends DbSyncedRecord>
@@ -351,7 +380,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecord>
   // must be int for indexing
   static const String syncIdIndex = DbField.syncId;
 
-  ProviderIndexTransaction indexTransaction(String indexName,
+  ProviderIndexTransaction<T, int> indexTransaction(String indexName,
           [bool readWrite]) =>
       new ProviderIndexTransaction.fromStoreTransaction(
           storeTransaction(readWrite), indexName);
@@ -391,10 +420,16 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecord>
   }
 
   Future clear({bool syncing}) async {
+    if (syncing != true) {
+      throw new UnimplementedError("force the syncing field to true");
+    }
     var txn = storeTransaction(true);
-    await txn.clearRecords();
+    await txnClear(txn, syncing: syncing);
     return txn.completed;
   }
+
+  Future txnClear(DbRecordProviderWriteTransaction txn, {bool syncing}) =>
+      txn.clearRecords();
 
   ///
   /// TODO: Put won't change data (which one) if local version has changed
@@ -552,9 +587,13 @@ abstract class DbRecordProvidersMixin {
           List<String> storeNames) =>
       new DbRecordProviderReadTransactionList(this, storeNames);
 
-  DbRecordProviderWriteTransactionList dbRecordProviderWriteTransactionList(
+  DbRecordProviderWriteTransactionList writeTransactionList(
           List<String> storeNames) =>
       new DbRecordProviderWriteTransactionList(this, storeNames);
+
+  DbRecordProviderWriteTransactionList dbRecordProviderWriteTransactionList(
+          List<String> storeNames) =>
+      writeTransactionList(storeNames);
 
   @deprecated // 2016-02-12
   DbRecordProviderTransactionList dbRecordProviderTransactionList(

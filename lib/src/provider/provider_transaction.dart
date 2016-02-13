@@ -192,7 +192,7 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
 abstract class ProviderStoreTransactionMixin<K, V> {
   ProviderStore get store;
 
-  ProviderIndexTransaction index(String name) =>
+  ProviderIndexTransaction<K, dynamic> index(String name) =>
       new ProviderIndexTransaction.fromStoreTransaction(this, name);
 
   Future count() => store.count();

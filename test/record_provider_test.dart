@@ -191,16 +191,23 @@ defineTests() {
     group('access', () {
       test('open', () async {
         DbBasicAppProvider appProvider = new DbBasicAppProvider(idbFactory);
+        await appProvider.delete();
         await appProvider.ready;
 
-        var txn = appProvider.basic.storeReadTransaction;
-        expect(await txn.get(1), isNull);
-        await txn.completed;
+        DbRecordProviderReadTransaction<DbBasicRecord, String> readTxn =
+            appProvider.basic.readTransaction;
+        var txn = readTxn;
+        expect(await readTxn.get(1), isNull);
+        await readTxn.completed;
 
         DbBasicRecord record = new DbBasicRecord();
         record.name = "test";
         record.id = "_1";
-        txn = appProvider.basic.storeWriteTransaction;
+
+        DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
+            appProvider.basic.writeTransaction;
+        txn = writeTxn;
+
         var key = (await txn.putRecord(record)).id;
         expect(key, "_1");
         expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
@@ -216,15 +223,100 @@ defineTests() {
 
         await txn.completed;
 
-        DbRecordProviderReadTransactionList allStoreTransaction = appProvider
-            .dbRecordProviderReadTransactionList(
-                [DbBasicAppProvider.basicStore]);
-        txn = appProvider.basic.storeListReadTransaction(allStoreTransaction);
+        var txnList = appProvider.dbRecordProviderReadTransactionList(
+            [DbBasicAppProvider.basicStore]);
+        txn = appProvider.basic.txnListReadTransaction(txnList);
         expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
 
-        await allStoreTransaction.completed;
+        await txnList.completed;
+
+        txnList = appProvider.dbRecordProviderWriteTransactionList(
+            [DbBasicAppProvider.basicStore]);
+        //txn = appProvider.basic.txnListReadTransaction(txnList);
+
+        txn = appProvider.basic.txnListWriteTransaction(txnList);
+        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        await appProvider.basic.txnClear(txn);
+        expect((await appProvider.basic.txnGet(txn, "_1")), isNull);
+
+        await txnList.completed;
         //var txn = basicRecordProvider.store;
         //basicRecordProvider.get()
+      });
+
+      test('write', () async {
+        DbBasicAppProvider appProvider = new DbBasicAppProvider(idbFactory);
+        await appProvider.delete();
+        await appProvider.ready;
+
+        DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
+            appProvider.basic.writeTransaction;
+        var txn = writeTxn;
+
+        DbBasicRecord record = new DbBasicRecord();
+        record.name = "test";
+        record.id = "_1";
+
+        var key = (await txn.putRecord(record)).id;
+        expect(key, "_1");
+        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        await txn.completed;
+
+        txn = appProvider.basic.storeReadTransaction;
+        var stream = txn.openCursor(limit: 1);
+        await stream.listen((CursorWithValue cwv) {
+          DbBasicRecord record =
+              new DbBasicRecord.fromDbEntry(cwv.value, cwv.primaryKey);
+          expect(record.id, "_1");
+        }).asFuture();
+
+        await txn.completed;
+
+        var txnList = appProvider.dbRecordProviderReadTransactionList(
+            [DbBasicAppProvider.basicStore]);
+        txn = appProvider.basic.txnListReadTransaction(txnList);
+        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+
+        await txnList.completed;
+
+        txnList = appProvider.dbRecordProviderWriteTransactionList(
+            [DbBasicAppProvider.basicStore]);
+        //txn = appProvider.basic.txnListReadTransaction(txnList);
+
+        txn = appProvider.basic.txnListWriteTransaction(txnList);
+        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        await appProvider.basic.txnClear(txn);
+        expect((await appProvider.basic.txnGet(txn, "_1")), isNull);
+
+        await txnList.completed;
+        //var txn = basicRecordProvider.store;
+        //basicRecordProvider.get()
+      });
+
+      test('index', () async {
+        DbBasicAppProvider appProvider = new DbBasicAppProvider(idbFactory);
+        await appProvider.delete();
+        await appProvider.ready;
+
+        DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
+            appProvider.basic.writeTransaction;
+        var txn = writeTxn;
+
+        DbBasicRecord record = new DbBasicRecord();
+        record.name = "test";
+        record.id = "_1";
+
+        var key = (await txn.putRecord(record)).id;
+        await txn;
+
+        txn = appProvider.basic.readTransaction;
+        var index = txn.index(dbFieldName);
+
+        expect((await appProvider.basic.indexGet(index, "test")).id, "_1");
+
+        await txn;
+        //index.
+        //expect(key, "_1");
       });
     });
   });
