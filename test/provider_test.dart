@@ -62,11 +62,11 @@ void testMain(TestContext context) {
     });
   });
   group('test_provider_open', () {
-    test('open', () {
+    test('open', () async {
       // open normal
       TestProvider provider = new TestProvider(idbFactory);
       TestProvider provider2 = new TestProvider(idbFactory);
-      return provider.delete().then((_) {
+      await provider.delete().then((_) {
         expect(provider.isReady, isFalse);
         Future done = provider.ready.then((readyProvider) {
           expect(readyProvider, provider);
@@ -83,11 +83,9 @@ void testMain(TestContext context) {
           expect(readyProvider2, provider2);
         });
         return done;
-      }).then((_) {
-        //provider2.close();
-      }).then((_) {
-        provider.close();
       });
+
+      provider.close();
     });
   });
   group('test_provider', () {
@@ -101,6 +99,14 @@ void testMain(TestContext context) {
     });
     tearDown(() {
       provider.close();
+    });
+    test('toString', () {
+      //print(provider);
+      expect(provider.toString(), startsWith("{"));
+
+      TestProvider anotherProvider = new TestProvider(idbFactory);
+      expect(anotherProvider.toString(), "{}");
+      //print(anotherProvider);
     });
     test('empty', () {
       return provider.count().then((int count) {

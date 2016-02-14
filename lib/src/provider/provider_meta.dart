@@ -80,6 +80,9 @@ class ProviderDb {
   }
 
   IdbFactory get factory => _database.factory;
+
+  @override
+  String toString() => "${_database}";
 }
 
 class StoreRow<K, V> {}

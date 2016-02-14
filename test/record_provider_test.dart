@@ -3,6 +3,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:dev_test/test.dart';
 import 'package:tekartik_idb_provider/record_provider.dart';
 import 'package:tekartik_idb_provider/provider.dart';
+import 'package:tekartik_core/dev_utils.dart';
 //import 'dart:async';
 
 IdbFactory idbFactory;
@@ -80,10 +81,14 @@ class DbBasicAppProvider extends DynamicProvider
 
   //static const String currentIndex = dbFieldCurrent;
 
-  DbBasicAppProvider(IdbFactory idbFactory, [String dbName])
+  // _dbVersion for testing
+  DbBasicAppProvider(IdbFactory idbFactory, [String dbName, int _dbVersion])
       : super.noMeta(idbFactory) {
     basic.provider = this;
-    init(idbFactory, dbName == null ? defaultDbName : dbName, dbVersion);
+    if (_dbVersion == null) {
+      _dbVersion = dbVersion;
+    }
+    init(idbFactory, dbName == null ? defaultDbName : dbName, _dbVersion);
 
     providerMap = {basicStore: basic,};
   }
@@ -109,6 +114,7 @@ class DbBasicAppProvider extends DynamicProvider
   }
   */
   void onUpdateDatabase(VersionChangeEvent e) {
+    devPrint("${e.newVersion}/${e.oldVersion}");
     //Database db = e.database;
     //int version = e.oldVersion;
 
@@ -132,6 +138,12 @@ class DbBasicAppProvider extends DynamicProvider
       // ProviderIndex fileIndex = entriesStore.createIndex(indexMeta);
 
       addStores(new ProviderStoresMeta([basicStoreMeta]));
+
+      //providerStore.c
+    } else if (e.newVersion > 2 && e.oldVersion < 3) {
+      ObjectStore store = e.transaction.objectStore(basicStore);
+      idbDevPrint(store);
+      ProviderStore providerStore = new ProviderStore(store);
     }
 
     super.onUpdateDatabase(e);
@@ -160,6 +172,15 @@ defineTests() {
     });
 
     group('DbRecord', () {
+      test('toString', () {
+        DbBasicRecord record1 = new DbBasicRecord();
+
+        expect(record1.toString(), "{}");
+        record1.id = "key1";
+        expect(record1.toString(), "{_id: key1}");
+        record1.name = "test";
+        expect(record1.toString(), "{name: test, _id: key1}");
+      });
       test('equality', () {
         DbBasicRecord record1 = new DbBasicRecord();
         DbBasicRecord record2 = new DbBasicRecord();
@@ -189,6 +210,17 @@ defineTests() {
     });
 
     group('access', () {
+      solo_test('version', () async {
+        DbBasicAppProvider appProvider = new DbBasicAppProvider(idbFactory);
+        await appProvider.delete();
+        await appProvider.ready;
+        await appProvider.close();
+
+        appProvider = new DbBasicAppProvider(
+            idbFactory, DbBasicAppProvider.defaultDbName, 3);
+        await appProvider.ready;
+      });
+
       test('open', () async {
         DbBasicAppProvider appProvider = new DbBasicAppProvider(idbFactory);
         await appProvider.delete();
@@ -197,7 +229,7 @@ defineTests() {
         DbRecordProviderReadTransaction<DbBasicRecord, String> readTxn =
             appProvider.basic.readTransaction;
         var txn = readTxn;
-        expect(await readTxn.get(1), isNull);
+        expect(await readTxn.get("_1"), isNull);
         await readTxn.completed;
 
         DbBasicRecord record = new DbBasicRecord();

@@ -248,4 +248,14 @@ abstract class Provider {
       [bool readWrite = false]) {
     return new ProviderTransactionList(this, storeNames, readWrite);
   }
+
+  Map toMap() {
+    Map map = {};
+    if (_db != null) {
+      map['db'] = _db._database.name;
+    }
+    return map;
+  }
+
+  String toString() => toMap().toString();
 }

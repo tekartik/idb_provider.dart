@@ -42,6 +42,9 @@ abstract class DbRecordBase {
   @override toString() {
     Map map = new Map();
     fillDbEntry(map);
+    if (id != null) {
+      map['_id'] = id.toString();
+    }
     return map.toString();
   }
 
