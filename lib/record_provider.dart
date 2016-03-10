@@ -75,14 +75,26 @@ abstract class DbRecord extends DbRecordBase {
   }
 }
 
-abstract class DbSyncedRecord extends DbRecordBase {
-  String get kind;
+abstract class StringIdMixin {
+  String _id;
 
+  String get id => _id;
+
+  set id(String id) => _id = id;
+
+}
+
+abstract class IntIdMixin {
   int _id;
 
   int get id => _id;
 
   set id(int id) => _id = id;
+
+}
+
+abstract class DbSyncedRecordBase extends DbRecordBase {
+  String get kind;
 
   int _version;
 
@@ -139,6 +151,12 @@ abstract class DbSyncedRecord extends DbRecordBase {
     set(entry, DbField.dirty, dirty ? 1 : null);
     set(entry, DbField.kind, kind);
   }
+}
+
+
+abstract class DbSyncedRecord extends DbSyncedRecordBase with IntIdMixin {
+
+
 }
 
 class DbRecordProviderPutEvent extends DbRecordProviderEvent {
@@ -376,19 +394,19 @@ abstract class DbRecordProvider<T extends DbRecord, K>
   Future txnClear(DbRecordProviderWriteTransaction txn) => txn.clearRecords();
 }
 
-abstract class DbSyncedRecordProvider<T extends DbSyncedRecord>
-    extends DbRecordBaseProvider<T, int> {
+abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
+    extends DbRecordBaseProvider<T, K> {
   static const String dirtyIndex = DbField.dirty;
 
   // must be int for indexing
   static const String syncIdIndex = DbField.syncId;
 
-  ProviderIndexTransaction<T, int> indexTransaction(String indexName,
+  ProviderIndexTransaction<dynamic, T> indexTransaction(String indexName,
           [bool readWrite]) =>
       new ProviderIndexTransaction.fromStoreTransaction(
           storeTransaction(readWrite), indexName);
 
-  Future delete(int id, {bool syncing}) async {
+  Future delete(K id, {bool syncing}) async {
     var txn = storeTransaction(true);
     T list = await txnGet(txn, id);
     if (list != null) {
@@ -404,12 +422,12 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecord>
     await txn.completed;
   }
 
-  Future txnDelete(DbRecordProviderWriteTransaction txn, int id) =>
+  Future txnDelete(DbRecordProviderWriteTransaction txn, K id) =>
       txn.deleteRecord(id);
 
   Future<T> getBySyncId(String syncId) async {
-    var txn = indexTransaction(syncIdIndex);
-    var id = await txn.getKey(syncId);
+    ProviderIndexTransaction<String, T> txn = indexTransaction(syncIdIndex);
+    K id = await txn.getKey(syncId);
     T record;
     if (id != null) {
       record = await txnGet(txn.store, id);
@@ -448,7 +466,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecord>
     if (existingRecord != null) {
       record.version = existingRecord.version + 1;
     } else {
-      record.version++;
+      record.version = 1;
     }
     /*
       if (list.version != existingList.version) {
@@ -490,7 +508,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecord>
   ///
   Future updateSyncInfo(T record, String syncId, String syncVersion) async {
     var txn = storeTransaction(true);
-    DbSyncedRecord existingRecord = await txnGet(txn, record.id);
+    DbSyncedRecordBase existingRecord = await txnGet(txn, record.id);
     if (existingRecord != null) {
       // Check version before changing the dirty flag
       if (record.version == existingRecord.version) {
@@ -506,7 +524,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecord>
   Future<T> getFirstDirty() async {
     var txn = indexTransaction(dirtyIndex);
     var id = await txn.getKey(1); // 1 is dirty
-    DbSyncedRecord record;
+    DbSyncedRecordBase record;
     if (id != null) {
       record = await txnGet(txn.store, id);
     }
