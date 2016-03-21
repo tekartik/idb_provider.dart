@@ -463,7 +463,11 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
     if (record.id != null) {
       return txnGet(txn, record.id).then((T existingRecord) {
         if (existingRecord != null) {
-          record.setSyncInfo(existingRecord.syncId, existingRecord.syncVersion);
+          // if not syncing keep existing syncId and syncVersion
+          if (syncing != true) {
+            record.setSyncInfo(
+                existingRecord.syncId, existingRecord.syncVersion);
+          }
           record.version = existingRecord.version + 1;
           return txnRawPut(txn, record);
         } else {

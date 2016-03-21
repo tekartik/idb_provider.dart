@@ -158,11 +158,15 @@ class DbBasicAppProvider extends DynamicProvider
 
       ProviderIndexMeta nameIndexMeta =
           new ProviderIndexMeta(dbFieldName, dbFieldName);
-
-      ProviderStoreMeta basicStoreMeta =
-          new ProviderStoreMeta(basicStore, indecies: [nameIndexMeta]);
+      ProviderIndexMeta dirtyIndexMeta =
+          new ProviderIndexMeta(DbField.dirty, DbField.dirty);
+      ProviderIndexMeta syncIdIndexMeta =
+          new ProviderIndexMeta(DbField.syncId, DbField.syncId);
+      ProviderStoreMeta basicStoreMeta = new ProviderStoreMeta(basicStore,
+          indecies: [nameIndexMeta, dirtyIndexMeta, syncIdIndexMeta]);
       ProviderStoreMeta autoStoreMeta = new ProviderStoreMeta(autoStore,
-          autoIncrement: true, indecies: [nameIndexMeta]);
+          autoIncrement: true,
+          indecies: [nameIndexMeta, dirtyIndexMeta, syncIdIndexMeta]);
 
       // ProviderIndex fileIndex = entriesStore.createIndex(indexMeta);
       //devPrint(autoStoreMeta);
@@ -366,6 +370,129 @@ void testMain(TestContext context) {
         await txn;
         //index.
         //expect(key, "_1");
+      });
+    });
+
+    group('auto', () {
+      DbAutoRecordProvider provider;
+      DbBasicAppProvider appProvider;
+
+      setUp(() async {
+        appProvider = new DbBasicAppProvider(idbFactory, context.dbName);
+        await appProvider.delete();
+        await appProvider.ready;
+        provider = appProvider.auto;
+      });
+      tearDown(() {
+        appProvider.close();
+      });
+
+      test('get_none', () async {
+        expect(await provider.get(123), isNull);
+        expect(await provider.getBySyncId("123"), isNull);
+      });
+
+      test('put/get/getBySyncId', () async {
+        DbAutoRecord project = new DbAutoRecord();
+        project.name = "my_name";
+        project.setSyncInfo("my_sync_id", "my_sync_version");
+        expect(project.version, isNull);
+        project = await provider.put(project, syncing: true);
+        expect(project.id, 1);
+        expect(project.version, 1);
+        expect(project.dirty, false);
+        expect(project.deleted, false);
+        expect(project.name, "my_name");
+        expect(project.syncId, "my_sync_id");
+        expect(project.syncVersion, "my_sync_version");
+
+        project = await provider.get(project.id);
+        expect(project.id, 1);
+        expect(project.dirty, false);
+        expect(project.deleted, false);
+        expect(project.version, 1);
+        expect(project.name, "my_name");
+        expect(project.syncId, "my_sync_id");
+        expect(project.syncVersion, "my_sync_version");
+
+        await provider.updateSyncInfo(project, "my_sync_id", "my_sync_version");
+
+        project = await provider.getBySyncId("123");
+        expect(project, isNull);
+        project = await provider.getBySyncId("my_sync_id");
+        expect(project.id, 1);
+
+        project = await provider.put(project, syncing: true);
+        expect(project.dirty, false);
+        DbAutoRecord list2 = await provider.get(project.id);
+        expect(list2.id, project.id);
+        expect(list2.name, project.name);
+        expect(project.syncId, "my_sync_id");
+        expect(project.syncVersion, "my_sync_version");
+        expect(project.dirty, false);
+        expect(project.deleted, false);
+      });
+
+      test('project_sync_info', () async {
+        DbAutoRecord project = new DbAutoRecord();
+        project.setSyncInfo("my_sync_id", "my_sync_version");
+        project = await provider.put(project);
+        expect(project.syncId, null);
+        expect(project.syncVersion, null);
+
+        // updating won't work if not syncing
+        project.setSyncInfo("my_sync_id_2", "my_sync_version_2");
+        project = await provider.put(project);
+        expect(project.syncId, null);
+        expect(project.syncVersion, null);
+
+        // but will if syncing
+        project.setSyncInfo("my_sync_id_2", "my_sync_version_2");
+        project = await provider.put(project, syncing: true);
+        expect(project.syncId, "my_sync_id_2");
+        expect(project.syncVersion, "my_sync_version_2");
+
+        // or through direct update
+        await provider.updateSyncInfo(project, "my_sync_id", "my_sync_version");
+        project = await provider.get(project.id);
+        expect(project.syncId, "my_sync_id");
+        expect(project.syncVersion, "my_sync_version");
+      });
+
+      test('.list.getFirstDirty(', () async {
+        expect(await provider.getFirstDirty(), isNull);
+        DbAutoRecord list = new DbAutoRecord();
+        list = await provider.put(list);
+        expect((await provider.getFirstDirty()).id, list.id);
+      });
+
+      test('delete_none', () async {
+        // none
+        await provider.delete(0);
+      });
+
+      test('delete', () async {
+        // none
+        await provider.delete(0);
+
+        // create for deletion
+        DbAutoRecord list = new DbAutoRecord();
+        list = await provider.put(list);
+
+        await provider.delete(list.id);
+
+        expect(await provider.get(list.id), isNull);
+
+        // create for deletion with a syncId (won't be deleted
+        list = new DbAutoRecord()..setSyncInfo("1", null);
+        list = await provider.put(list, syncing: true);
+
+        await provider.delete(list.id);
+
+        expect((await provider.get(list.id)).deleted, isTrue);
+
+        await provider.delete(list.id, syncing: true);
+        expect(await provider.get(list.id), isNull);
       });
     });
 
