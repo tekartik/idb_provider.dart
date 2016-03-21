@@ -39,7 +39,8 @@ abstract class DbRecordBase {
     }
   }
 
-  @override toString() {
+  @override
+  toString() {
     Map map = new Map();
     fillDbEntry(map);
     if (id != null) {
@@ -49,7 +50,7 @@ abstract class DbRecordBase {
   }
 
   @override
-  int get hashCode => const MapEquality().hash(toDbEntry());
+  int get hashCode => const MapEquality().hash(toDbEntry()) + id.hashCode ?? 0;
 
   @override
   bool operator ==(o) {
@@ -57,22 +58,22 @@ abstract class DbRecordBase {
       return false;
     }
     return (o.runtimeType == runtimeType) &&
-        (const MapEquality().equals(toDbEntry(), o.toDbEntry()));
+        (const MapEquality().equals(toDbEntry(), o.toDbEntry())) &&
+        id == o.id;
   }
 }
 
 abstract class DbRecord extends DbRecordBase {
+  /*
   get id;
 
   set id(var id);
 
   @override
-  int get hashCode => id == null ? 0 : id.hashCode * 17 + super.hashCode;
-
-  @override
   bool operator ==(o) {
     return (super == (o) && id == o.id);
   }
+  */
 }
 
 abstract class StringIdMixin {
@@ -81,7 +82,6 @@ abstract class StringIdMixin {
   String get id => _id;
 
   set id(String id) => _id = id;
-
 }
 
 abstract class IntIdMixin {
@@ -90,11 +90,10 @@ abstract class IntIdMixin {
   int get id => _id;
 
   set id(int id) => _id = id;
-
 }
 
 abstract class DbSyncedRecordBase extends DbRecordBase {
-  String get kind;
+  //String get kind;
 
   int _version;
 
@@ -144,20 +143,16 @@ abstract class DbSyncedRecordBase extends DbRecordBase {
   }
 
   fillDbEntry(Map entry) {
-    entry[DbField.version] = version;
+    set(entry, DbField.version, version);
     set(entry, DbField.syncId, syncId);
     set(entry, DbField.syncVersion, syncVersion);
     set(entry, DbField.deleted, deleted ? true : null);
     set(entry, DbField.dirty, dirty ? 1 : null);
-    set(entry, DbField.kind, kind);
+    //set(entry, DbField.kind, kind);
   }
 }
 
-
-abstract class DbSyncedRecord extends DbSyncedRecordBase with IntIdMixin {
-
-
-}
+abstract class DbSyncedRecord extends DbSyncedRecordBase with IntIdMixin {}
 
 class DbRecordProviderPutEvent extends DbRecordProviderEvent {
   DbRecordBase record;
@@ -297,7 +292,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
 /// in one store
 ///
 abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
-  DynamicProvider provider;
+  Provider provider;
 
   String get store;
 
@@ -408,22 +403,28 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
 
   Future delete(K id, {bool syncing}) async {
     var txn = storeTransaction(true);
-    T list = await txnGet(txn, id);
-    if (list != null) {
-      // Not synced yet or from sync adapter
-      if (list.syncId == null || (syncing == true)) {
-        await txnDelete(txn, id);
-      } else if (list.deleted != true) {
-        list.deleted = true;
-        list.dirty = true;
-        await txnPut(txn, list);
-      }
-    }
+    await txnDelete(txn, id, syncing: syncing);
     await txn.completed;
   }
 
-  Future txnDelete(DbRecordProviderWriteTransaction txn, K id) =>
+  Future txnRawDelete(DbRecordProviderWriteTransaction txn, K id) =>
       txn.deleteRecord(id);
+
+  Future txnDelete(DbRecordProviderWriteTransaction txn, K id, {bool syncing}) {
+    return txnGet(txn, id).then((T existing) {
+      if (existing != null) {
+        // Not synced yet or from sync adapter
+        if (existing.syncId == null || (syncing == true)) {
+          return txnRawDelete(txn, id);
+        } else if (existing.deleted != true) {
+          existing.deleted = true;
+          existing.dirty = true;
+          existing.version++;
+          return txnRawPut(txn, existing);
+        }
+      }
+    });
+  }
 
   Future<T> getBySyncId(String syncId) async {
     ProviderIndexTransaction<String, T> txn = indexTransaction(syncIdIndex);
@@ -436,8 +437,42 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
     return record;
   }
 
-  Future<T> txnPut(DbRecordProviderWriteTransaction txn, T record) {
+  Future<T> txnRawPut(DbRecordProviderWriteTransaction txn, T record) {
     return txn.putRecord(record);
+  }
+
+  Future<T> txnPut(DbRecordProviderWriteTransaction txn, T record,
+      {bool syncing}) {
+    syncing = syncing == true;
+    // remove deleted if set
+    record.deleted = false;
+    // never update sync info
+    // dirty for not sync only
+    if (syncing == true) {
+      record.dirty = false;
+    } else {
+      // try to retrieve existing sync info
+      // list.setSyncInfo(null, null);
+      record.setSyncInfo(null, null);
+      record.dirty = true;
+    }
+    _insert() {
+      record.version = 1;
+      return txnRawPut(txn, record);
+    }
+    if (record.id != null) {
+      return txnGet(txn, record.id).then((T existingRecord) {
+        if (existingRecord != null) {
+          record.setSyncInfo(existingRecord.syncId, existingRecord.syncVersion);
+          record.version = existingRecord.version + 1;
+          return txnRawPut(txn, record);
+        } else {
+          return _insert();
+        }
+      });
+    } else {
+      return _insert();
+    }
   }
 
   Future clear({bool syncing}) async {
@@ -449,8 +484,12 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
     return txn.completed;
   }
 
-  Future txnClear(DbRecordProviderWriteTransaction txn, {bool syncing}) =>
-      txn.clearRecords();
+  Future txnClear(DbRecordProviderWriteTransaction txn, {bool syncing}) {
+    if (syncing != true) {
+      throw new UnimplementedError("force the syncing field to true");
+    }
+    return txn.clearRecords();
+  }
 
   ///
   /// TODO: Put won't change data (which one) if local version has changed
@@ -458,44 +497,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
   Future<T> put(T record, {bool syncing}) async {
     var txn = storeTransaction(true);
 
-    syncing = syncing == true;
-    T existingRecord;
-    if (record.id != null) {
-      existingRecord = await txnGet(txn, record.id);
-    }
-    if (existingRecord != null) {
-      record.version = existingRecord.version + 1;
-    } else {
-      record.version = 1;
-    }
-    /*
-      if (list.version != existingList.version) {
-        // don't erase data - only update syncInfo if needed
-        if (syncing) {
-          existingList.setSyncInfo(list.syncId, list.syncVersion);
-          await txnPutList(txn, existingList);
-        }
-
-          (txn, list);
-        }
-      } else
-    }
-    */
-    // remove deleted if set
-    record.deleted = false;
-    // never update sync info
-    // dirty for not sync only
-    if (syncing == true) {
-      record.dirty = false;
-    } else {
-      // try to retrieve existing sync info
-      // list.setSyncInfo(null, null);
-      record.dirty = true;
-      if (existingRecord != null) {
-        record.setSyncInfo(existingRecord.syncId, existingRecord.syncVersion);
-      }
-    }
-    record = await txnPut(txn, record);
+    record = await txnPut(txn, record, syncing: syncing);
     await txn.completed;
     return record;
   }
@@ -517,7 +519,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
       record = existingRecord;
     }
     record.setSyncInfo(syncId, syncVersion);
-    await txnPut(txn, record);
+    await txnRawPut(txn, record);
     await txn.completed;
   }
 
@@ -590,7 +592,18 @@ class DbRecordProviderWriteTransactionList
 }
 
 abstract class DbRecordProvidersMapMixin {
-  Map<String, DbRecordBaseProvider> providerMap;
+  Map<String, DbRecordBaseProvider> _providerMap;
+  Map<String, DbRecordBaseProvider> get providerMap => _providerMap;
+  set providerMap(Map<String, DbRecordBaseProvider> providerMap) {
+    _providerMap = providerMap;
+  }
+
+  initAll(Provider provider) {
+    for (DbRecordBaseProvider recordProvider in _providerMap.values) {
+      recordProvider.provider = provider;
+    }
+  }
+
   DbRecordBaseProvider getRecordProvider(String storeName) =>
       providerMap[storeName];
 

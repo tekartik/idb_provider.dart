@@ -2,6 +2,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:dev_test/test.dart';
 import 'package:tekartik_idb_provider/record_provider.dart';
 import 'package:tekartik_idb_provider/provider.dart';
+//import 'package:tekartik_core/dev_utils.dart';
 import 'test_common.dart';
 //IdbFactory idbFactory;
 
@@ -15,34 +16,44 @@ abstract class DbBasicRecordMixin {
   var id;
   String name;
 
-  fillFromDbEntry(Map entry) {
+  mixinFillFromDbEntry(Map entry) {
     name = entry[dbFieldName];
   }
 
-  fillDbEntry(Map entry) {
+  mixinFillDbEntry(Map entry) {
     if (name != null) {
       entry[dbFieldName] = name;
     }
   }
 }
 
-class DbBasicRecordBase extends DbRecordBase with DbBasicRecordMixin {
-  DbBasicRecordBase();
+class DbAutoRecord extends DbSyncedRecordBase
+    with DbBasicRecordMixin, IntIdMixin {
+  DbAutoRecord();
 
   /// create if null
-  factory DbBasicRecordBase.fromDbEntry(Map entry) {
+  factory DbAutoRecord.fromDbEntry(Map entry, int id) {
     if (entry == null) {
       return null;
     }
-    DbBasicRecordBase record = new DbBasicRecordBase();
+    DbAutoRecord record = new DbAutoRecord()..id = id;
     record.fillFromDbEntry(entry);
     return record;
   }
+
+  fillFromDbEntry(Map entry) {
+    super.fillFromDbEntry(entry);
+    mixinFillFromDbEntry(entry);
+  }
+
+  fillDbEntry(Map entry) {
+    super.fillDbEntry(entry);
+    mixinFillDbEntry(entry);
+  }
 }
 
-class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
-  String id;
-
+class DbBasicRecord extends DbSyncedRecordBase
+    with DbBasicRecordMixin, StringIdMixin {
   DbBasicRecord();
 
   /// create if null
@@ -54,22 +65,41 @@ class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
     record.fillFromDbEntry(entry);
     return record;
   }
+
+  fillFromDbEntry(Map entry) {
+    super.fillFromDbEntry(entry);
+    mixinFillFromDbEntry(entry);
+  }
+
+  fillDbEntry(Map entry) {
+    super.fillDbEntry(entry);
+    mixinFillDbEntry(entry);
+  }
 }
 
-class DbBasicRecordProvider extends DbRecordProvider<DbBasicRecord, String> {
+class DbBasicRecordProvider
+    extends DbSyncedRecordProvider<DbBasicRecord, String> {
   String get store => DbBasicAppProvider.basicStore;
   DbBasicRecord fromEntry(Map entry, String id) =>
       new DbBasicRecord.fromDbEntry(entry, id);
 }
 
+class DbAutoRecordProvider extends DbSyncedRecordProvider<DbAutoRecord, int> {
+  String get store => DbBasicAppProvider.autoStore;
+  DbAutoRecord fromEntry(Map entry, int id) =>
+      new DbAutoRecord.fromDbEntry(entry, id);
+}
+
 class DbBasicAppProvider extends DynamicProvider
     with DbRecordProvidersMixin, DbRecordProvidersMapMixin {
   DbBasicRecordProvider basic = new DbBasicRecordProvider();
+  DbAutoRecordProvider auto = new DbAutoRecordProvider();
 
   // version 1 - initial
   static const int dbVersion = 1;
 
   static const String basicStore = "basic";
+  static const String autoStore = "auto";
 
   static const String defaultDbName =
       'com.tekartik.tekartik_idb_provider.record_test.db';
@@ -79,13 +109,14 @@ class DbBasicAppProvider extends DynamicProvider
   // _dbVersion for testing
   DbBasicAppProvider(IdbFactory idbFactory, String dbName, [int _dbVersion])
       : super.noMeta(idbFactory) {
-    basic.provider = this;
     if (_dbVersion == null) {
       _dbVersion = dbVersion;
     }
     init(idbFactory, dbName == null ? defaultDbName : dbName, _dbVersion);
 
-    providerMap = {basicStore: basic,};
+    providerMap = {basicStore: basic, autoStore: auto};
+
+    initAll(this);
   }
 
   @override
@@ -123,16 +154,19 @@ class DbBasicAppProvider extends DynamicProvider
 
       // default erase everything, we don't care we sync
       db.deleteStore(basicStore);
+      db.deleteStore(autoStore);
 
       ProviderIndexMeta nameIndexMeta =
           new ProviderIndexMeta(dbFieldName, dbFieldName);
 
-      ProviderStoreMeta basicStoreMeta = new ProviderStoreMeta(basicStore,
+      ProviderStoreMeta basicStoreMeta =
+          new ProviderStoreMeta(basicStore, indecies: [nameIndexMeta]);
+      ProviderStoreMeta autoStoreMeta = new ProviderStoreMeta(autoStore,
           autoIncrement: true, indecies: [nameIndexMeta]);
 
       // ProviderIndex fileIndex = entriesStore.createIndex(indexMeta);
-
-      addStores(new ProviderStoresMeta([basicStoreMeta]));
+      //devPrint(autoStoreMeta);
+      addStores(new ProviderStoresMeta([basicStoreMeta, autoStoreMeta]));
 
       //providerStore.c
     } else if (e.newVersion > 2 && e.oldVersion < 3) {
@@ -149,26 +183,7 @@ class DbBasicAppProvider extends DynamicProvider
 
 void testMain(TestContext context) {
   IdbFactory idbFactory = context.factory;
-  group('record_provider', () {
-    group('DbRecordBase', () {
-      test('equality', () {
-        DbBasicRecordBase record1 = new DbBasicRecordBase();
-        DbBasicRecordBase record2 = new DbBasicRecordBase();
-        expect(record1.hashCode, record2.hashCode);
-        expect(record1, record2);
-
-        record1.name = "value";
-
-        expect(record1.hashCode, isNot(record2.hashCode));
-        expect(record1, isNot(record2));
-
-        record2.name = "value";
-
-        expect(record1.hashCode, record2.hashCode);
-        expect(record1, record2);
-      });
-    });
-
+  group('synced_record_provider', () {
     group('DbRecord', () {
       test('toString', () {
         DbBasicRecord record1 = new DbBasicRecord();
@@ -268,7 +283,7 @@ void testMain(TestContext context) {
 
         txn = appProvider.basic.txnListWriteTransaction(txnList);
         expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
-        await appProvider.basic.txnClear(txn);
+        await appProvider.basic.txnClear(txn, syncing: true);
         expect((await appProvider.basic.txnGet(txn, "_1")), isNull);
 
         await txnList.completed;
@@ -318,7 +333,7 @@ void testMain(TestContext context) {
 
         txn = appProvider.basic.txnListWriteTransaction(txnList);
         expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
-        await appProvider.basic.txnClear(txn);
+        await appProvider.basic.txnClear(txn, syncing: true);
         expect((await appProvider.basic.txnGet(txn, "_1")), isNull);
 
         await txnList.completed;
@@ -351,6 +366,136 @@ void testMain(TestContext context) {
         await txn;
         //index.
         //expect(key, "_1");
+      });
+    });
+
+    group('put', () {
+      DbBasicRecordProvider basicProvider;
+      DbAutoRecordProvider autoProvider;
+      DbBasicAppProvider appProvider;
+
+      setUp(() async {
+        appProvider = new DbBasicAppProvider(idbFactory, context.dbName);
+        await appProvider.delete();
+        await appProvider.ready;
+        basicProvider = appProvider.basic;
+        autoProvider = appProvider.auto;
+      });
+      tearDown(() {
+        appProvider.close();
+      });
+
+      test('put', () async {
+        DbBasicRecord dbRecord = new DbBasicRecord()..id = "key";
+        dbRecord = await basicProvider.put(dbRecord);
+        expect(dbRecord.id, "key");
+      });
+
+      test('put_auto', () async {
+        DbAutoRecord dbRecord = new DbAutoRecord();
+
+        dbRecord = await autoProvider.put(dbRecord);
+        expect(dbRecord.id, 1);
+        expect(dbRecord.version, 1);
+        expect(dbRecord.dirty, true);
+
+        await autoProvider.put(dbRecord);
+        expect(dbRecord.id, 1);
+        expect(dbRecord.version, 2);
+        expect(dbRecord.dirty, true);
+
+        await autoProvider.put(dbRecord, syncing: true);
+        expect(dbRecord.id, 1);
+        expect(dbRecord.version, 3);
+        expect(dbRecord.dirty, false);
+
+        var txn = autoProvider.storeTransaction(true);
+        dbRecord = await autoProvider.txnPut(txn, dbRecord);
+        await txn;
+        expect(dbRecord.id, 1);
+        expect(dbRecord.version, 4);
+        expect(dbRecord.dirty, true);
+
+        txn = autoProvider.storeTransaction(true);
+        dbRecord = await autoProvider.txnPut(txn, dbRecord, syncing: true);
+        await txn;
+        expect(dbRecord.id, 1);
+        expect(dbRecord.version, 5);
+        expect(dbRecord.dirty, false);
+      });
+
+      test('delete_auto', () async {
+        DbAutoRecord dbRecord = new DbAutoRecord();
+
+        // not synced yet
+        dbRecord.setSyncInfo("1", "ver");
+        dbRecord.deleted = true;
+        dbRecord = await autoProvider.put(dbRecord);
+        expect(dbRecord.id, 1);
+        expect(dbRecord.version, 1);
+        expect(dbRecord.dirty, true);
+        expect(dbRecord.syncId, isNull);
+        expect(dbRecord.syncVersion, isNull);
+        expect(dbRecord.deleted, false);
+
+        await autoProvider.delete(dbRecord.id);
+        expect(await autoProvider.get(dbRecord.id), isNull);
+
+        // synced
+        dbRecord = new DbAutoRecord();
+        dbRecord.setSyncInfo("1", "ver");
+        dbRecord = await autoProvider.put(dbRecord, syncing: true);
+        expect(dbRecord.id, 2);
+        expect(dbRecord.version, 1);
+        expect(dbRecord.dirty, false);
+        expect(dbRecord.syncId, '1');
+        expect(dbRecord.syncVersion, 'ver');
+
+        await autoProvider.delete(dbRecord.id);
+        dbRecord = await autoProvider.get(dbRecord.id);
+        expect(dbRecord.id, 2);
+        expect(dbRecord.version, 2);
+        expect(dbRecord.dirty, true);
+        expect(dbRecord.deleted, true);
+        expect(dbRecord.syncId, '1');
+        expect(dbRecord.syncVersion, 'ver');
+
+        // put again
+        dbRecord = await autoProvider.put(dbRecord, syncing: true);
+        expect(dbRecord.id, 2);
+        expect(dbRecord.version, 3);
+        expect(dbRecord.dirty, false);
+        expect(dbRecord.deleted, false);
+        expect(dbRecord.syncId, '1');
+        expect(dbRecord.syncVersion, 'ver');
+
+        await autoProvider.delete(dbRecord.id, syncing: true);
+        expect(await autoProvider.get(dbRecord.id), isNull);
+
+        // put again
+        dbRecord = await autoProvider.put(dbRecord, syncing: true);
+        expect(dbRecord.id, 2);
+        expect(dbRecord.version, 1);
+        expect(dbRecord.dirty, false);
+        expect(dbRecord.syncId, '1');
+        expect(dbRecord.syncVersion, 'ver');
+
+        // delete in transaction
+        var txn = autoProvider.storeTransaction(true);
+        await autoProvider.txnDelete(txn, dbRecord.id);
+        await txn;
+        dbRecord = await autoProvider.get(dbRecord.id);
+        expect(dbRecord.id, 2);
+        expect(dbRecord.version, 2);
+        expect(dbRecord.dirty, true);
+        expect(dbRecord.deleted, true);
+        expect(dbRecord.syncId, '1');
+        expect(dbRecord.syncVersion, 'ver');
+
+        txn = autoProvider.storeTransaction(true);
+        await autoProvider.txnDelete(txn, dbRecord.id, syncing: true);
+        await txn;
+        expect(await autoProvider.get(dbRecord.id), isNull);
       });
     });
   });
