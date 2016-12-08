@@ -146,7 +146,7 @@ void testMain(TestContext context) {
       return trans.store.objectStore
           .openCursor(
               //
-              direction: IDB_DIRECTION_NEXT,
+              direction: idbDirectionNext,
               autoAdvance: false)
           .listen((CursorWithValue cwv) {
             count++;
@@ -156,6 +156,7 @@ void testMain(TestContext context) {
             return count;
           });
     }
+
     test('cursor count', () {
       slowCount().then((int count) {
         expect(count, 0);

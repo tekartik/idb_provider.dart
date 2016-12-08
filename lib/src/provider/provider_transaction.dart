@@ -117,6 +117,7 @@ abstract class ProviderSourceTransactionMixin<K, V> {
         ctlr.close();
       }
     }
+
     onCursorValue(Cursor c) {
       if (offset != null && offset > 0) {
         c.advance(offset);
@@ -161,7 +162,7 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
 
   ProviderStoreTransactionBase(Provider provider, String storeName,
       [bool readWrite = false]) {
-    _mode = readWrite ? IDB_MODE_READ_WRITE : IDB_MODE_READ_ONLY;
+    _mode = readWrite ? idbModeReadWrite : idbModeReadOnly;
 
     try {
       _transaction = provider.db._database.transaction(storeName, _mode);
@@ -216,7 +217,7 @@ abstract class ProviderStoreTransactionMixin<K, V> {
 class ProviderTransactionList extends ProviderTransaction {
   ProviderTransactionList(Provider provider, Iterable<String> storeNames,
       [bool readWrite = false]) {
-    _mode = readWrite ? IDB_MODE_READ_WRITE : IDB_MODE_READ_ONLY;
+    _mode = readWrite ? idbModeReadWrite : idbModeReadOnly;
     _transaction = provider.db._database.transactionList(storeNames, _mode);
   }
   ProviderStoreTransaction store(String storeName) {

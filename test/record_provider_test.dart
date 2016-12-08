@@ -85,7 +85,9 @@ class DbBasicAppProvider extends DynamicProvider
     }
     init(idbFactory, dbName == null ? defaultDbName : dbName, _dbVersion);
 
-    providerMap = {basicStore: basic,};
+    providerMap = {
+      basicStore: basic,
+    };
   }
 
   @override

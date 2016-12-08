@@ -1,10 +1,9 @@
 library tekartik_provider;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:tekartik_core/hash_code_utils.dart';
 import 'package:collection/collection.dart';
 import 'dart:async';
-
+import 'package:tekartik_common_utils/hash_code_utils.dart';
 part 'src/provider/provider_transaction.dart';
 part 'src/provider/provider_row.dart';
 part 'src/provider/provider_meta.dart';

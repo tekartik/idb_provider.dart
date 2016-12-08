@@ -2,13 +2,18 @@ name: tekartik_idb_provider
 version: 0.1.1
 description: Provider pattern on top of indexeddb
 dependencies:
-  tekartik_core:
-    git: git://github.com/alextekartik/tekartik_core.dart
+  tekartik_common_utils:
+    git: git://github.com/tekartik/tekartik_common_utils.dart
   idb_shim: any
   collection: any
 dev_dependencies:
   test: any
   dev_test: any
+  chrome_travis:
+    git: git://github.com/tekartik/chrome_travis.dart
 dependency_overrides:
 #  idb_shim:
 #    git: https://github.com/alextekartik/idb_shim.dart
+transformers:
+#  - $dart2js:
+#      commandLineOptions: [--show-package-warnings]
