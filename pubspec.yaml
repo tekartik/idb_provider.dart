@@ -3,7 +3,7 @@ version: 0.1.1
 description: Provider pattern on top of indexeddb
 dependencies:
   tekartik_common_utils:
-    git: git://github.com/tekartik/tekartik_common_utils.dart
+    git: git://github.com/tekartik/common_utils.dart
   idb_shim: any
   collection: any
 dev_dependencies:
