@@ -4,32 +4,34 @@ import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 import 'package:tekartik_idb_provider/provider.dart';
 
-int DB_VERSION = 1;
-String DB_NAME = 'tekartik_app.test.app_provider';
+int dbVersion = 1;
+String databaseName = 'tekartik_app.test.app_provider';
 
-String ITEMS_STORE = "items";
-String NAME_INDEX = "name";
-String NAME_FIELD = "name";
+String itemsStore = "items";
+String nameIndex = "name";
+String nameField = "name";
+
+// String NAME_FIELD = "name";
 
 class TestProvider extends Provider {
   TestProvider(IdbFactory idbFactory) {
-    init(idbFactory, DB_NAME, DB_VERSION);
+    init(idbFactory, databaseName, dbVersion);
   }
   void onUpdateDatabase(VersionChangeEvent e) {
-    if (e.oldVersion < DB_VERSION) {
+    if (e.oldVersion < dbVersion) {
       // delete stuff
     }
     var objectStore =
-        database.createObjectStore(ITEMS_STORE, autoIncrement: true);
-    objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: false);
+        database.createObjectStore(itemsStore, autoIncrement: true);
+    objectStore.createIndex(nameIndex, nameField, unique: false);
   }
 
   Future delete() {
-    return idbFactory.deleteDatabase(DB_NAME);
+    return idbFactory.deleteDatabase(databaseName);
   }
 
   Future count() {
-    var trans = new ProviderStoreTransaction(this, ITEMS_STORE);
+    var trans = new ProviderStoreTransaction(this, itemsStore);
     return trans.count().then((int count) {
       return trans.completed.then((_) {
         return count;
@@ -38,12 +40,12 @@ class TestProvider extends Provider {
   }
 
   Future<List<String>> getNames({int limit, int offset}) {
-    var trans = new ProviderStoreTransaction(this, ITEMS_STORE);
+    var trans = new ProviderStoreTransaction(this, itemsStore);
     List<String> names = [];
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
-          names.add((cwv.value as Map)[NAME_FIELD]);
+          names.add((cwv.value as Map)[nameField] as String);
         })
         .asFuture()
         .then((_) {
@@ -52,13 +54,13 @@ class TestProvider extends Provider {
   }
 
   Future<List<String>> getOrderedNames({int limit, int offset}) {
-    var trans = new ProviderIndexTransaction(this, ITEMS_STORE, NAME_INDEX);
+    var trans = new ProviderIndexTransaction(this, itemsStore, nameIndex);
 
     List<String> names = [];
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
-          names.add((cwv.value as Map)[NAME_FIELD]);
+          names.add((cwv.value as Map)[nameField] as String);
         })
         .asFuture()
         .then((_) {
@@ -70,37 +72,37 @@ class TestProvider extends Provider {
   }
 
   Future<int> putName(String name) {
-    var trans = new ProviderStoreTransaction(this, ITEMS_STORE, true);
+    var trans = new ProviderStoreTransaction(this, itemsStore, true);
 
     Map data = {};
-    data[NAME_FIELD] = name;
+    data[nameField] = name;
 
-    return trans.add(data).then((int key) {
+    return trans.add(data).then((key) {
       return trans.completed.then((_) {
-        return key;
+        return key as int;
       });
     });
   }
 
   // null if not found
   Future<String> getName(int key) {
-    var trans = new ProviderStoreTransaction(this, ITEMS_STORE);
+    var trans = new ProviderStoreTransaction(this, itemsStore);
 
-    return trans.get(key).then((Map data) {
+    return trans.get(key).then((var data) {
       return trans.completed.then((_) {
         if (data == null) {
           return null;
         }
-        return data[NAME_FIELD];
+        return (data as Map)[nameField] as String;
       });
     });
   }
 
   Future<int> get(int key) {
-    var trans = new ProviderStoreTransaction(this, ITEMS_STORE);
-    return trans.store.get(key).then((int key) {
+    var trans = new ProviderStoreTransaction(this, itemsStore);
+    return trans.store.get(key).then((var key) {
       return trans.completed.then((_) {
-        return key;
+        return key as int;
       });
     });
   }

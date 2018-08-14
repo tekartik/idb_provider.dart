@@ -154,7 +154,7 @@ abstract class Provider {
       _storesMeta = new Future.sync(() {
         List<ProviderStoreMeta> metas = [];
 
-        Iterable<String> storeNames = db.storeNames.toList();
+        var storeNames = db.storeNames.toList();
         ProviderTransactionList txn = transactionList(storeNames);
         for (String storeName in storeNames) {
           metas.add(txn.store(storeName).store.meta);
@@ -204,7 +204,7 @@ abstract class Provider {
   }
 
   Future<Provider> _ready;
-  Completer _readyCompleter;
+  Completer<Provider> _readyCompleter;
   bool get isReady => _readyCompleter != null && _readyCompleter.isCompleted;
   Future<Provider> get ready {
     if (_ready == null) {
@@ -221,7 +221,7 @@ abstract class Provider {
           _setDatabase(db);
           _readyCompleter.complete(this);
         });
-      }, onError: (e, st) {
+      }, onError: (e, StackTrace st) {
         print('open failed');
         print(e);
         print(st);

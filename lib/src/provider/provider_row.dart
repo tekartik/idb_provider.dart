@@ -25,7 +25,7 @@ abstract class _BaseRow<K, V> {
 abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
   Map get value => super.value;
 
-  _BaseMapRow.from(key, map) : super.from(key, map);
+  _BaseMapRow.from(K key, Map map) : super.from(key, map);
 
   @override
   operator ==(Object other) {
@@ -50,7 +50,7 @@ abstract class ProviderRowFactory<T extends _BaseRow<K, V>, K, V> {
   T newRow(K key, V value);
 
   T cursorWithValueRow(CursorWithValue cwv) =>
-      newRow(cwv.primaryKey, cwv.value);
+      newRow(cwv.primaryKey as K, cwv.value as V);
 }
 
 class IntMapProviderRowFactory extends ProviderRowFactory<IntMapRow, int, Map> {

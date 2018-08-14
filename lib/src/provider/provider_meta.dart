@@ -167,7 +167,7 @@ class ProviderStore {
         indecies.add(index.meta);
       }
       _meta = new ProviderStoreMeta(objectStore.name,
-          keyPath: objectStore.keyPath,
+          keyPath: objectStore.keyPath as String,
           autoIncrement: objectStore.autoIncrement,
           indecies: indecies);
     }
@@ -243,7 +243,7 @@ class ProviderIndex {
   ProviderIndexMeta _meta;
   ProviderIndexMeta get meta {
     if (_meta == null) {
-      _meta = new ProviderIndexMeta(index.name, index.keyPath,
+      _meta = new ProviderIndexMeta(index.name, index.keyPath as String,
           unique: index.unique, multiEntry: index.multiEntry);
     }
     return _meta;

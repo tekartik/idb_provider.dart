@@ -4,8 +4,8 @@ class ProviderIndexTransaction<K, V> extends Object
     with ProviderSourceTransactionMixin<K, V> {
   Future get completed => _store.completed;
 
-  ProviderStoreTransaction _store;
-  ProviderStoreTransaction get store => _store;
+  ProviderStoreTransaction<K, V> _store;
+  ProviderStoreTransaction<K, V> get store => _store;
 
   ProviderIndexTransaction.fromStoreTransaction(this._store, String indexName) {
     _index = _store.store.index(indexName);
@@ -15,8 +15,8 @@ class ProviderIndexTransaction<K, V> extends Object
   //ProviderStore get store => super._store;
 
   @override
-  Future<V> get(K key) {
-    return _index.index.get(key);
+  Future<V> get(K key) async {
+    return await _index.index.get(key) as V;
   }
 
   Future getKey(K key) {
@@ -43,7 +43,8 @@ class ProviderIndexTransaction<K, V> extends Object
         direction: direction);
   }
 
-  Stream<CursorWithValue> openRawKeyCursor({K key, String direction}) {
+  // @override
+  Stream<Cursor> openRawKeyCursor({K key, String direction}) {
     return _index.index.openKeyCursor(
         //
         key: key,
@@ -89,16 +90,16 @@ class WriteTransactionMixin {}
 abstract class ProviderWritableSourceTransactionMixin<K, V> {
   ProviderStore _store;
 
-  Future<K> add(V value, [K key]) {
-    return _store.objectStore.add(value, key);
+  Future<K> add(V value, [K key]) async {
+    return await _store.objectStore.add(value, key) as K;
   }
 
-  Future<K> put(V value, [K key]) {
-    return _store.objectStore.put(value, key);
+  Future<K> put(V value, [K key]) async {
+    return await _store.objectStore.put(value, key) as K;
   }
 
-  Future<V> get(K key) {
-    return _store.objectStore.getObject(key);
+  Future<V> get(K key) async {
+    return await _store.objectStore.getObject(key) as V;
   }
 }
 
@@ -107,8 +108,9 @@ abstract class ProviderSourceTransactionMixin<K, V> {
   Future<int> count();
   Stream<CursorWithValue> openRawCursor({String direction});
 
-  Stream _limitOffsetStream(Stream rawStream, {int limit, int offset}) {
-    StreamController<Cursor> ctlr = new StreamController(sync: true);
+  Stream<T> _limitOffsetStream<T extends Cursor>(Stream<T> rawStream,
+      {int limit, int offset}) {
+    StreamController<T> ctlr = new StreamController(sync: true);
 
     int count = 0;
 
@@ -118,7 +120,7 @@ abstract class ProviderSourceTransactionMixin<K, V> {
       }
     }
 
-    onCursorValue(Cursor c) {
+    onCursorValue(T c) {
       if (offset != null && offset > 0) {
         c.advance(offset);
       } else {
@@ -151,7 +153,9 @@ abstract class ProviderWritableSourceTransaction<K, V> {
 }
 
 class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
-    with ProviderStoreTransactionMixin, ProviderSourceTransactionMixin {
+    with
+        ProviderStoreTransactionMixin<K, V>,
+        ProviderSourceTransactionMixin<K, V> {
   ProviderStore _store;
 
   // not recommended though
@@ -193,18 +197,19 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
 abstract class ProviderStoreTransactionMixin<K, V> {
   ProviderStore get store;
 
-  ProviderIndexTransaction<K, dynamic> index(String name) =>
-      new ProviderIndexTransaction.fromStoreTransaction(this, name);
+  ProviderIndexTransaction<K, V> index(String name) =>
+      new ProviderIndexTransaction.fromStoreTransaction(
+          this as ProviderStoreTransaction<K, V>, name);
 
   Future count() => store.count();
 
-  Future get(var key) => store.get(key);
+  Future get(K key) => store.get(key);
 
-  Future<K> add(V value, [K key]) => store.add(value, key);
+  Future<K> add(V value, [K key]) async => await store.add(value, key) as K;
 
-  Future<K> put(V value, [K key]) => store.put(value, key);
+  Future<K> put(V value, [K key]) async => await store.put(value, key) as K;
 
-  delete(K key) => store.delete(key);
+  Future delete(K key) => store.delete(key);
 
   Future clear() => store.clear();
 }
@@ -218,7 +223,8 @@ class ProviderTransactionList extends ProviderTransaction {
   ProviderTransactionList(Provider provider, Iterable<String> storeNames,
       [bool readWrite = false]) {
     _mode = readWrite ? idbModeReadWrite : idbModeReadOnly;
-    _transaction = provider.db._database.transactionList(storeNames, _mode);
+    _transaction =
+        provider.db._database.transactionList(storeNames.toList(), _mode);
   }
   ProviderStoreTransaction store(String storeName) {
     return new ProviderStoreTransaction.fromList(this, storeName);

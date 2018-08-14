@@ -58,7 +58,7 @@ void testMain(TestContext context) {
       List<Map> data = [];
       //List<String> keyData = [];
       txn.openCursor().listen((CursorWithValue cwv) {
-        data.add(cwv.value);
+        data.add(cwv.value as Map);
       });
 
       // listed last
@@ -83,12 +83,12 @@ void testMain(TestContext context) {
       ProviderIndexTransaction txn =
           provider.indexTransaction(storeName, indexName);
       List<Map> data = [];
-      List<String> keyData = [];
+      List<int> keyData = [];
       txn.openCursor().listen((CursorWithValue cwv) {
-        data.add(cwv.value);
+        data.add(cwv.value as Map);
       });
       txn.openKeyCursor().listen((Cursor c) {
-        keyData.add(c.key);
+        keyData.add(c.key as int);
       });
 
       // listed last

@@ -18,7 +18,8 @@ class TestContext {
 
 class SembastTestContext extends TestContext {
   sdb.DatabaseFactory sdbFactory;
-  IdbSembastFactory get factory => super.factory;
+  @override
+  IdbFactorySembast get factory => super.factory as IdbFactorySembast;
   String get dbName => join(joinAll(testDescriptions), "test.db");
 }
 

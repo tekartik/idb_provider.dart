@@ -12,11 +12,11 @@ void main() {
 const String dbFieldName = "name";
 
 abstract class DbBasicRecordMixin {
-  var id;
+  dynamic id;
   String name;
 
   fillFromDbEntry(Map entry) {
-    name = entry[dbFieldName];
+    name = entry[dbFieldName] as String;
   }
 
   fillDbEntry(Map entry) {
@@ -41,7 +41,7 @@ class DbBasicRecordBase extends DbRecordBase with DbBasicRecordMixin {
 }
 
 class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
-  String id;
+  //String id;
 
   DbBasicRecord();
 
@@ -230,7 +230,7 @@ void testMain(TestContext context) {
 
         DbRecordProviderReadTransaction<DbBasicRecord, String> readTxn =
             appProvider.basic.readTransaction;
-        var txn = readTxn;
+        dynamic txn = readTxn;
         expect(await appProvider.basic.txnGet(readTxn, "_1"), isNull);
         await readTxn.completed;
 
@@ -244,14 +244,18 @@ void testMain(TestContext context) {
 
         var key = (await txn.putRecord(record)).id;
         expect(key, "_1");
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect(
+            (await appProvider.basic
+                    .txnGet(txn as DbRecordProviderWriteTransaction, "_1"))
+                .id,
+            "_1");
         await txn.completed;
 
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          DbBasicRecord record =
-              new DbBasicRecord.fromDbEntry(cwv.value, cwv.primaryKey);
+          DbBasicRecord record = new DbBasicRecord.fromDbEntry(
+              cwv.value as Map, cwv.primaryKey as String);
           expect(record.id, "_1");
         }).asFuture();
 
@@ -260,18 +264,30 @@ void testMain(TestContext context) {
         var txnList = appProvider.dbRecordProviderReadTransactionList(
             [DbBasicAppProvider.basicStore]);
         txn = appProvider.basic.txnListReadTransaction(txnList);
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect(
+            (await appProvider.basic
+                    .txnGet(txn as DbRecordProviderTransaction, "_1"))
+                .id,
+            "_1");
 
         await txnList.completed;
 
-        txnList = appProvider.dbRecordProviderWriteTransactionList(
+        var writeTxnList = appProvider.dbRecordProviderWriteTransactionList(
             [DbBasicAppProvider.basicStore]);
         //txn = appProvider.basic.txnListReadTransaction(txnList);
 
-        txn = appProvider.basic.txnListWriteTransaction(txnList);
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
-        await appProvider.basic.txnClear(txn);
-        expect((await appProvider.basic.txnGet(txn, "_1")), isNull);
+        txn = appProvider.basic.txnListWriteTransaction(writeTxnList);
+        expect(
+            (await appProvider.basic
+                    .txnGet(txn as DbRecordProviderTransaction, "_1"))
+                .id,
+            "_1");
+        await appProvider.basic
+            .txnClear(txn as DbRecordProviderWriteTransaction);
+        expect(
+            (await appProvider.basic
+                .txnGet(txn as DbRecordProviderTransaction, "_1")),
+            isNull);
 
         await txnList.completed;
         //var txn = basicRecordProvider.store;
@@ -286,13 +302,15 @@ void testMain(TestContext context) {
 
         DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
             appProvider.basic.writeTransaction;
-        var txn = writeTxn;
+        DbRecordProviderTransaction txn = writeTxn;
 
         DbBasicRecord record = new DbBasicRecord();
         record.name = "test";
         record.id = "_1";
 
-        var key = (await txn.putRecord(record)).id;
+        var key =
+            (await (txn as DbRecordProviderWriteTransaction).putRecord(record))
+                .id;
         expect(key, "_1");
         expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
         await txn.completed;
@@ -300,8 +318,8 @@ void testMain(TestContext context) {
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          DbBasicRecord record =
-              new DbBasicRecord.fromDbEntry(cwv.value, cwv.primaryKey);
+          DbBasicRecord record = new DbBasicRecord.fromDbEntry(
+              cwv.value as Map, cwv.primaryKey as String);
           expect(record.id, "_1");
         }).asFuture();
 
@@ -314,13 +332,14 @@ void testMain(TestContext context) {
 
         await txnList.completed;
 
-        txnList = appProvider.dbRecordProviderWriteTransactionList(
+        var writeTxnList = appProvider.dbRecordProviderWriteTransactionList(
             [DbBasicAppProvider.basicStore]);
         //txn = appProvider.basic.txnListReadTransaction(txnList);
 
-        txn = appProvider.basic.txnListWriteTransaction(txnList);
+        txn = appProvider.basic.txnListWriteTransaction(writeTxnList);
         expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
-        await appProvider.basic.txnClear(txn);
+        await appProvider.basic
+            .txnClear(txn as DbRecordProviderWriteTransaction);
         expect((await appProvider.basic.txnGet(txn, "_1")), isNull);
 
         await txnList.completed;
@@ -336,13 +355,15 @@ void testMain(TestContext context) {
 
         DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
             appProvider.basic.writeTransaction;
-        var txn = writeTxn;
+        DbRecordProviderTransaction txn = writeTxn;
 
         DbBasicRecord record = new DbBasicRecord();
         record.name = "test";
         record.id = "_1";
 
-        var key = (await txn.putRecord(record)).id;
+        var key =
+            (await (txn as DbRecordProviderWriteTransaction).putRecord(record))
+                .id;
         await txn;
 
         txn = appProvider.basic.readTransaction;

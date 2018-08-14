@@ -47,7 +47,8 @@ void testMain(TestContext context) {
 
           return txn.put({"test": 1}).then((key) {
             return txn.get(key).then((value) {
-              IntMapRow row = intMapProviderRawFactory.newRow(key, value);
+              IntMapRow row =
+                  intMapProviderRawFactory.newRow(key as int, value as Map);
 
               // Cursor
               txn.openCursor().listen((cwv) {
@@ -109,7 +110,7 @@ void testMain(TestContext context) {
       //print(anotherProvider);
     });
     test('empty', () {
-      return provider.count().then((int count) {
+      return provider.count().then((count) {
         expect(count, 0);
       });
     });
@@ -132,7 +133,7 @@ void testMain(TestContext context) {
             expect(name, "test");
           });
         }).then((_) {
-          return provider.count().then((int count) {
+          return provider.count().then((count) {
             expect(count, 1);
           });
         });
@@ -141,7 +142,7 @@ void testMain(TestContext context) {
 
     Future<int> slowCount() {
       ProviderStoreTransaction trans =
-          new ProviderStoreTransaction(provider, ITEMS_STORE);
+          new ProviderStoreTransaction(provider, itemsStore);
       int count = 0;
       return trans.store.objectStore
           .openCursor(
