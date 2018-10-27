@@ -27,7 +27,7 @@ abstract class DbBasicRecordMixin<T> {
   }
 }
 
-class DbAutoRecord extends DbSyncedRecordBase
+class DbAutoRecord extends DbSyncedRecordBase<int>
     with DbBasicRecordMixin<int>, IntIdMixin {
   DbAutoRecord();
 
@@ -52,7 +52,7 @@ class DbAutoRecord extends DbSyncedRecordBase
   }
 }
 
-class DbBasicRecord extends DbSyncedRecordBase
+class DbBasicRecord extends DbSyncedRecordBase<String>
     with DbBasicRecordMixin<String>, StringIdMixin {
   DbBasicRecord();
 

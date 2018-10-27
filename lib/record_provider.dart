@@ -16,9 +16,9 @@ abstract class DbField {
   static const String kind = "kind";
 }
 
-abstract class DbRecordBase {
-  get id;
-  set id(var id);
+abstract class DbRecordBase<K> {
+  K get id;
+  set id(K id);
 
   fillDbEntry(Map entry);
 
@@ -93,7 +93,7 @@ abstract class IntIdMixin {
   set id(int id) => _id = id;
 }
 
-abstract class DbSyncedRecordBase extends DbRecordBase {
+abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
   //String get kind;
 
   int _version;
@@ -153,7 +153,7 @@ abstract class DbSyncedRecordBase extends DbRecordBase {
   }
 }
 
-abstract class DbSyncedRecord extends DbSyncedRecordBase with IntIdMixin {}
+abstract class DbSyncedRecord extends DbSyncedRecordBase<int> with IntIdMixin {}
 
 class DbRecordProviderPutEvent extends DbRecordProviderEvent {
   DbRecordBase record;

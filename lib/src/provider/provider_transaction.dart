@@ -201,9 +201,12 @@ abstract class ProviderStoreTransactionMixin<K, V> {
       new ProviderIndexTransaction.fromStoreTransaction(
           this as ProviderStoreTransaction<K, V>, name);
 
-  Future count() => store.count();
+  Future<int> count() => store.count();
 
-  Future get(K key) => store.get(key);
+  Future<V> get(K key) async {
+    V value = await store.get(key);
+    return value;
+  }
 
   Future<K> add(V value, [K key]) async => await store.add(value, key) as K;
 
