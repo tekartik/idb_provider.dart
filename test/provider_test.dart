@@ -23,12 +23,11 @@ void testMain(TestContext context) {
       ProviderTransaction transaction;
 
       setUp(() {
-        provider =
-            new DynamicProvider(idbFactory, new ProviderDbMeta(PROVIDER_NAME));
+        provider = DynamicProvider(idbFactory, ProviderDbMeta(PROVIDER_NAME));
         return provider.delete();
       });
       tearDown(() {
-        return new Future.value(() {
+        return Future.value(() {
           if (transaction != null) {
             return transaction.completed;
           }
@@ -38,7 +37,7 @@ void testMain(TestContext context) {
       });
 
       test('int_map', () {
-        provider.addStore(new ProviderStoreMeta("store", autoIncrement: true));
+        provider.addStore(ProviderStoreMeta("store", autoIncrement: true));
         return provider.ready.then((Provider readyProvider) {
           ProviderStoreTransaction txn =
               provider.storeTransaction("store", true);
@@ -65,8 +64,8 @@ void testMain(TestContext context) {
   group('test_provider_open', () {
     test('open', () async {
       // open normal
-      TestProvider provider = new TestProvider(idbFactory);
-      TestProvider provider2 = new TestProvider(idbFactory);
+      TestProvider provider = TestProvider(idbFactory);
+      TestProvider provider2 = TestProvider(idbFactory);
       await provider.delete().then((_) {
         expect(provider.isReady, isFalse);
         Future done = provider.ready.then((readyProvider) {
@@ -90,7 +89,7 @@ void testMain(TestContext context) {
     });
   });
   group('test_provider', () {
-    TestProvider provider = new TestProvider(idbFactory);
+    TestProvider provider = TestProvider(idbFactory);
     setUp(() {
       return provider.delete().then((_) {
         return provider.ready.then((_) {
@@ -105,7 +104,7 @@ void testMain(TestContext context) {
       //print(provider);
       expect(provider.toString(), startsWith("{"));
 
-      TestProvider anotherProvider = new TestProvider(idbFactory);
+      TestProvider anotherProvider = TestProvider(idbFactory);
       expect(anotherProvider.toString(), "{}");
       //print(anotherProvider);
     });
@@ -142,7 +141,7 @@ void testMain(TestContext context) {
 
     Future<int> slowCount() {
       ProviderStoreTransaction trans =
-          new ProviderStoreTransaction(provider, itemsStore);
+          ProviderStoreTransaction(provider, itemsStore);
       int count = 0;
       return trans.store.objectStore
           .openCursor(

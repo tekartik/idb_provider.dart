@@ -13,66 +13,66 @@ void testMain(TestContext context) {
   group('meta', () {
     group('raw', () {
       test('index', () {
-        ProviderIndexMeta indexMeta = new ProviderIndexMeta("idx", "my_key");
-        ProviderIndexMeta indexMeta2 = new ProviderIndexMeta("idx", "my_key");
+        ProviderIndexMeta indexMeta = ProviderIndexMeta("idx", "my_key");
+        ProviderIndexMeta indexMeta2 = ProviderIndexMeta("idx", "my_key");
         expect(indexMeta, indexMeta2);
         expect(
             indexMeta,
-            new ProviderIndexMeta("idx", "my_key",
+            ProviderIndexMeta("idx", "my_key",
                 unique: false, multiEntry: false));
         expect(
             indexMeta,
-            isNot(new ProviderIndexMeta("idx", "my_key",
+            isNot(ProviderIndexMeta("idx", "my_key",
                 unique: false, multiEntry: true)));
         expect(
             indexMeta,
-            isNot(new ProviderIndexMeta("idx", "my_key",
+            isNot(ProviderIndexMeta("idx", "my_key",
                 unique: true, multiEntry: false)));
         expect(
             indexMeta,
-            isNot(new ProviderIndexMeta("idx", "my_key2",
+            isNot(ProviderIndexMeta("idx", "my_key2",
                 unique: false, multiEntry: false)));
         expect(
             indexMeta,
-            isNot(new ProviderIndexMeta("idx2", "my_key",
+            isNot(ProviderIndexMeta("idx2", "my_key",
                 unique: false, multiEntry: false)));
       });
 
       test('store', () {
-        ProviderStoreMeta storeMeta = new ProviderStoreMeta("str");
-        expect(storeMeta, new ProviderStoreMeta("str"));
-        expect(storeMeta, isNot(new ProviderStoreMeta("str2")));
+        ProviderStoreMeta storeMeta = ProviderStoreMeta("str");
+        expect(storeMeta, ProviderStoreMeta("str"));
+        expect(storeMeta, isNot(ProviderStoreMeta("str2")));
         expect(storeMeta,
-            new ProviderStoreMeta("str", keyPath: null, autoIncrement: false));
+            ProviderStoreMeta("str", keyPath: null, autoIncrement: false));
         expect(
             storeMeta,
-            isNot(new ProviderStoreMeta("str",
-                keyPath: null, autoIncrement: true)));
+            isNot(
+                ProviderStoreMeta("str", keyPath: null, autoIncrement: true)));
         expect(
             storeMeta,
-            isNot(new ProviderStoreMeta("str",
+            isNot(ProviderStoreMeta("str",
                 keyPath: "some", autoIncrement: false)));
         expect(
             storeMeta,
-            isNot(new ProviderStoreMeta("str2",
+            isNot(ProviderStoreMeta("str2",
                 keyPath: null, autoIncrement: false)));
 
         storeMeta =
-            new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true);
+            ProviderStoreMeta("str", keyPath: "some", autoIncrement: true);
         ProviderStoreMeta storeMeta2 =
-            new ProviderStoreMeta("str", keyPath: "some", autoIncrement: true);
+            ProviderStoreMeta("str", keyPath: "some", autoIncrement: true);
         expect(storeMeta, storeMeta2);
-        ProviderIndexMeta indexMeta = new ProviderIndexMeta("idx", "my_key");
-        ProviderIndexMeta indexMeta2 = new ProviderIndexMeta("idx", "my_key");
+        ProviderIndexMeta indexMeta = ProviderIndexMeta("idx", "my_key");
+        ProviderIndexMeta indexMeta2 = ProviderIndexMeta("idx", "my_key");
 
-        storeMeta = new ProviderStoreMeta("str",
+        storeMeta = ProviderStoreMeta("str",
             keyPath: "some", autoIncrement: true, indecies: [indexMeta]);
         expect(storeMeta, isNot(storeMeta2));
-        storeMeta = new ProviderStoreMeta("str",
+        storeMeta = ProviderStoreMeta("str",
             keyPath: "some",
             autoIncrement: true,
             indecies: [indexMeta, indexMeta2]);
-        storeMeta2 = new ProviderStoreMeta("str",
+        storeMeta2 = ProviderStoreMeta("str",
             keyPath: "some",
             autoIncrement: true,
             indecies: [indexMeta2, indexMeta]);
@@ -80,19 +80,19 @@ void testMain(TestContext context) {
       });
 
       test('stores', () {
-        ProviderStoreMeta storeMeta = new ProviderStoreMeta("str");
-        ProviderStoreMeta storeMeta2 = new ProviderStoreMeta("str2");
-        ProviderStoresMeta storesMeta = new ProviderStoresMeta([]);
-        ProviderStoresMeta storesMeta2 = new ProviderStoresMeta([]);
+        ProviderStoreMeta storeMeta = ProviderStoreMeta("str");
+        ProviderStoreMeta storeMeta2 = ProviderStoreMeta("str2");
+        ProviderStoresMeta storesMeta = ProviderStoresMeta([]);
+        ProviderStoresMeta storesMeta2 = ProviderStoresMeta([]);
         expect(storesMeta, storesMeta2);
-        storesMeta = new ProviderStoresMeta([storeMeta]);
+        storesMeta = ProviderStoresMeta([storeMeta]);
         expect(storesMeta, isNot(storesMeta2));
-        storesMeta2 = new ProviderStoresMeta([storeMeta]);
+        storesMeta2 = ProviderStoresMeta([storeMeta]);
         expect(storesMeta, storesMeta2);
-        storesMeta2 = new ProviderStoresMeta([storeMeta2]);
+        storesMeta2 = ProviderStoresMeta([storeMeta2]);
         expect(storesMeta, isNot(storesMeta2));
-        storesMeta = new ProviderStoresMeta([storeMeta, storeMeta2]);
-        storesMeta2 = new ProviderStoresMeta([storeMeta2, storeMeta]);
+        storesMeta = ProviderStoresMeta([storeMeta, storeMeta2]);
+        storesMeta2 = ProviderStoresMeta([storeMeta2, storeMeta]);
         expect(storesMeta, storesMeta2);
       });
     });
@@ -104,8 +104,7 @@ void testMain(TestContext context) {
         ProviderTransaction transaction;
 
         setUp(() {
-          provider = new DynamicProvider(
-              idbFactory, new ProviderDbMeta(PROVIDER_NAME));
+          provider = DynamicProvider(idbFactory, ProviderDbMeta(PROVIDER_NAME));
           return provider.delete();
         });
         tearDown(() async {
@@ -126,42 +125,41 @@ void testMain(TestContext context) {
         }
 
         test('one_store', () {
-          provider.addStore(new ProviderStoreMeta("store"));
+          provider.addStore(ProviderStoreMeta("store"));
           return provider.ready.then((Provider readyProvider) {
             return provider.storesMeta.then((metas) {
-              expect(metas,
-                  new ProviderStoresMeta([new ProviderStoreMeta("store")]));
+              expect(metas, ProviderStoresMeta([ProviderStoreMeta("store")]));
             });
           });
         });
 
         test('one_store round_cirle', () {
-          ProviderStoresMeta meta = new ProviderStoresMeta([
+          ProviderStoresMeta meta = ProviderStoresMeta([
             //)
-            new ProviderStoreMeta("store")
+            ProviderStoreMeta("store")
           ]);
           return _roundCircle(meta);
         });
         test('two_stores', () {
-          provider.addStore(new ProviderStoreMeta("store"));
-          provider.addStore(new ProviderStoreMeta("store1"));
+          provider.addStore(ProviderStoreMeta("store"));
+          provider.addStore(ProviderStoreMeta("store1"));
           return provider.ready.then((Provider readyProvider) {
             return provider.storesMeta.then((metas) {
               expect(
                   metas,
-                  new ProviderStoresMeta([
-                    new ProviderStoreMeta("store"),
-                    new ProviderStoreMeta("store1")
+                  ProviderStoresMeta([
+                    ProviderStoreMeta("store"),
+                    ProviderStoreMeta("store1")
                   ]));
             });
           });
         });
 
         test('one_index', () {
-          ProviderStoresMeta meta = new ProviderStoresMeta([
+          ProviderStoresMeta meta = ProviderStoresMeta([
             //)
-            new ProviderStoreMeta("store", indecies: //
-                    [new ProviderIndexMeta("idx", "my_key")] //
+            ProviderStoreMeta("store", indecies: //
+                    [ProviderIndexMeta("idx", "my_key")] //
                 )
           ]);
           return _roundCircle(meta);

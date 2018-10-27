@@ -9,11 +9,11 @@ export 'test_common.dart';
 class IoTestContext extends SembastTestContext {
   IoTestContext() {
     sdbFactory = databaseFactoryIo;
-    factory = new IdbFactorySembast(databaseFactoryIo, testOutTopPath);
+    factory = IdbFactorySembast(databaseFactoryIo, testOutTopPath);
   }
 }
 
-IoTestContext idbIoContext = new IoTestContext();
+IoTestContext idbIoContext = IoTestContext();
 
 String get testScriptPath => 'test';
 String get testOutTopPath =>

@@ -28,7 +28,7 @@ class ProviderIndexTransaction<K, V> extends Object
       Provider provider, String storeName, String indexName,
       [bool readWrite = false]) //
   {
-    _store = new ProviderStoreTransaction(provider, storeName, readWrite);
+    _store = ProviderStoreTransaction(provider, storeName, readWrite);
     _index = _store.store.index(indexName);
   }
 
@@ -52,7 +52,7 @@ class ProviderIndexTransaction<K, V> extends Object
   }
 
   Stream<Cursor> openKeyCursor(
-      {K key, bool reverse: false, int limit, int offset}) {
+      {K key, bool reverse = false, int limit, int offset}) {
     String direction = reverse ? idbDirectionPrev : null;
     Stream<Cursor> stream = openRawKeyCursor(key: key, direction: direction);
     return _limitOffsetStream(stream, limit: limit, offset: offset);
@@ -60,7 +60,7 @@ class ProviderIndexTransaction<K, V> extends Object
 
   //@override
   Stream<CursorWithValue> openCursor(
-      {K key, bool reverse: false, int limit, int offset}) {
+      {K key, bool reverse = false, int limit, int offset}) {
     String direction = reverse ? idbDirectionPrev : null;
     Stream<CursorWithValue> stream =
         openRawCursor(key: key, direction: direction);
@@ -81,7 +81,7 @@ class ProviderStoreTransaction<K, V>
       : super._() {
     _transaction = list._transaction;
     _mode = list._mode;
-    _store = new ProviderStore(_transaction.objectStore(storeName));
+    _store = ProviderStore(_transaction.objectStore(storeName));
   }
 }
 
@@ -110,7 +110,7 @@ abstract class ProviderSourceTransactionMixin<K, V> {
 
   Stream<T> _limitOffsetStream<T extends Cursor>(Stream<T> rawStream,
       {int limit, int offset}) {
-    StreamController<T> ctlr = new StreamController(sync: true);
+    StreamController<T> ctlr = StreamController(sync: true);
 
     int count = 0;
 
@@ -177,7 +177,7 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
       }
       rethrow;
     }
-    _store = new ProviderStore(_transaction.objectStore(storeName));
+    _store = ProviderStore(_transaction.objectStore(storeName));
   }
 
   Stream<CursorWithValue> openRawCursor({String direction}) {
@@ -187,7 +187,7 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
   }
 
   Stream<CursorWithValue> openCursor(
-      {bool reverse: false, int limit, int offset}) {
+      {bool reverse = false, int limit, int offset}) {
     String direction = reverse ? idbDirectionPrev : null;
     Stream<CursorWithValue> stream = openRawCursor(direction: direction);
     return _limitOffsetStream(stream, limit: limit, offset: offset);
@@ -198,7 +198,7 @@ abstract class ProviderStoreTransactionMixin<K, V> {
   ProviderStore get store;
 
   ProviderIndexTransaction<K, V> index(String name) =>
-      new ProviderIndexTransaction.fromStoreTransaction(
+      ProviderIndexTransaction.fromStoreTransaction(
           this as ProviderStoreTransaction<K, V>, name);
 
   Future<int> count() => store.count();
@@ -230,7 +230,7 @@ class ProviderTransactionList extends ProviderTransaction {
         provider.db._database.transactionList(storeNames.toList(), _mode);
   }
   ProviderStoreTransaction store(String storeName) {
-    return new ProviderStoreTransaction.fromList(this, storeName);
+    return ProviderStoreTransaction.fromList(this, storeName);
   }
 
   ProviderIndexTransaction index(String storeName, String indexName) =>

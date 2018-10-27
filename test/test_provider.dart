@@ -31,7 +31,7 @@ class TestProvider extends Provider {
   }
 
   Future count() {
-    var trans = new ProviderStoreTransaction(this, itemsStore);
+    var trans = ProviderStoreTransaction(this, itemsStore);
     return trans.count().then((int count) {
       return trans.completed.then((_) {
         return count;
@@ -40,7 +40,7 @@ class TestProvider extends Provider {
   }
 
   Future<List<String>> getNames({int limit, int offset}) {
-    var trans = new ProviderStoreTransaction(this, itemsStore);
+    var trans = ProviderStoreTransaction(this, itemsStore);
     List<String> names = [];
     return trans
         .openCursor(limit: limit, offset: offset)
@@ -54,7 +54,7 @@ class TestProvider extends Provider {
   }
 
   Future<List<String>> getOrderedNames({int limit, int offset}) {
-    var trans = new ProviderIndexTransaction(this, itemsStore, nameIndex);
+    var trans = ProviderIndexTransaction(this, itemsStore, nameIndex);
 
     List<String> names = [];
     return trans
@@ -72,7 +72,7 @@ class TestProvider extends Provider {
   }
 
   Future<int> putName(String name) {
-    var trans = new ProviderStoreTransaction(this, itemsStore, true);
+    var trans = ProviderStoreTransaction(this, itemsStore, true);
 
     Map data = {};
     data[nameField] = name;
@@ -86,7 +86,7 @@ class TestProvider extends Provider {
 
   // null if not found
   Future<String> getName(int key) {
-    var trans = new ProviderStoreTransaction(this, itemsStore);
+    var trans = ProviderStoreTransaction(this, itemsStore);
 
     return trans.get(key).then((var data) {
       return trans.completed.then((_) {
@@ -99,7 +99,7 @@ class TestProvider extends Provider {
   }
 
   Future<int> get(int key) {
-    var trans = new ProviderStoreTransaction(this, itemsStore);
+    var trans = ProviderStoreTransaction(this, itemsStore);
     return trans.store.get(key).then((var key) {
       return trans.completed.then((_) {
         return key as int;

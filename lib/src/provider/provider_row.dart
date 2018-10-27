@@ -55,16 +55,16 @@ abstract class ProviderRowFactory<T extends _BaseRow<K, V>, K, V> {
 
 class IntMapProviderRowFactory extends ProviderRowFactory<IntMapRow, int, Map> {
   IntMapRow newRow(int key, Map value) {
-    return new IntMapRow.from(key, value);
+    return IntMapRow.from(key, value);
   }
 }
 
 final IntMapProviderRowFactory intMapProviderRawFactory =
-    new IntMapProviderRowFactory();
+    IntMapProviderRowFactory();
 
 class StringMapProviderRowFactory
     extends ProviderRowFactory<StringMapRow, String, Map> {
   StringMapRow newRow(String key, Map value) {
-    return new StringMapRow.from(key, value);
+    return StringMapRow.from(key, value);
   }
 }

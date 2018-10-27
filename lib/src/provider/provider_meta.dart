@@ -13,7 +13,7 @@ class ProviderDbMeta {
     if (version == null) {
       version = this.version;
     }
-    return new ProviderDbMeta(name, version);
+    return ProviderDbMeta(name, version);
   }
 
   @override
@@ -46,7 +46,7 @@ class ProviderDb {
   ProviderStore createStore(ProviderStoreMeta meta) {
     ObjectStore objectStore = database.createObjectStore(meta.name,
         keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
-    return new ProviderStore(objectStore);
+    return ProviderStore(objectStore);
   }
 
   /// during onUpdateOnly
@@ -67,7 +67,7 @@ class ProviderDb {
   ProviderDbMeta _meta;
   ProviderDbMeta get meta {
     if (_meta == null) {
-      _meta = new ProviderDbMeta(database.name, database.version);
+      _meta = ProviderDbMeta(database.name, database.version);
     }
     return _meta;
   }
@@ -121,7 +121,7 @@ class ProviderStoreMeta {
   final List<ProviderIndexMeta> indecies;
 
   ProviderStoreMeta overrideIndecies(List<ProviderIndexMeta> indecies) {
-    return new ProviderStoreMeta(name,
+    return ProviderStoreMeta(name,
         keyPath: keyPath, autoIncrement: autoIncrement, indecies: indecies);
   }
 
@@ -166,7 +166,7 @@ class ProviderStore {
         ProviderIndex index = this.index(indexName);
         indecies.add(index.meta);
       }
-      _meta = new ProviderStoreMeta(objectStore.name,
+      _meta = ProviderStoreMeta(objectStore.name,
           keyPath: objectStore.keyPath as String,
           autoIncrement: objectStore.autoIncrement,
           indecies: indecies);
@@ -179,14 +179,14 @@ class ProviderStore {
   ProviderIndex createIndex(ProviderIndexMeta meta) {
     Index index = objectStore.createIndex(meta.name, meta.keyPath,
         unique: meta.unique, multiEntry: meta.multiEntry);
-    return new ProviderIndex(index);
+    return ProviderIndex(index);
   }
 
   Future<int> count() => objectStore.count();
 
   ProviderIndex index(String name) {
     Index index = objectStore.index(name);
-    return new ProviderIndex(index);
+    return ProviderIndex(index);
   }
 
   Future get(var key) => objectStore.getObject(key);
@@ -243,7 +243,7 @@ class ProviderIndex {
   ProviderIndexMeta _meta;
   ProviderIndexMeta get meta {
     if (_meta == null) {
-      _meta = new ProviderIndexMeta(index.name, index.keyPath as String,
+      _meta = ProviderIndexMeta(index.name, index.keyPath as String,
           unique: index.unique, multiEntry: index.multiEntry);
     }
     return _meta;

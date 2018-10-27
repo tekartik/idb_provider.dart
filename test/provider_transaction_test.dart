@@ -23,19 +23,17 @@ void testMain(TestContext context) {
     ProviderTransaction transaction;
 
     _setUp() {
-      provider =
-          new DynamicProvider(idbFactory, new ProviderDbMeta(context.dbName));
+      provider = DynamicProvider(idbFactory, ProviderDbMeta(context.dbName));
       return provider.delete().then((_) {
-        ProviderIndexMeta indexMeta =
-            new ProviderIndexMeta(indexName, indexKey);
-        provider.addStore(new ProviderStoreMeta(storeName,
+        ProviderIndexMeta indexMeta = ProviderIndexMeta(indexName, indexKey);
+        provider.addStore(ProviderStoreMeta(storeName,
             indecies: [indexMeta], autoIncrement: true));
         return provider.ready;
       });
     }
 
     tearDown(() {
-      return new Future.value(() {
+      return Future.value(() {
         if (transaction != null) {
           return transaction.completed;
         }
