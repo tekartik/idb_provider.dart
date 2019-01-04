@@ -10,7 +10,7 @@ class BrowserContext extends TestContext {
   }
 }
 
-BrowserContext idbBrowserContext = new BrowserContext();
+BrowserContext idbBrowserContext = BrowserContext();
 main() {
   test_runner.testMain(idbBrowserContext);
 }

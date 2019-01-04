@@ -57,12 +57,12 @@ abstract class Provider {
   //AppProvider(this.idbFactory);
   void init(IdbFactory idbFactory, String dbName, int dbVersion) {
     this._idbFactory = idbFactory;
-    _databaseMeta = new ProviderDbMeta(dbName, dbVersion);
+    _databaseMeta = ProviderDbMeta(dbName, dbVersion);
   }
 
   // when everything ready
   _setDatabase(Database db) {
-    this._db = new ProviderDb(db);
+    this._db = ProviderDb(db);
   }
 
   // must be set before being ready
@@ -76,7 +76,7 @@ abstract class Provider {
       if (_ready != null) {
         throw "ready should not have been called before setting the db";
       } else {
-        _readyCompleter = new Completer.sync();
+        _readyCompleter = Completer.sync();
         this._db = db;
         this._idbFactory = db.factory;
         this._databaseMeta = _db.meta;
@@ -100,7 +100,7 @@ abstract class Provider {
       if (_ready != null) {
         throw "ready should not have been called before setting the db";
       } else {
-        _readyCompleter = new Completer.sync();
+        _readyCompleter = Completer.sync();
         _setDatabase(db);
         this._idbFactory = db.factory;
         this._databaseMeta = _db.meta;
@@ -126,7 +126,7 @@ abstract class Provider {
   Future clear() {
     List<String> storeNames =
         db.database.objectStoreNames.toList(growable: false);
-    var globalTrans = new ProviderTransactionList(this, storeNames, true);
+    var globalTrans = ProviderTransactionList(this, storeNames, true);
     List<Future> futures = [];
     for (String storeName in storeNames) {
       var trans = globalTrans.store(storeName);
@@ -151,7 +151,7 @@ abstract class Provider {
   Future<ProviderStoresMeta> _storesMeta;
   Future<ProviderStoresMeta> get storesMeta {
     if (_storesMeta == null) {
-      _storesMeta = new Future.sync(() {
+      _storesMeta = Future.sync(() {
         List<ProviderStoreMeta> metas = [];
 
         var storeNames = db.storeNames.toList();
@@ -160,7 +160,7 @@ abstract class Provider {
           metas.add(txn.store(storeName).store.meta);
         }
         return txn.completed.then((_) {
-          ProviderStoresMeta meta = new ProviderStoresMeta(metas);
+          ProviderStoresMeta meta = ProviderStoresMeta(metas);
           return meta;
         });
       });
@@ -208,7 +208,7 @@ abstract class Provider {
   bool get isReady => _readyCompleter != null && _readyCompleter.isCompleted;
   Future<Provider> get ready {
     if (_ready == null) {
-      _readyCompleter = new Completer.sync();
+      _readyCompleter = Completer.sync();
 
       _ready = _readyCompleter.future;
 
@@ -234,18 +234,18 @@ abstract class Provider {
 // default read-only
   ProviderStoreTransaction storeTransaction(String storeName,
       [bool readWrite = false]) {
-    return new ProviderStoreTransaction(this, storeName, readWrite);
+    return ProviderStoreTransaction(this, storeName, readWrite);
   }
 
   // default read-only
   ProviderIndexTransaction indexTransaction(String storeName, String indexName,
       [bool readWrite = false]) {
-    return new ProviderIndexTransaction(this, storeName, indexName, readWrite);
+    return ProviderIndexTransaction(this, storeName, indexName, readWrite);
   }
 
   ProviderTransactionList transactionList(List<String> storeNames,
       [bool readWrite = false]) {
-    return new ProviderTransactionList(this, storeNames, readWrite);
+    return ProviderTransactionList(this, storeNames, readWrite);
   }
 
   Map toMap() {

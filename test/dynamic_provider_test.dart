@@ -16,7 +16,7 @@ void testMain(TestContext context) {
 
       test('database', () {
         DynamicProvider provider =
-            new DynamicProvider(idbFactory, new ProviderDbMeta("test"));
+            DynamicProvider(idbFactory, ProviderDbMeta("test"));
 
         return provider
             .delete()
@@ -31,7 +31,7 @@ void testMain(TestContext context) {
 
       test('database name version', () {
         DynamicProvider provider =
-            new DynamicProvider(idbFactory, new ProviderDbMeta("test2", 2));
+            DynamicProvider(idbFactory, ProviderDbMeta("test2", 2));
 
         return provider
             .delete()
@@ -53,8 +53,7 @@ void testMain(TestContext context) {
 
     setUp(() {
       transaction = null;
-      provider =
-          new DynamicProvider(idbFactory, new ProviderDbMeta(PROVIDER_NAME));
+      provider = DynamicProvider(idbFactory, ProviderDbMeta(PROVIDER_NAME));
       return provider.delete();
     });
     tearDown(() async {
@@ -65,7 +64,7 @@ void testMain(TestContext context) {
     });
 
     test('one_store', () {
-      provider.addStore(new ProviderStoreMeta("store"));
+      provider.addStore(ProviderStoreMeta("store"));
       return provider.ready.then((Provider readyProvider) {
         ProviderStoreTransaction txn = provider.storeTransaction("store");
         expect(txn.store.meta.name, "store");
@@ -81,8 +80,8 @@ void testMain(TestContext context) {
 
     test('multiple_store', () {
       provider.addStore(
-          new ProviderStoreMeta("store", keyPath: "key", autoIncrement: true));
-      provider.addStore(new ProviderStoreMeta("store2"));
+          ProviderStoreMeta("store", keyPath: "key", autoIncrement: true));
+      provider.addStore(ProviderStoreMeta("store2"));
       return provider.ready.then((Provider readyProvider) {
         ProviderTransactionList txn =
             provider.transactionList(["store", "store2"]);
@@ -106,8 +105,8 @@ void testMain(TestContext context) {
     });
 
     test('one_index', () {
-      ProviderIndexMeta indexMeta = new ProviderIndexMeta("idx", "my_key");
-      provider.addStore(new ProviderStoreMeta("store", indecies: [indexMeta]));
+      ProviderIndexMeta indexMeta = ProviderIndexMeta("idx", "my_key");
+      provider.addStore(ProviderStoreMeta("store", indecies: [indexMeta]));
       return provider.ready.then((Provider readyProvider) {
         ProviderStoreTransaction txn = provider.storeTransaction("store");
         expect(txn.store.meta.name, "store");

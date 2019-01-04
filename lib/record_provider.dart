@@ -16,16 +16,16 @@ abstract class DbField {
   static const String kind = "kind";
 }
 
-abstract class DbRecordBase {
-  get id;
-  set id(var id);
+abstract class DbRecordBase<K> {
+  K get id;
+  set id(K id);
 
   fillDbEntry(Map entry);
 
   fillFromDbEntry(Map entry);
 
   Map toDbEntry() {
-    Map entry = new Map();
+    Map entry = Map();
     fillDbEntry(entry);
 
     return entry;
@@ -41,7 +41,7 @@ abstract class DbRecordBase {
 
   @override
   toString() {
-    Map map = new Map();
+    Map map = Map();
     fillDbEntry(map);
     if (id != null) {
       map['_id'] = id.toString();
@@ -93,7 +93,7 @@ abstract class IntIdMixin {
   set id(int id) => _id = id;
 }
 
-abstract class DbSyncedRecordBase extends DbRecordBase {
+abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
   //String get kind;
 
   int _version;
@@ -153,7 +153,7 @@ abstract class DbSyncedRecordBase extends DbRecordBase {
   }
 }
 
-abstract class DbSyncedRecord extends DbSyncedRecordBase with IntIdMixin {}
+abstract class DbSyncedRecord extends DbSyncedRecordBase<int> with IntIdMixin {}
 
 class DbRecordProviderPutEvent extends DbRecordProviderEvent {
   DbRecordBase record;
@@ -182,9 +182,9 @@ abstract class DbRecordProviderTransaction<K>
       DbRecordBaseProvider provider, String storeName,
       [bool readWrite = false]) {
     if (readWrite == true) {
-      return new DbRecordProviderWriteTransaction(provider, storeName);
+      return DbRecordProviderWriteTransaction(provider, storeName);
     } else {
-      return new DbRecordProviderReadTransaction(provider, storeName);
+      return DbRecordProviderReadTransaction(provider, storeName);
     }
   }
 
@@ -232,7 +232,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
     return super.put(record.toDbEntry(), record.id as K).then((var key) {
       record.id = key;
       if (_hasListener) {
-        changes.add(new DbRecordProviderPutEvent()
+        changes.add(DbRecordProviderPutEvent()
           ..record = record
           ..syncing = syncing);
       }
@@ -240,7 +240,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
     });
   }
 
-  Future _throwError() async => throw new UnsupportedError(
+  Future _throwError() async => throw UnsupportedError(
       "use putRecord, deleteRecord and clearRecords API");
 
   @deprecated
@@ -262,7 +262,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
   Future deleteRecord(K key, {bool syncing}) {
     return super.delete(key).then((_) {
       if (_hasListener) {
-        changes.add(new DbRecordProviderDeleteEvent()
+        changes.add(DbRecordProviderDeleteEvent()
           ..key = key
           ..syncing = syncing);
       }
@@ -272,7 +272,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
   Future clearRecords({bool syncing}) {
     return super.clear().then((_) {
       if (_hasListener) {
-        changes.add(new DbRecordProviderClearEvent()..syncing = syncing);
+        changes.add(DbRecordProviderClearEvent()..syncing = syncing);
       }
     });
   }
@@ -300,9 +300,9 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
   String get store;
 
   DbRecordProviderReadTransaction<T, K> get readTransaction =>
-      new DbRecordProviderReadTransaction<T, K>(this, store);
+      DbRecordProviderReadTransaction<T, K>(this, store);
   DbRecordProviderWriteTransaction<T, K> get writeTransaction =>
-      new DbRecordProviderWriteTransaction<T, K>(this, store);
+      DbRecordProviderWriteTransaction<T, K>(this, store);
   DbRecordProviderReadTransaction<T, K> get storeReadTransaction =>
       readTransaction;
 
@@ -310,7 +310,7 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
       writeTransaction;
 
   DbRecordProviderTransaction storeTransaction(bool readWrite) =>
-      new DbRecordProviderTransaction(this, store, readWrite);
+      DbRecordProviderTransaction(this, store, readWrite);
 
   Future<T> get(K id) async {
     var txn = provider.storeTransaction(store);
@@ -338,17 +338,17 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
   // transaction from a transaction list
   DbRecordProviderReadTransaction txnListReadTransaction(
           DbRecordProviderTransactionList txnList) =>
-      new DbRecordProviderReadTransaction.fromList(this, txnList, store);
+      DbRecordProviderReadTransaction.fromList(this, txnList, store);
 
   DbRecordProviderWriteTransaction txnListWriteTransaction(
           DbRecordProviderWriteTransactionList txnList) =>
-      new DbRecordProviderWriteTransaction.fromList(this, txnList, store);
+      DbRecordProviderWriteTransaction.fromList(this, txnList, store);
 
   // Listener
   final List<StreamController> _onChangeCtlrs = [];
 
   Stream<List<DbRecordProviderEvent>> get onChange {
-    var ctlr = new StreamController<List<DbRecordProviderEvent>>(sync: true);
+    var ctlr = StreamController<List<DbRecordProviderEvent>>(sync: true);
     _onChangeCtlrs.add(ctlr);
     return ctlr.stream;
   }
@@ -402,7 +402,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
 
   ProviderIndexTransaction indexTransaction(String indexName,
           [bool readWrite]) =>
-      new ProviderIndexTransaction.fromStoreTransaction(
+      ProviderIndexTransaction.fromStoreTransaction(
           storeTransaction(readWrite), indexName);
 
   Future delete(K id, {bool syncing}) async {
@@ -488,7 +488,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
 
   Future clear({bool syncing}) async {
     if (syncing != true) {
-      throw new UnimplementedError("force the syncing field to true");
+      throw UnimplementedError("force the syncing field to true");
     }
     var txn = storeTransaction(true);
     await txnClear(txn as DbRecordProviderWriteTransaction, syncing: syncing);
@@ -497,7 +497,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
 
   Future txnClear(DbRecordProviderWriteTransaction txn, {bool syncing}) {
     if (syncing != true) {
-      throw new UnimplementedError("force the syncing field to true");
+      throw UnimplementedError("force the syncing field to true");
     }
     return txn.clearRecords();
   }
@@ -549,7 +549,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
   // Delete all records with synchronisation information
   txnDeleteSyncedRecord(DbRecordProviderWriteTransaction txn) {
     ProviderIndexTransaction index =
-        new ProviderIndexTransaction.fromStoreTransaction(txn, syncIdIndex);
+        ProviderIndexTransaction.fromStoreTransaction(txn, syncIdIndex);
     index.openCursor().listen((idb.CursorWithValue cwv) {
       //print("deleting: ${cwv.primaryKey}");
       cwv.delete();
@@ -564,9 +564,9 @@ abstract class DbRecordProviderTransactionList extends ProviderTransactionList {
       DbRecordProvidersMixin provider, List<String> storeNames,
       [bool readWrite = false]) {
     if (readWrite == true) {
-      return new DbRecordProviderWriteTransactionList(provider, storeNames);
+      return DbRecordProviderWriteTransactionList(provider, storeNames);
     } else {
-      return new DbRecordProviderReadTransactionList(provider, storeNames);
+      return DbRecordProviderReadTransactionList(provider, storeNames);
     }
   }
 
@@ -586,7 +586,7 @@ class DbRecordProviderReadTransactionList
       : super._(provider, storeNames, false) {}
 
   DbRecordProviderReadTransaction store(String storeName) {
-    return new DbRecordProviderReadTransaction.fromList(
+    return DbRecordProviderReadTransaction.fromList(
         _provider.getRecordProvider(storeName), this, storeName);
   }
 }
@@ -598,7 +598,7 @@ class DbRecordProviderWriteTransactionList
       : super._(provider, storeNames, true) {}
 
   DbRecordProviderTransaction store(String storeName) {
-    return new DbRecordProviderWriteTransaction.fromList(
+    return DbRecordProviderWriteTransaction.fromList(
         _provider.getRecordProvider(storeName), this, storeName);
   }
 }
@@ -631,11 +631,11 @@ abstract class DbRecordProvidersMapMixin {
 abstract class DbRecordProvidersMixin {
   DbRecordProviderReadTransactionList dbRecordProviderReadTransactionList(
           List<String> storeNames) =>
-      new DbRecordProviderReadTransactionList(this, storeNames);
+      DbRecordProviderReadTransactionList(this, storeNames);
 
   DbRecordProviderWriteTransactionList writeTransactionList(
           List<String> storeNames) =>
-      new DbRecordProviderWriteTransactionList(this, storeNames);
+      DbRecordProviderWriteTransactionList(this, storeNames);
 
   DbRecordProviderWriteTransactionList dbRecordProviderWriteTransactionList(
           List<String> storeNames) =>
@@ -645,7 +645,7 @@ abstract class DbRecordProvidersMixin {
   DbRecordProviderTransactionList dbRecordProviderTransactionList(
       List<String> storeNames,
       [bool readWrite = false]) {
-    return new DbRecordProviderTransactionList(this, storeNames, readWrite);
+    return DbRecordProviderTransactionList(this, storeNames, readWrite);
   }
 
   // to implement

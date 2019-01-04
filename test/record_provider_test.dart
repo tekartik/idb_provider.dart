@@ -34,7 +34,7 @@ class DbBasicRecordBase extends DbRecordBase with DbBasicRecordMixin {
     if (entry == null) {
       return null;
     }
-    DbBasicRecordBase record = new DbBasicRecordBase();
+    DbBasicRecordBase record = DbBasicRecordBase();
     record.fillFromDbEntry(entry);
     return record;
   }
@@ -50,7 +50,7 @@ class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
     if (entry == null) {
       return null;
     }
-    DbBasicRecord record = new DbBasicRecord()..id = id;
+    DbBasicRecord record = DbBasicRecord()..id = id;
     record.fillFromDbEntry(entry);
     return record;
   }
@@ -59,12 +59,12 @@ class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
 class DbBasicRecordProvider extends DbRecordProvider<DbBasicRecord, String> {
   String get store => DbBasicAppProvider.basicStore;
   DbBasicRecord fromEntry(Map entry, String id) =>
-      new DbBasicRecord.fromDbEntry(entry, id);
+      DbBasicRecord.fromDbEntry(entry, id);
 }
 
 class DbBasicAppProvider extends DynamicProvider
     with DbRecordProvidersMixin, DbRecordProvidersMapMixin {
-  DbBasicRecordProvider basic = new DbBasicRecordProvider();
+  DbBasicRecordProvider basic = DbBasicRecordProvider();
 
   // version 1 - initial
   static const int dbVersion = 1;
@@ -127,14 +127,14 @@ class DbBasicAppProvider extends DynamicProvider
       db.deleteStore(basicStore);
 
       ProviderIndexMeta nameIndexMeta =
-          new ProviderIndexMeta(dbFieldName, dbFieldName);
+          ProviderIndexMeta(dbFieldName, dbFieldName);
 
-      ProviderStoreMeta basicStoreMeta = new ProviderStoreMeta(basicStore,
+      ProviderStoreMeta basicStoreMeta = ProviderStoreMeta(basicStore,
           autoIncrement: true, indecies: [nameIndexMeta]);
 
       // ProviderIndex fileIndex = entriesStore.createIndex(indexMeta);
 
-      addStores(new ProviderStoresMeta([basicStoreMeta]));
+      addStores(ProviderStoresMeta([basicStoreMeta]));
 
       //providerStore.c
     } else if (e.newVersion > 2 && e.oldVersion < 3) {
@@ -154,8 +154,8 @@ void testMain(TestContext context) {
   group('record_provider', () {
     group('DbRecordBase', () {
       test('equality', () {
-        DbBasicRecordBase record1 = new DbBasicRecordBase();
-        DbBasicRecordBase record2 = new DbBasicRecordBase();
+        DbBasicRecordBase record1 = DbBasicRecordBase();
+        DbBasicRecordBase record2 = DbBasicRecordBase();
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
 
@@ -173,7 +173,7 @@ void testMain(TestContext context) {
 
     group('DbRecord', () {
       test('toString', () {
-        DbBasicRecord record1 = new DbBasicRecord();
+        DbBasicRecord record1 = DbBasicRecord();
 
         expect(record1.toString(), "{}");
         record1.id = "key1";
@@ -182,8 +182,8 @@ void testMain(TestContext context) {
         expect(record1.toString(), "{name: test, _id: key1}");
       });
       test('equality', () {
-        DbBasicRecord record1 = new DbBasicRecord();
-        DbBasicRecord record2 = new DbBasicRecord();
+        DbBasicRecord record1 = DbBasicRecord();
+        DbBasicRecord record2 = DbBasicRecord();
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
 
@@ -212,19 +212,19 @@ void testMain(TestContext context) {
     group('access', () {
       test('version', () async {
         DbBasicAppProvider appProvider =
-            new DbBasicAppProvider(idbFactory, context.dbName);
+            DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
         await appProvider.close();
 
-        appProvider = new DbBasicAppProvider(
-            idbFactory, DbBasicAppProvider.defaultDbName, 3);
+        appProvider =
+            DbBasicAppProvider(idbFactory, DbBasicAppProvider.defaultDbName, 3);
         await appProvider.ready;
       });
 
       test('open', () async {
         DbBasicAppProvider appProvider =
-            new DbBasicAppProvider(idbFactory, context.dbName);
+            DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
@@ -234,7 +234,7 @@ void testMain(TestContext context) {
         expect(await appProvider.basic.txnGet(readTxn, "_1"), isNull);
         await readTxn.completed;
 
-        DbBasicRecord record = new DbBasicRecord();
+        DbBasicRecord record = DbBasicRecord();
         record.name = "test";
         record.id = "_1";
 
@@ -254,7 +254,7 @@ void testMain(TestContext context) {
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          DbBasicRecord record = new DbBasicRecord.fromDbEntry(
+          DbBasicRecord record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String);
           expect(record.id, "_1");
         }).asFuture();
@@ -296,7 +296,7 @@ void testMain(TestContext context) {
 
       test('write', () async {
         DbBasicAppProvider appProvider =
-            new DbBasicAppProvider(idbFactory, context.dbName);
+            DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
@@ -304,7 +304,7 @@ void testMain(TestContext context) {
             appProvider.basic.writeTransaction;
         DbRecordProviderTransaction txn = writeTxn;
 
-        DbBasicRecord record = new DbBasicRecord();
+        DbBasicRecord record = DbBasicRecord();
         record.name = "test";
         record.id = "_1";
 
@@ -318,7 +318,7 @@ void testMain(TestContext context) {
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          DbBasicRecord record = new DbBasicRecord.fromDbEntry(
+          DbBasicRecord record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String);
           expect(record.id, "_1");
         }).asFuture();
@@ -349,7 +349,7 @@ void testMain(TestContext context) {
 
       test('index', () async {
         DbBasicAppProvider appProvider =
-            new DbBasicAppProvider(idbFactory, context.dbName);
+            DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
@@ -357,7 +357,7 @@ void testMain(TestContext context) {
             appProvider.basic.writeTransaction;
         DbRecordProviderTransaction txn = writeTxn;
 
-        DbBasicRecord record = new DbBasicRecord();
+        DbBasicRecord record = DbBasicRecord();
         record.name = "test";
         record.id = "_1";
 

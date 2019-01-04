@@ -23,5 +23,4 @@ class SembastTestContext extends TestContext {
   String get dbName => join(joinAll(testDescriptions), "test.db");
 }
 
-TestContext idbMemoryContext = new SembastTestContext()
-  ..factory = idbMemoryFactory;
+TestContext idbMemoryContext = SembastTestContext()..factory = idbMemoryFactory;
