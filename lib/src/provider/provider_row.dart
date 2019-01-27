@@ -14,7 +14,7 @@ abstract class _BaseRow<K, V> {
   String toString() => '${key} ${value}';
 
   @override
-  operator ==(other) {
+  bool operator ==(other) {
     if (other.runtimeType == runtimeType) {
       return (key == other.key) && (value == other.value);
     }
@@ -23,19 +23,22 @@ abstract class _BaseRow<K, V> {
 }
 
 abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
+  @override
   Map get value => super.value;
 
   _BaseMapRow.from(K key, Map map) : super.from(key, map);
 
   @override
-  operator ==(Object other) {
-    if (other.runtimeType == runtimeType) {
-      return const MapEquality().equals(value, (other as _BaseMapRow).value);
+  int get hashCode => value?.hashCode ?? 0;
+  @override
+  bool operator ==(other) {
+    if (other is _BaseMapRow) {
+      return const MapEquality().equals(value, other.value);
     }
     return false;
   }
 
-  operator [](String key) => value[key];
+  dynamic operator [](String key) => value[key];
 }
 
 class StringMapRow extends _BaseMapRow<String> {
@@ -54,6 +57,7 @@ abstract class ProviderRowFactory<T extends _BaseRow<K, V>, K, V> {
 }
 
 class IntMapProviderRowFactory extends ProviderRowFactory<IntMapRow, int, Map> {
+  @override
   IntMapRow newRow(int key, Map value) {
     return IntMapRow.from(key, value);
   }
@@ -64,6 +68,7 @@ final IntMapProviderRowFactory intMapProviderRawFactory =
 
 class StringMapProviderRowFactory
     extends ProviderRowFactory<StringMapRow, String, Map> {
+  @override
   StringMapRow newRow(String key, Map value) {
     return StringMapRow.from(key, value);
   }

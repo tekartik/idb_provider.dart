@@ -72,7 +72,7 @@ class ProviderStoreTransaction<K, V>
     extends ProviderStoreTransactionBase<K, V> {
   ProviderStoreTransaction(Provider provider, String storeName,
       [bool readWrite = false])
-      : super(provider, storeName, readWrite) {}
+      : super(provider, storeName, readWrite);
   // for creating from list
   ProviderStoreTransaction._() : super._();
 
@@ -114,13 +114,13 @@ abstract class ProviderSourceTransactionMixin<K, V> {
 
     int count = 0;
 
-    close() {
+    void close() {
       if (!ctlr.isClosed) {
         ctlr.close();
       }
     }
 
-    onCursorValue(T c) {
+    void onCursorValue(T c) {
       if (offset != null && offset > 0) {
         c.advance(offset);
       } else {
@@ -160,6 +160,7 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
 
   // not recommended though
   //@deprecated
+  @override
   ProviderStore get store => _store;
 
   ProviderStoreTransactionBase._();
@@ -180,6 +181,7 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
     _store = ProviderStore(_transaction.objectStore(storeName));
   }
 
+  @override
   Stream<CursorWithValue> openRawCursor({String direction}) {
     return store.objectStore.openCursor(
         //
@@ -204,7 +206,7 @@ abstract class ProviderStoreTransactionMixin<K, V> {
   Future<int> count() => store.count();
 
   Future<V> get(K key) async {
-    V value = await store.get(key);
+    V value = await store.get(key) as V;
     return value;
   }
 

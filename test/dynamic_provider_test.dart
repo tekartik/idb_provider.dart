@@ -46,14 +46,14 @@ void testMain(TestContext context) {
     });
   });
   group('more', () {
-    String PROVIDER_NAME = "test";
+    String providerName = "test";
 
     DynamicProvider provider;
     ProviderTransaction transaction;
 
     setUp(() {
       transaction = null;
-      provider = DynamicProvider(idbFactory, ProviderDbMeta(PROVIDER_NAME));
+      provider = DynamicProvider(idbFactory, ProviderDbMeta(providerName));
       return provider.delete();
     });
     tearDown(() async {

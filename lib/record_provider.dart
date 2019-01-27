@@ -1,9 +1,9 @@
 library tekartik_idb_provider.record_provider;
 
-import 'package:tekartik_idb_provider/provider.dart';
-import 'package:idb_shim/idb_client.dart' as idb;
 import 'dart:async';
+
 import 'package:collection/collection.dart';
+import 'package:tekartik_idb_provider/provider.dart';
 
 abstract class DbField {
   static const String syncVersion = "syncVersion";
@@ -18,20 +18,21 @@ abstract class DbField {
 
 abstract class DbRecordBase<K> {
   K get id;
+
   set id(K id);
 
-  fillDbEntry(Map entry);
+  void fillDbEntry(Map entry);
 
-  fillFromDbEntry(Map entry);
+  void fillFromDbEntry(Map entry);
 
   Map toDbEntry() {
-    Map entry = Map();
+    Map entry = {};
     fillDbEntry(entry);
 
     return entry;
   }
 
-  set(Map map, String key, value) {
+  void set(Map map, String key, value) {
     if (value != null) {
       map[key] = value;
     } else {
@@ -40,8 +41,8 @@ abstract class DbRecordBase<K> {
   }
 
   @override
-  toString() {
-    Map map = Map();
+  String toString() {
+    final map = {};
     fillDbEntry(map);
     if (id != null) {
       map['_id'] = id.toString();
@@ -54,13 +55,11 @@ abstract class DbRecordBase<K> {
 
   @override
   bool operator ==(o) {
-    if (o == null) {
-      return false;
+    if (o is DbRecordBase) {
+      return (const MapEquality().equals(toDbEntry(), o.toDbEntry())) &&
+          id == o.id;
     }
-    return (o.runtimeType == runtimeType) &&
-        (const MapEquality()
-            .equals(toDbEntry(), (o as DbRecordBase).toDbEntry())) &&
-        id == (o as DbRecordBase).id;
+    return false;
   }
 }
 
@@ -130,11 +129,8 @@ abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
   // true or false
   set dirty(bool dirty) => _dirty = dirty;
 
-  DbSyncedRecord() {
-    _version = 0;
-  }
-
-  fillFromDbEntry(Map entry) {
+  @override
+  void fillFromDbEntry(Map entry) {
     // type = entry[FIELD_TYPE]; already done
     _version = entry[DbField.version] as int;
     _syncId = entry[DbField.syncId] as String;
@@ -143,7 +139,8 @@ abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
     _dirty = entry[DbField.dirty] == 1;
   }
 
-  fillDbEntry(Map entry) {
+  @override
+  void fillDbEntry(Map entry) {
     set(entry, DbField.version, version);
     set(entry, DbField.syncId, syncId);
     set(entry, DbField.syncVersion, syncVersion);
@@ -178,6 +175,7 @@ class DbRecordProviderEvent {
 abstract class DbRecordProviderTransaction<K>
     extends ProviderStoreTransaction<K, Map> {
   DbRecordBaseProvider _provider;
+
   factory DbRecordProviderTransaction(
       DbRecordBaseProvider provider, String storeName,
       [bool readWrite = false]) {
@@ -195,7 +193,7 @@ abstract class DbRecordProviderTransaction<K>
 
   DbRecordProviderTransaction._fromList(
       this._provider, ProviderTransactionList list, String storeName)
-      : super.fromList(list, storeName) {}
+      : super.fromList(list, storeName);
 
   DbRecordProviderTransaction._(DbRecordBaseProvider provider, String storeName,
       [bool readWrite = false])
@@ -207,11 +205,11 @@ class DbRecordProviderReadTransaction<T extends DbRecordBase, K>
     extends DbRecordProviderTransaction<K> {
   DbRecordProviderReadTransaction(
       DbRecordBaseProvider provider, String storeName)
-      : super._(provider, storeName, false) {}
+      : super._(provider, storeName, false);
 
   DbRecordProviderReadTransaction.fromList(DbRecordBaseProvider _provider,
       ProviderTransactionList list, String storeName)
-      : super._fromList(_provider, list, storeName) {}
+      : super._fromList(_provider, list, storeName);
 }
 
 class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
@@ -222,11 +220,11 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
 
   DbRecordProviderWriteTransaction(
       DbRecordBaseProvider provider, String storeName)
-      : super._(provider, storeName, true) {}
+      : super._(provider, storeName, true);
 
   DbRecordProviderWriteTransaction.fromList(DbRecordBaseProvider provider,
       ProviderTransactionList list, String storeName)
-      : super._fromList(provider, list, storeName) {}
+      : super._fromList(provider, list, storeName);
 
   Future<T> putRecord(T record, {bool syncing}) {
     return super.put(record.toDbEntry(), record.id as K).then((var key) {
@@ -253,7 +251,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
 
   @deprecated
   @override
-  delete(K key) => _throwError();
+  Future delete(K key) => _throwError();
 
   @deprecated
   @override
@@ -301,8 +299,10 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
 
   DbRecordProviderReadTransaction<T, K> get readTransaction =>
       DbRecordProviderReadTransaction<T, K>(this, store);
+
   DbRecordProviderWriteTransaction<T, K> get writeTransaction =>
       DbRecordProviderWriteTransaction<T, K>(this, store);
+
   DbRecordProviderReadTransaction<T, K> get storeReadTransaction =>
       readTransaction;
 
@@ -434,7 +434,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
   Future<T> getBySyncId(String syncId) async {
     ProviderIndexTransaction<dynamic, dynamic> txn =
         indexTransaction(syncIdIndex);
-    K id = await txn.getKey(syncId);
+    K id = await txn.getKey(syncId) as K;
     T record;
     if (id != null) {
       record = await txnGet(txn.store, id);
@@ -462,7 +462,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
       record.setSyncInfo(null, null);
       record.dirty = true;
     }
-    _insert() {
+    Future<T> _insert() {
       record.version = 1;
       return txnRawPut(txn, record);
     }
@@ -546,8 +546,9 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
     return record as T;
   }
 
+/*
   // Delete all records with synchronisation information
-  txnDeleteSyncedRecord(DbRecordProviderWriteTransaction txn) {
+  Future txnDeleteSyncedRecord(DbRecordProviderWriteTransaction txn) {
     ProviderIndexTransaction index =
         ProviderIndexTransaction.fromStoreTransaction(txn, syncIdIndex);
     index.openCursor().listen((idb.CursorWithValue cwv) {
@@ -555,11 +556,13 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
       cwv.delete();
     });
   }
+  */
 }
 
 // only for writable transaction
 abstract class DbRecordProviderTransactionList extends ProviderTransactionList {
   DbRecordProvidersMixin _provider;
+
   factory DbRecordProviderTransactionList(
       DbRecordProvidersMixin provider, List<String> storeNames,
       [bool readWrite = false]) {
@@ -583,8 +586,9 @@ class DbRecordProviderReadTransactionList
     extends DbRecordProviderTransactionList {
   DbRecordProviderReadTransactionList(
       DbRecordProvidersMixin provider, List<String> storeNames)
-      : super._(provider, storeNames, false) {}
+      : super._(provider, storeNames, false);
 
+  @override
   DbRecordProviderReadTransaction store(String storeName) {
     return DbRecordProviderReadTransaction.fromList(
         _provider.getRecordProvider(storeName), this, storeName);
@@ -595,8 +599,9 @@ class DbRecordProviderWriteTransactionList
     extends DbRecordProviderTransactionList {
   DbRecordProviderWriteTransactionList(
       DbRecordProvidersMixin provider, List<String> storeNames)
-      : super._(provider, storeNames, true) {}
+      : super._(provider, storeNames, true);
 
+  @override
   DbRecordProviderTransaction store(String storeName) {
     return DbRecordProviderWriteTransaction.fromList(
         _provider.getRecordProvider(storeName), this, storeName);
@@ -605,12 +610,14 @@ class DbRecordProviderWriteTransactionList
 
 abstract class DbRecordProvidersMapMixin {
   Map<String, DbRecordBaseProvider> _providerMap;
+
   Map<String, DbRecordBaseProvider> get providerMap => _providerMap;
+
   set providerMap(Map<String, DbRecordBaseProvider> providerMap) {
     _providerMap = providerMap;
   }
 
-  initAll(Provider provider) {
+  void initAll(Provider provider) {
     for (DbRecordBaseProvider recordProvider in _providerMap.values) {
       recordProvider.provider = provider;
     }
@@ -619,7 +626,7 @@ abstract class DbRecordProvidersMapMixin {
   DbRecordBaseProvider getRecordProvider(String storeName) =>
       providerMap[storeName];
 
-  closeAll() {
+  void closeAll() {
     for (DbRecordBaseProvider recordProvider in recordProviders) {
       recordProvider.close();
     }
@@ -650,5 +657,6 @@ abstract class DbRecordProvidersMixin {
 
   // to implement
   DbRecordBaseProvider getRecordProvider(String storeName);
+
   Iterable<DbRecordBaseProvider> get recordProviders;
 }

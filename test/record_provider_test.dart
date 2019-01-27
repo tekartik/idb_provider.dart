@@ -15,11 +15,11 @@ abstract class DbBasicRecordMixin {
   dynamic id;
   String name;
 
-  fillFromDbEntry(Map entry) {
+  void fillFromDbEntry(Map entry) {
     name = entry[dbFieldName] as String;
   }
 
-  fillDbEntry(Map entry) {
+  void fillDbEntry(Map entry) {
     if (name != null) {
       entry[dbFieldName] = name;
     }
@@ -57,7 +57,9 @@ class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
 }
 
 class DbBasicRecordProvider extends DbRecordProvider<DbBasicRecord, String> {
+  @override
   String get store => DbBasicAppProvider.basicStore;
+  @override
   DbBasicRecord fromEntry(Map entry, String id) =>
       DbBasicRecord.fromDbEntry(entry, id);
 }
@@ -91,7 +93,7 @@ class DbBasicAppProvider extends DynamicProvider
   }
 
   @override
-  close() {
+  void close() {
     closeAll();
     super.close();
   }
@@ -110,6 +112,7 @@ class DbBasicAppProvider extends DynamicProvider
     return projectProvider;
   }
   */
+  @override
   void onUpdateDatabase(VersionChangeEvent e) {
     //devPrint("${e.newVersion}/${e.oldVersion}");
     //Database db = e.database;
@@ -215,7 +218,7 @@ void testMain(TestContext context) {
             DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
-        await appProvider.close();
+        appProvider.close();
 
         appProvider =
             DbBasicAppProvider(idbFactory, DbBasicAppProvider.defaultDbName, 3);
@@ -364,14 +367,12 @@ void testMain(TestContext context) {
         var key =
             (await (txn as DbRecordProviderWriteTransaction).putRecord(record))
                 .id;
-        await txn;
 
         txn = appProvider.basic.readTransaction;
         var index = txn.index(dbFieldName);
 
         expect((await appProvider.basic.indexGet(index, "test")).id, key);
 
-        await txn;
         //index.
         //expect(key, "_1");
       });
