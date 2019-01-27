@@ -4,7 +4,7 @@ class ProviderDbMeta {
   final String name;
   final int version;
   ProviderDbMeta(this.name, [int version])
-      : version = version != null ? version : 1 {}
+      : version = version != null ? version : 1;
 
   ProviderDbMeta overrideMeta({String name, int version}) {
     if (name == null) {

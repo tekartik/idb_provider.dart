@@ -17,6 +17,7 @@ class TestProvider extends Provider {
   TestProvider(IdbFactory idbFactory) {
     init(idbFactory, databaseName, dbVersion);
   }
+  @override
   void onUpdateDatabase(VersionChangeEvent e) {
     if (e.oldVersion < dbVersion) {
       // delete stuff
@@ -26,6 +27,7 @@ class TestProvider extends Provider {
     objectStore.createIndex(nameIndex, nameField, unique: false);
   }
 
+  @override
   Future delete() {
     return idbFactory.deleteDatabase(databaseName);
   }

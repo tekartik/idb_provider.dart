@@ -1,16 +1,21 @@
 library tekartik_provider;
 
-import 'package:idb_shim/idb_client.dart';
-import 'package:collection/collection.dart';
 import 'dart:async';
+
+import 'package:collection/collection.dart';
+import 'package:idb_shim/idb_client.dart';
 import 'package:tekartik_common_utils/hash_code_utils.dart';
-part 'src/provider/provider_transaction.dart';
-part 'src/provider/provider_row.dart';
-part 'src/provider/provider_meta.dart';
+
+part 'package:tekartik_idb_provider/src/provider/provider_meta.dart';
+
+part 'package:tekartik_idb_provider/src/provider/provider_row.dart';
+
+part 'package:tekartik_idb_provider/src/provider/provider_transaction.dart';
 
 class DynamicProvider extends Provider {
   final List<ProviderStoreMeta> _storeMetas = [];
 
+  @override
   void onUpdateDatabase(VersionChangeEvent e) {
     for (var meta in _storeMetas) {
       var store = db.createStore(meta);
@@ -35,6 +40,7 @@ class DynamicProvider extends Provider {
   DynamicProvider.noMeta(IdbFactory idbFactory) {
     _idbFactory = idbFactory;
   }
+
   DynamicProvider(IdbFactory idbFactory, [ProviderDbMeta meta]) {
     _idbFactory = idbFactory;
     _databaseMeta = meta;
@@ -47,13 +53,16 @@ abstract class Provider {
   ProviderDbMeta _databaseMeta;
 
   IdbFactory get idbFactory => _idbFactory;
+
   ProviderDb get db => _db;
 
   Provider();
+
   Provider.fromIdb(Database idbDatabase) {
     _setDatabase(idbDatabase);
     _databaseMeta = db.meta;
   }
+
   //AppProvider(this.idbFactory);
   void init(IdbFactory idbFactory, String dbName, int dbVersion) {
     this._idbFactory = idbFactory;
@@ -61,7 +70,7 @@ abstract class Provider {
   }
 
   // when everything ready
-  _setDatabase(Database db) {
+  void _setDatabase(Database db) {
     this._db = ProviderDb(db);
   }
 
@@ -113,7 +122,7 @@ abstract class Provider {
 
   // during onUpdateOnly
 
-  close() {
+  void close() {
     if (db != null) {
       db.close();
       _db = null;
@@ -149,6 +158,7 @@ abstract class Provider {
   }
 
   Future<ProviderStoresMeta> _storesMeta;
+
   Future<ProviderStoresMeta> get storesMeta {
     if (_storesMeta == null) {
       _storesMeta = Future.sync(() {
@@ -205,7 +215,9 @@ abstract class Provider {
 
   Future<Provider> _ready;
   Completer<Provider> _readyCompleter;
+
   bool get isReady => _readyCompleter != null && _readyCompleter.isCompleted;
+
   Future<Provider> get ready {
     if (_ready == null) {
       _readyCompleter = Completer.sync();
@@ -256,5 +268,6 @@ abstract class Provider {
     return map;
   }
 
+  @override
   String toString() => toMap().toString();
 }

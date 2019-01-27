@@ -22,7 +22,7 @@ void testMain(TestContext context) {
     DynamicProvider provider;
     ProviderTransaction transaction;
 
-    _setUp() {
+    Future _setUp() {
       provider = DynamicProvider(idbFactory, ProviderDbMeta(context.dbName));
       return provider.delete().then((_) {
         ProviderIndexMeta indexMeta = ProviderIndexMeta(indexName, indexKey);

@@ -1,12 +1,12 @@
 library tekartik_app_provider_test;
 
+import 'dart:async';
+
 import 'package:idb_shim/idb_client.dart';
 import 'package:tekartik_idb_provider/provider.dart';
 
-import 'dart:async';
-
-import 'test_provider.dart';
 import 'test_common.dart';
+import 'test_provider.dart';
 
 void main() {
   testMain(idbMemoryContext);
@@ -17,13 +17,13 @@ void testMain(TestContext context) {
 
   group('provider', () {
     group('row', () {
-      String PROVIDER_NAME = "test";
+      String providerName = "test";
 
       DynamicProvider provider;
       ProviderTransaction transaction;
 
       setUp(() {
-        provider = DynamicProvider(idbFactory, ProviderDbMeta(PROVIDER_NAME));
+        provider = DynamicProvider(idbFactory, ProviderDbMeta(providerName));
         return provider.delete();
       });
       tearDown(() {
@@ -163,9 +163,9 @@ void testMain(TestContext context) {
       });
     });
     test('getNames', () {
-      String C1 = "C1";
-      String A2 = "A2";
-      String B3 = "B3";
+      String c1 = "C1";
+      String a2 = "A2";
+      String b3 = "B3";
       /*
       int c1;
       int a2;
@@ -174,35 +174,35 @@ void testMain(TestContext context) {
       return provider.getNames().then((var list) {
         expect(list, isEmpty);
       }).then((_) {
-        return provider.putName(C1).then((int key) {
+        return provider.putName(c1).then((int key) {
           //c1 = key;
         });
       }).then((_) {
         return provider.getNames().then((var list) {
-          expect(list, [C1]);
+          expect(list, [c1]);
           //expect(list.first, C1);
         });
       }).then((_) {
-        return provider.putName(A2).then((int key) {
+        return provider.putName(a2).then((int key) {
           //a2 = key;
         });
       }).then((_) {
-        return provider.putName(B3).then((int key) {
+        return provider.putName(b3).then((int key) {
           //b3 = key;
         });
       }).then((_) {
         return provider.getNames().then((var list) {
-          expect(list, [C1, A2, B3]);
+          expect(list, [c1, a2, b3]);
           //expect(list.first, C1);
         });
       }).then((_) {
         return provider.getNames(limit: 2).then((var list) {
-          expect(list, [C1, A2]);
+          expect(list, [c1, a2]);
           //expect(list.first, C1);
         });
       }).then((_) {
         return provider.getOrderedNames().then((var list) {
-          expect(list, [A2, B3, C1]);
+          expect(list, [a2, b3, c1]);
           //expect(list.first, C1);
         });
       });

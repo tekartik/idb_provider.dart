@@ -98,13 +98,13 @@ void testMain(TestContext context) {
     });
     group('provider', () {
       group('more', () {
-        String PROVIDER_NAME = "test";
+        String providerName = "test";
 
         DynamicProvider provider;
         ProviderTransaction transaction;
 
         setUp(() {
-          provider = DynamicProvider(idbFactory, ProviderDbMeta(PROVIDER_NAME));
+          provider = DynamicProvider(idbFactory, ProviderDbMeta(providerName));
           return provider.delete();
         });
         tearDown(() async {
@@ -114,7 +114,7 @@ void testMain(TestContext context) {
           provider.close();
         });
 
-        _roundCircle(ProviderStoresMeta storesMeta) {
+        Future _roundCircle(ProviderStoresMeta storesMeta) {
           provider.addStores(storesMeta);
           return provider.ready.then((Provider readyProvider) {
             return provider.storesMeta.then((metas) {

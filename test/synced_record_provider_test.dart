@@ -16,11 +16,11 @@ abstract class DbBasicRecordMixin<T> {
   T id;
   String name;
 
-  mixinFillFromDbEntry(Map entry) {
+  void mixinFillFromDbEntry(Map entry) {
     name = entry[dbFieldName] as String;
   }
 
-  mixinFillDbEntry(Map entry) {
+  void mixinFillDbEntry(Map entry) {
     if (name != null) {
       entry[dbFieldName] = name;
     }
@@ -41,12 +41,14 @@ class DbAutoRecord extends DbSyncedRecordBase<int>
     return record;
   }
 
-  fillFromDbEntry(Map entry) {
+  @override
+  void fillFromDbEntry(Map entry) {
     super.fillFromDbEntry(entry);
     mixinFillFromDbEntry(entry);
   }
 
-  fillDbEntry(Map entry) {
+  @override
+  void fillDbEntry(Map entry) {
     super.fillDbEntry(entry);
     mixinFillDbEntry(entry);
   }
@@ -66,12 +68,14 @@ class DbBasicRecord extends DbSyncedRecordBase<String>
     return record;
   }
 
-  fillFromDbEntry(Map entry) {
+  @override
+  void fillFromDbEntry(Map entry) {
     super.fillFromDbEntry(entry);
     mixinFillFromDbEntry(entry);
   }
 
-  fillDbEntry(Map entry) {
+  @override
+  void fillDbEntry(Map entry) {
     super.fillDbEntry(entry);
     mixinFillDbEntry(entry);
   }
@@ -79,13 +83,17 @@ class DbBasicRecord extends DbSyncedRecordBase<String>
 
 class DbBasicRecordProvider
     extends DbSyncedRecordProvider<DbBasicRecord, String> {
+  @override
   String get store => DbBasicAppProvider.basicStore;
+  @override
   DbBasicRecord fromEntry(Map entry, String id) =>
       DbBasicRecord.fromDbEntry(entry, id);
 }
 
 class DbAutoRecordProvider extends DbSyncedRecordProvider<DbAutoRecord, int> {
+  @override
   String get store => DbBasicAppProvider.autoStore;
+  @override
   DbAutoRecord fromEntry(Map entry, int id) =>
       DbAutoRecord.fromDbEntry(entry, id);
 }
@@ -120,7 +128,7 @@ class DbBasicAppProvider extends DynamicProvider
   }
 
   @override
-  close() {
+  void close() {
     closeAll();
     super.close();
   }
@@ -139,6 +147,7 @@ class DbBasicAppProvider extends DynamicProvider
     return projectProvider;
   }
   */
+  @override
   void onUpdateDatabase(VersionChangeEvent e) {
     //devPrint("${e.newVersion}/${e.oldVersion}");
     //Database db = e.database;
@@ -232,7 +241,7 @@ void testMain(TestContext context) {
             DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
-        await appProvider.close();
+        appProvider.close();
 
         appProvider =
             DbBasicAppProvider(idbFactory, DbBasicAppProvider.defaultDbName, 3);
@@ -372,14 +381,14 @@ void testMain(TestContext context) {
         var key =
             (await (txn as DbRecordProviderWriteTransaction).putRecord(record))
                 .id;
-        await txn;
+        await txn.completed;
 
         txn = appProvider.basic.readTransaction;
         var index = txn.index(dbFieldName);
 
         expect((await appProvider.basic.indexGet(index, "test")).id, key);
 
-        await txn;
+        await txn.completed;
         //index.
         //expect(key, "_1");
       });
@@ -551,7 +560,7 @@ void testMain(TestContext context) {
         var txn = autoProvider.storeTransaction(true)
             as DbRecordProviderWriteTransaction;
         dbRecord = await autoProvider.txnPut(txn, dbRecord);
-        await txn;
+        await txn.completed;
         expect(dbRecord.id, 1);
         expect(dbRecord.version, 4);
         expect(dbRecord.dirty, true);
@@ -559,7 +568,7 @@ void testMain(TestContext context) {
         txn = autoProvider.storeTransaction(true)
             as DbRecordProviderWriteTransaction;
         dbRecord = await autoProvider.txnPut(txn, dbRecord, syncing: true);
-        await txn;
+        await txn.completed;
         expect(dbRecord.id, 1);
         expect(dbRecord.version, 5);
         expect(dbRecord.dirty, false);
@@ -625,7 +634,7 @@ void testMain(TestContext context) {
         var txn = autoProvider.storeTransaction(true)
             as DbRecordProviderWriteTransaction;
         await autoProvider.txnDelete(txn, dbRecord.id);
-        await txn;
+        await txn.completed;
         dbRecord = await autoProvider.get(dbRecord.id);
         expect(dbRecord.id, 2);
         expect(dbRecord.version, 2);
@@ -637,7 +646,7 @@ void testMain(TestContext context) {
         txn = autoProvider.storeTransaction(true)
             as DbRecordProviderWriteTransaction;
         await autoProvider.txnDelete(txn, dbRecord.id, syncing: true);
-        await txn;
+        await txn.completed;
         expect(await autoProvider.get(dbRecord.id), isNull);
       });
     });

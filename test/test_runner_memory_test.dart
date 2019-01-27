@@ -1,6 +1,6 @@
-import 'test_runner.dart' as all_common;
 import 'test_common.dart';
+import 'test_runner.dart' as all_common;
 
-main() {
+void main() {
   all_common.testMain(idbMemoryContext);
 }
