@@ -26,14 +26,9 @@ void testMain(TestContext context) {
         provider = DynamicProvider(idbFactory, ProviderDbMeta(providerName));
         return provider.delete();
       });
-      tearDown(() {
-        return Future.value(() {
-          if (transaction != null) {
-            return transaction.completed;
-          }
-        }).then((_) {
-          provider.close();
-        });
+      tearDown(() async {
+        await transaction?.completed;
+        provider.close();
       });
 
       test('int_map', () {
