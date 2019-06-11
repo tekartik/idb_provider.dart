@@ -428,6 +428,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
           return txnRawPut(txn, existing);
         }
       }
+      return null;
     });
   }
 

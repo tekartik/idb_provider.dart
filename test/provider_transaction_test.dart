@@ -32,14 +32,9 @@ void testMain(TestContext context) {
       });
     }
 
-    tearDown(() {
-      return Future.value(() {
-        if (transaction != null) {
-          return transaction.completed;
-        }
-      }).then((_) {
-        provider.close();
-      });
+    tearDown(() async {
+      await transaction?.completed;
+      provider.close();
     });
 
     test('store_cursor', () async {
