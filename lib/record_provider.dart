@@ -6,14 +6,14 @@ import 'package:collection/collection.dart';
 import 'package:tekartik_idb_provider/provider.dart';
 
 abstract class DbField {
-  static const String syncVersion = "syncVersion";
-  static const String version = "version";
+  static const String syncVersion = 'syncVersion';
+  static const String version = 'version';
 
   // local version (incremented)
-  static const String dirty = "dirty";
-  static const String deleted = "deleted";
-  static const String syncId = "syncId";
-  static const String kind = "kind";
+  static const String dirty = 'dirty';
+  static const String deleted = 'deleted';
+  static const String syncId = 'syncId';
+  static const String kind = 'kind';
 }
 
 abstract class DbRecordBase<K> {
@@ -26,7 +26,7 @@ abstract class DbRecordBase<K> {
   void fillFromDbEntry(Map entry);
 
   Map toDbEntry() {
-    Map entry = {};
+    final entry = {};
     fillDbEntry(entry);
 
     return entry;
@@ -77,30 +77,17 @@ abstract class DbRecord extends DbRecordBase {
 }
 
 abstract class StringIdMixin {
-  String _id;
-
-  String get id => _id;
-
-  set id(String id) => _id = id;
+  String id;
 }
 
 abstract class IntIdMixin {
-  int _id;
-
-  int get id => _id;
-
-  set id(int id) => _id = id;
+  int id;
 }
 
 abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
   //String get kind;
 
-  int _version;
-
-  int get version => _version;
-
-  // updated on each modification
-  set version(int version) => _version = version;
+  int version;
 
   String _syncId;
   String _syncVersion;
@@ -132,7 +119,7 @@ abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
   @override
   void fillFromDbEntry(Map entry) {
     // type = entry[FIELD_TYPE]; already done
-    _version = entry[DbField.version] as int;
+    version = entry[DbField.version] as int;
     _syncId = entry[DbField.syncId] as String;
     _syncVersion = entry[DbField.syncVersion] as String;
     _deleted = entry[DbField.deleted] as bool;
@@ -239,7 +226,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
   }
 
   Future _throwError() async => throw UnsupportedError(
-      "use putRecord, deleteRecord and clearRecords API");
+      'use putRecord, deleteRecord and clearRecords API');
 
   @deprecated
   @override
@@ -280,7 +267,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
     // delayed notification
     return super.completed.then((_) {
       if (_hasListener && changes.isNotEmpty) {
-        for (StreamController ctlr in _provider._onChangeCtlrs) {
+        for (final ctlr in _provider._onChangeCtlrs) {
           ctlr.add(changes);
         }
       }
@@ -314,7 +301,7 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
 
   Future<T> get(K id) async {
     var txn = provider.storeTransaction(store);
-    T record = await txnGet(txn, id);
+    final record = await txnGet(txn, id);
     await txn.completed;
     return record;
   }
@@ -354,7 +341,7 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
   }
 
   void close() {
-    for (StreamController ctlr in _onChangeCtlrs) {
+    for (final ctlr in _onChangeCtlrs) {
       ctlr.close();
     }
   }
@@ -433,9 +420,8 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
   }
 
   Future<T> getBySyncId(String syncId) async {
-    ProviderIndexTransaction<dynamic, dynamic> txn =
-        indexTransaction(syncIdIndex);
-    K id = await txn.getKey(syncId) as K;
+    final txn = indexTransaction(syncIdIndex);
+    final id = await txn.getKey(syncId) as K;
     T record;
     if (id != null) {
       record = await txnGet(txn.store, id);
@@ -489,7 +475,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
 
   Future clear({bool syncing}) async {
     if (syncing != true) {
-      throw UnimplementedError("force the syncing field to true");
+      throw UnimplementedError('force the syncing field to true');
     }
     var txn = storeTransaction(true);
     await txnClear(txn as DbRecordProviderWriteTransaction, syncing: syncing);
@@ -498,7 +484,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
 
   Future txnClear(DbRecordProviderWriteTransaction txn, {bool syncing}) {
     if (syncing != true) {
-      throw UnimplementedError("force the syncing field to true");
+      throw UnimplementedError('force the syncing field to true');
     }
     return txn.clearRecords();
   }
@@ -553,7 +539,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
     ProviderIndexTransaction index =
         ProviderIndexTransaction.fromStoreTransaction(txn, syncIdIndex);
     index.openCursor().listen((idb.CursorWithValue cwv) {
-      //print("deleting: ${cwv.primaryKey}");
+      //print('deleting: ${cwv.primaryKey}');
       cwv.delete();
     });
   }
@@ -610,16 +596,10 @@ class DbRecordProviderWriteTransactionList
 }
 
 abstract class DbRecordProvidersMapMixin {
-  Map<String, DbRecordBaseProvider> _providerMap;
-
-  Map<String, DbRecordBaseProvider> get providerMap => _providerMap;
-
-  set providerMap(Map<String, DbRecordBaseProvider> providerMap) {
-    _providerMap = providerMap;
-  }
+  Map<String, DbRecordBaseProvider> providerMap;
 
   void initAll(Provider provider) {
-    for (DbRecordBaseProvider recordProvider in _providerMap.values) {
+    for (final recordProvider in providerMap.values) {
       recordProvider.provider = provider;
     }
   }
@@ -628,7 +608,7 @@ abstract class DbRecordProvidersMapMixin {
       providerMap[storeName];
 
   void closeAll() {
-    for (DbRecordBaseProvider recordProvider in recordProviders) {
+    for (final recordProvider in recordProviders) {
       recordProvider.close();
     }
   }

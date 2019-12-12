@@ -13,11 +13,11 @@ void main() {
 }
 
 void testMain(TestContext context) {
-  IdbFactory idbFactory = context.factory;
+  final idbFactory = context.factory;
 
   group('provider', () {
     group('row', () {
-      String providerName = "test";
+      final providerName = 'test';
 
       DynamicProvider provider;
       ProviderTransaction transaction;
@@ -32,21 +32,20 @@ void testMain(TestContext context) {
       });
 
       test('int_map', () {
-        provider.addStore(ProviderStoreMeta("store", autoIncrement: true));
+        provider.addStore(ProviderStoreMeta('store', autoIncrement: true));
         return provider.ready.then((Provider readyProvider) {
-          ProviderStoreTransaction txn =
-              provider.storeTransaction("store", true);
+          final txn = provider.storeTransaction('store', true);
           // for cleanup
           transaction = txn;
 
-          return txn.put({"test": 1}).then((key) {
+          return txn.put({'test': 1}).then((key) {
             return txn.get(key).then((value) {
-              IntMapRow row =
+              final row =
                   intMapProviderRawFactory.newRow(key as int, value as Map);
 
               // Cursor
               txn.openCursor().listen((cwv) {
-                IntMapRow cursorRow =
+                final cursorRow =
                     intMapProviderRawFactory.cursorWithValueRow(cwv);
                 expect(cursorRow, row);
               });
@@ -59,11 +58,11 @@ void testMain(TestContext context) {
   group('test_provider_open', () {
     test('open', () async {
       // open normal
-      TestProvider provider = TestProvider(idbFactory);
-      TestProvider provider2 = TestProvider(idbFactory);
+      final provider = TestProvider(idbFactory);
+      final provider2 = TestProvider(idbFactory);
       await provider.delete().then((_) {
         expect(provider.isReady, isFalse);
-        Future done = provider.ready.then((readyProvider) {
+        final done = provider.ready.then((readyProvider) {
           expect(readyProvider, provider);
         });
         // not ready yet when opening the db
@@ -74,7 +73,7 @@ void testMain(TestContext context) {
         expect(provider2.isReady, isFalse);
         provider2.db = provider.db;
         expect(provider2.isReady, isTrue);
-        Future done = provider2.ready.then((readyProvider2) {
+        final done = provider2.ready.then((readyProvider2) {
           expect(readyProvider2, provider2);
         });
         return done;
@@ -84,7 +83,7 @@ void testMain(TestContext context) {
     });
   });
   group('test_provider', () {
-    TestProvider provider = TestProvider(idbFactory);
+    final provider = TestProvider(idbFactory);
     setUp(() {
       return provider.delete().then((_) {
         return provider.ready.then((_) {
@@ -97,10 +96,10 @@ void testMain(TestContext context) {
     });
     test('toString', () {
       //print(provider);
-      expect(provider.toString(), startsWith("{"));
+      expect(provider.toString(), startsWith('{'));
 
-      TestProvider anotherProvider = TestProvider(idbFactory);
-      expect(anotherProvider.toString(), "{}");
+      final anotherProvider = TestProvider(idbFactory);
+      expect(anotherProvider.toString(), '{}');
       //print(anotherProvider);
     });
     test('empty', () {
@@ -110,10 +109,10 @@ void testMain(TestContext context) {
     });
 
     test('put/get', () {
-      return provider.putName("test").then((int key) {
+      return provider.putName('test').then((int key) {
         expect(key, 1);
         return provider.getName(key).then((String name) {
-          expect(name, "test");
+          expect(name, 'test');
         });
       });
     });
@@ -121,10 +120,10 @@ void testMain(TestContext context) {
     test('get/put', () {
       return provider.getName(1).then((data) {
         expect(data, isNull);
-        return provider.putName("test").then((int key) {
+        return provider.putName('test').then((int key) {
           expect(key, 1);
           return provider.getName(key).then((String name) {
-            expect(name, "test");
+            expect(name, 'test');
           });
         }).then((_) {
           return provider.count().then((count) {
@@ -135,9 +134,8 @@ void testMain(TestContext context) {
     });
 
     Future<int> slowCount() {
-      ProviderStoreTransaction trans =
-          ProviderStoreTransaction(provider, itemsStore);
-      int count = 0;
+      final trans = ProviderStoreTransaction(provider, itemsStore);
+      var count = 0;
       return trans.store.objectStore
           .openCursor(
               //
@@ -158,9 +156,9 @@ void testMain(TestContext context) {
       });
     });
     test('getNames', () {
-      String c1 = "C1";
-      String a2 = "A2";
-      String b3 = "B3";
+      final c1 = 'C1';
+      final a2 = 'A2';
+      final b3 = 'B3';
       /*
       int c1;
       int a2;
@@ -204,7 +202,7 @@ void testMain(TestContext context) {
     });
 
     test('put/clear/get', () {
-      return provider.putName("test").then((int key) {
+      return provider.putName('test').then((int key) {
         expect(key, 1);
         return provider.clear().then((_) {
           return provider.getName(key).then((String name) {

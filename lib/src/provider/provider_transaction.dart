@@ -53,17 +53,16 @@ class ProviderIndexTransaction<K, V> extends Object
 
   Stream<Cursor> openKeyCursor(
       {K key, bool reverse = false, int limit, int offset}) {
-    String direction = reverse ? idbDirectionPrev : null;
-    Stream<Cursor> stream = openRawKeyCursor(key: key, direction: direction);
+    final direction = reverse ? idbDirectionPrev : null;
+    final stream = openRawKeyCursor(key: key, direction: direction);
     return _limitOffsetStream(stream, limit: limit, offset: offset);
   }
 
   //@override
   Stream<CursorWithValue> openCursor(
       {K key, bool reverse = false, int limit, int offset}) {
-    String direction = reverse ? idbDirectionPrev : null;
-    Stream<CursorWithValue> stream =
-        openRawCursor(key: key, direction: direction);
+    final direction = reverse ? idbDirectionPrev : null;
+    final stream = openRawCursor(key: key, direction: direction);
     return _limitOffsetStream(stream, limit: limit, offset: offset);
   }
 }
@@ -110,9 +109,9 @@ abstract class ProviderSourceTransactionMixin<K, V> {
 
   Stream<T> _limitOffsetStream<T extends Cursor>(Stream<T> rawStream,
       {int limit, int offset}) {
-    StreamController<T> ctlr = StreamController(sync: true);
+    final ctlr = StreamController<T>(sync: true);
 
-    int count = 0;
+    var count = 0;
 
     void close() {
       if (!ctlr.isClosed) {
@@ -174,7 +173,7 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
     } catch (e) {
       // typically db might have been closed so add some debug information
       if (provider.isClosed) {
-        print("database has been closed");
+        print('database has been closed');
       }
       rethrow;
     }
@@ -190,8 +189,8 @@ class ProviderStoreTransactionBase<K, V> extends ProviderTransaction
 
   Stream<CursorWithValue> openCursor(
       {bool reverse = false, int limit, int offset}) {
-    String direction = reverse ? idbDirectionPrev : null;
-    Stream<CursorWithValue> stream = openRawCursor(direction: direction);
+    final direction = reverse ? idbDirectionPrev : null;
+    final stream = openRawCursor(direction: direction);
     return _limitOffsetStream(stream, limit: limit, offset: offset);
   }
 }
@@ -206,7 +205,7 @@ abstract class ProviderStoreTransactionMixin<K, V> {
   Future<int> count() => store.count();
 
   Future<V> get(K key) async {
-    V value = await store.get(key) as V;
+    final value = await store.get(key) as V;
     return value;
   }
 

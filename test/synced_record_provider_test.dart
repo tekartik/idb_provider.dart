@@ -10,7 +10,7 @@ void main() {
   testMain(idbMemoryContext);
 }
 
-const String dbFieldName = "name";
+const String dbFieldName = 'name';
 
 abstract class DbBasicRecordMixin<T> {
   T id;
@@ -36,7 +36,7 @@ class DbAutoRecord extends DbSyncedRecordBase<int>
     if (entry == null) {
       return null;
     }
-    DbAutoRecord record = DbAutoRecord()..id = id;
+    final record = DbAutoRecord()..id = id;
     record.fillFromDbEntry(entry);
     return record;
   }
@@ -63,7 +63,7 @@ class DbBasicRecord extends DbSyncedRecordBase<String>
     if (entry == null) {
       return null;
     }
-    DbBasicRecord record = DbBasicRecord()..id = id;
+    final record = DbBasicRecord()..id = id;
     record.fillFromDbEntry(entry);
     return record;
   }
@@ -106,8 +106,8 @@ class DbBasicAppProvider extends DynamicProvider
   // version 1 - initial
   static const int dbVersion = 1;
 
-  static const String basicStore = "basic";
-  static const String autoStore = "auto";
+  static const String basicStore = 'basic';
+  static const String autoStore = 'auto';
 
   static const String defaultDbName =
       'com.tekartik.tekartik_idb_provider.record_test.db';
@@ -117,10 +117,9 @@ class DbBasicAppProvider extends DynamicProvider
   // _dbVersion for testing
   DbBasicAppProvider(IdbFactory idbFactory, String dbName, [int _dbVersion])
       : super.noMeta(idbFactory) {
-    if (_dbVersion == null) {
-      _dbVersion = dbVersion;
-    }
-    init(idbFactory, dbName == null ? defaultDbName : dbName, _dbVersion);
+    _dbVersion ??= dbVersion;
+
+    init(idbFactory, dbName ?? defaultDbName, _dbVersion);
 
     providerMap = {basicStore: basic, autoStore: auto};
 
@@ -142,14 +141,14 @@ class DbBasicAppProvider extends DynamicProvider
     ProjectProvider projectProvider;
     if (dbProject != null) {
       projectProvider =
-      new ProjectProvider(idbFactory, "${appPackage}-${dbProject.id}.db");
+      new ProjectProvider(idbFactory, '${appPackage}-${dbProject.id}.db');
     }
     return projectProvider;
   }
   */
   @override
   void onUpdateDatabase(VersionChangeEvent e) {
-    //devPrint("${e.newVersion}/${e.oldVersion}");
+    //devPrint('${e.newVersion}/${e.oldVersion}');
     //Database db = e.database;
     //int version = e.oldVersion;
 
@@ -165,15 +164,12 @@ class DbBasicAppProvider extends DynamicProvider
       db.deleteStore(basicStore);
       db.deleteStore(autoStore);
 
-      ProviderIndexMeta nameIndexMeta =
-          ProviderIndexMeta(dbFieldName, dbFieldName);
-      ProviderIndexMeta dirtyIndexMeta =
-          ProviderIndexMeta(DbField.dirty, DbField.dirty);
-      ProviderIndexMeta syncIdIndexMeta =
-          ProviderIndexMeta(DbField.syncId, DbField.syncId);
-      ProviderStoreMeta basicStoreMeta = ProviderStoreMeta(basicStore,
+      final nameIndexMeta = ProviderIndexMeta(dbFieldName, dbFieldName);
+      final dirtyIndexMeta = ProviderIndexMeta(DbField.dirty, DbField.dirty);
+      final syncIdIndexMeta = ProviderIndexMeta(DbField.syncId, DbField.syncId);
+      final basicStoreMeta = ProviderStoreMeta(basicStore,
           indecies: [nameIndexMeta, dirtyIndexMeta, syncIdIndexMeta]);
-      ProviderStoreMeta autoStoreMeta = ProviderStoreMeta(autoStore,
+      final autoStoreMeta = ProviderStoreMeta(autoStore,
           autoIncrement: true,
           indecies: [nameIndexMeta, dirtyIndexMeta, syncIdIndexMeta]);
 
@@ -195,40 +191,40 @@ class DbBasicAppProvider extends DynamicProvider
 }
 
 void testMain(TestContext context) {
-  IdbFactory idbFactory = context.factory;
+  final idbFactory = context.factory;
   group('synced_record_provider', () {
     group('DbRecord', () {
       test('toString', () {
-        DbBasicRecord record1 = DbBasicRecord();
+        final record1 = DbBasicRecord();
 
-        expect(record1.toString(), "{}");
-        record1.id = "key1";
-        expect(record1.toString(), "{_id: key1}");
-        record1.name = "test";
-        expect(record1.toString(), "{name: test, _id: key1}");
+        expect(record1.toString(), '{}');
+        record1.id = 'key1';
+        expect(record1.toString(), '{_id: key1}');
+        record1.name = 'test';
+        expect(record1.toString(), '{name: test, _id: key1}');
       });
       test('equality', () {
-        DbBasicRecord record1 = DbBasicRecord();
-        DbBasicRecord record2 = DbBasicRecord();
+        final record1 = DbBasicRecord();
+        final record2 = DbBasicRecord();
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
 
-        record1.id = "key";
+        record1.id = 'key';
 
         expect(record1.hashCode, isNot(record2.hashCode));
         expect(record1, isNot(record2));
 
-        record2.id = "key";
+        record2.id = 'key';
 
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
 
-        record1.name = "value";
+        record1.name = 'value';
 
         expect(record1.hashCode, isNot(record2.hashCode));
         expect(record1, isNot(record2));
 
-        record2.name = "value";
+        record2.name = 'value';
 
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
@@ -237,8 +233,7 @@ void testMain(TestContext context) {
 
     group('access', () {
       test('version', () async {
-        DbBasicAppProvider appProvider =
-            DbBasicAppProvider(idbFactory, context.dbName);
+        var appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
         appProvider.close();
@@ -249,38 +244,34 @@ void testMain(TestContext context) {
       });
 
       test('open', () async {
-        DbBasicAppProvider appProvider =
-            DbBasicAppProvider(idbFactory, context.dbName);
+        final appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
-        DbRecordProviderReadTransaction<DbBasicRecord, String> readTxn =
-            appProvider.basic.readTransaction;
+        final readTxn = appProvider.basic.readTransaction;
         DbRecordProviderTransaction txn = readTxn;
-        expect(await appProvider.basic.txnGet(readTxn, "_1"), isNull);
+        expect(await appProvider.basic.txnGet(readTxn, '_1'), isNull);
         await readTxn.completed;
 
-        DbBasicRecord record = DbBasicRecord();
-        record.name = "test";
-        record.id = "_1";
-
-        DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
-            appProvider.basic.writeTransaction;
+        final record = DbBasicRecord();
+        record.name = 'test';
+        record.id = '_1';
+        final writeTxn = appProvider.basic.writeTransaction;
         txn = writeTxn;
 
         var key =
             (await (txn as DbRecordProviderWriteTransaction).putRecord(record))
                 .id;
-        expect(key, "_1");
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect(key, '_1');
+        expect((await appProvider.basic.txnGet(txn, '_1')).id, '_1');
         await txn.completed;
 
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          DbBasicRecord record = DbBasicRecord.fromDbEntry(
+          final record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String);
-          expect(record.id, "_1");
+          expect(record.id, '_1');
         }).asFuture();
 
         await txn.completed;
@@ -289,7 +280,7 @@ void testMain(TestContext context) {
             .dbRecordProviderReadTransactionList(
                 [DbBasicAppProvider.basicStore]);
         txn = appProvider.basic.txnListReadTransaction(txnList);
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect((await appProvider.basic.txnGet(txn, '_1')).id, '_1');
 
         await txnList.completed;
 
@@ -299,10 +290,10 @@ void testMain(TestContext context) {
 
         txn = appProvider.basic.txnListWriteTransaction(
             txnList as DbRecordProviderWriteTransactionList);
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect((await appProvider.basic.txnGet(txn, '_1')).id, '_1');
         await appProvider.basic
             .txnClear(txn as DbRecordProviderWriteTransaction, syncing: true);
-        expect((await appProvider.basic.txnGet(txn, "_1")), isNull);
+        expect((await appProvider.basic.txnGet(txn, '_1')), isNull);
 
         await txnList.completed;
         //var txn = basicRecordProvider.store;
@@ -310,32 +301,30 @@ void testMain(TestContext context) {
       });
 
       test('write', () async {
-        DbBasicAppProvider appProvider =
-            DbBasicAppProvider(idbFactory, context.dbName);
+        final appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
-        DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
-            appProvider.basic.writeTransaction;
+        final writeTxn = appProvider.basic.writeTransaction;
         DbRecordProviderTransaction txn = writeTxn;
 
-        DbBasicRecord record = DbBasicRecord();
-        record.name = "test";
-        record.id = "_1";
+        final record = DbBasicRecord();
+        record.name = 'test';
+        record.id = '_1';
 
         var key =
             (await (txn as DbRecordProviderWriteTransaction).putRecord(record))
                 .id;
-        expect(key, "_1");
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect(key, '_1');
+        expect((await appProvider.basic.txnGet(txn, '_1')).id, '_1');
         await txn.completed;
 
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          DbBasicRecord record = DbBasicRecord.fromDbEntry(
+          final record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String);
-          expect(record.id, "_1");
+          expect(record.id, '_1');
         }).asFuture();
 
         await txn.completed;
@@ -344,7 +333,7 @@ void testMain(TestContext context) {
             .dbRecordProviderReadTransactionList(
                 [DbBasicAppProvider.basicStore]);
         txn = appProvider.basic.txnListReadTransaction(txnList);
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect((await appProvider.basic.txnGet(txn, '_1')).id, '_1');
 
         await txnList.completed;
 
@@ -354,10 +343,10 @@ void testMain(TestContext context) {
 
         txn = appProvider.basic.txnListWriteTransaction(
             txnList as DbRecordProviderWriteTransactionList);
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect((await appProvider.basic.txnGet(txn, '_1')).id, '_1');
         await appProvider.basic
             .txnClear(txn as DbRecordProviderWriteTransaction, syncing: true);
-        expect((await appProvider.basic.txnGet(txn, "_1")), isNull);
+        expect((await appProvider.basic.txnGet(txn, '_1')), isNull);
 
         await txnList.completed;
         //var txn = basicRecordProvider.store;
@@ -365,18 +354,16 @@ void testMain(TestContext context) {
       });
 
       test('index', () async {
-        DbBasicAppProvider appProvider =
-            DbBasicAppProvider(idbFactory, context.dbName);
+        final appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
-        DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
-            appProvider.basic.writeTransaction;
+        final writeTxn = appProvider.basic.writeTransaction;
         DbRecordProviderTransaction txn = writeTxn;
 
-        DbBasicRecord record = DbBasicRecord();
-        record.name = "test";
-        record.id = "_1";
+        final record = DbBasicRecord();
+        record.name = 'test';
+        record.id = '_1';
 
         var key =
             (await (txn as DbRecordProviderWriteTransaction).putRecord(record))
@@ -386,11 +373,11 @@ void testMain(TestContext context) {
         txn = appProvider.basic.readTransaction;
         var index = txn.index(dbFieldName);
 
-        expect((await appProvider.basic.indexGet(index, "test")).id, key);
+        expect((await appProvider.basic.indexGet(index, 'test')).id, key);
 
         await txn.completed;
         //index.
-        //expect(key, "_1");
+        //expect(key, '_1');
       });
     });
 
@@ -410,79 +397,79 @@ void testMain(TestContext context) {
 
       test('get_none', () async {
         expect(await provider.get(123), isNull);
-        expect(await provider.getBySyncId("123"), isNull);
+        expect(await provider.getBySyncId('123'), isNull);
       });
 
       test('put/get/getBySyncId', () async {
-        DbAutoRecord project = DbAutoRecord();
-        project.name = "my_name";
-        project.setSyncInfo("my_sync_id", "my_sync_version");
+        var project = DbAutoRecord();
+        project.name = 'my_name';
+        project.setSyncInfo('my_sync_id', 'my_sync_version');
         expect(project.version, isNull);
         project = await provider.put(project, syncing: true);
         expect(project.id, 1);
         expect(project.version, 1);
         expect(project.dirty, false);
         expect(project.deleted, false);
-        expect(project.name, "my_name");
-        expect(project.syncId, "my_sync_id");
-        expect(project.syncVersion, "my_sync_version");
+        expect(project.name, 'my_name');
+        expect(project.syncId, 'my_sync_id');
+        expect(project.syncVersion, 'my_sync_version');
 
         project = await provider.get(project.id);
         expect(project.id, 1);
         expect(project.dirty, false);
         expect(project.deleted, false);
         expect(project.version, 1);
-        expect(project.name, "my_name");
-        expect(project.syncId, "my_sync_id");
-        expect(project.syncVersion, "my_sync_version");
+        expect(project.name, 'my_name');
+        expect(project.syncId, 'my_sync_id');
+        expect(project.syncVersion, 'my_sync_version');
 
-        await provider.updateSyncInfo(project, "my_sync_id", "my_sync_version");
+        await provider.updateSyncInfo(project, 'my_sync_id', 'my_sync_version');
 
-        project = await provider.getBySyncId("123");
+        project = await provider.getBySyncId('123');
         expect(project, isNull);
-        project = await provider.getBySyncId("my_sync_id");
+        project = await provider.getBySyncId('my_sync_id');
         expect(project.id, 1);
 
         project = await provider.put(project, syncing: true);
         expect(project.dirty, false);
-        DbAutoRecord list2 = await provider.get(project.id);
+        final list2 = await provider.get(project.id);
         expect(list2.id, project.id);
         expect(list2.name, project.name);
-        expect(project.syncId, "my_sync_id");
-        expect(project.syncVersion, "my_sync_version");
+        expect(project.syncId, 'my_sync_id');
+        expect(project.syncVersion, 'my_sync_version');
         expect(project.dirty, false);
         expect(project.deleted, false);
       });
 
       test('project_sync_info', () async {
-        DbAutoRecord project = DbAutoRecord();
-        project.setSyncInfo("my_sync_id", "my_sync_version");
+        var project = DbAutoRecord();
+        project.setSyncInfo('my_sync_id', 'my_sync_version');
         project = await provider.put(project);
         expect(project.syncId, null);
         expect(project.syncVersion, null);
 
         // updating won't work if not syncing
-        project.setSyncInfo("my_sync_id_2", "my_sync_version_2");
+        project.setSyncInfo('my_sync_id_2', 'my_sync_version_2');
         project = await provider.put(project);
         expect(project.syncId, null);
         expect(project.syncVersion, null);
 
         // but will if syncing
-        project.setSyncInfo("my_sync_id_2", "my_sync_version_2");
+        project.setSyncInfo('my_sync_id_2', 'my_sync_version_2');
         project = await provider.put(project, syncing: true);
-        expect(project.syncId, "my_sync_id_2");
-        expect(project.syncVersion, "my_sync_version_2");
+        expect(project.syncId, 'my_sync_id_2');
+        expect(project.syncVersion, 'my_sync_version_2');
 
         // or through direct update
-        await provider.updateSyncInfo(project, "my_sync_id", "my_sync_version");
+        await provider.updateSyncInfo(project, 'my_sync_id', 'my_sync_version');
         project = await provider.get(project.id);
-        expect(project.syncId, "my_sync_id");
-        expect(project.syncVersion, "my_sync_version");
+        expect(project.syncId, 'my_sync_id');
+        expect(project.syncVersion, 'my_sync_version');
       });
 
       test('.list.getFirstDirty(', () async {
         expect(await provider.getFirstDirty(), isNull);
-        DbAutoRecord list = DbAutoRecord();
+        var list = DbAutoRecord();
         list = await provider.put(list);
         expect((await provider.getFirstDirty()).id, list.id);
       });
@@ -497,7 +484,7 @@ void testMain(TestContext context) {
         await provider.delete(0);
 
         // create for deletion
-        DbAutoRecord list = DbAutoRecord();
+        var list = DbAutoRecord();
         list = await provider.put(list);
 
         await provider.delete(list.id);
@@ -505,7 +492,7 @@ void testMain(TestContext context) {
         expect(await provider.get(list.id), isNull);
 
         // create for deletion with a syncId (won't be deleted
-        list = DbAutoRecord()..setSyncInfo("1", null);
+        list = DbAutoRecord()..setSyncInfo('1', null);
         list = await provider.put(list, syncing: true);
 
         await provider.delete(list.id);
@@ -534,13 +521,13 @@ void testMain(TestContext context) {
       });
 
       test('put', () async {
-        DbBasicRecord dbRecord = DbBasicRecord()..id = "key";
+        var dbRecord = DbBasicRecord()..id = 'key';
         dbRecord = await basicProvider.put(dbRecord);
-        expect(dbRecord.id, "key");
+        expect(dbRecord.id, 'key');
       });
 
       test('put_auto', () async {
-        DbAutoRecord dbRecord = DbAutoRecord();
+        var dbRecord = DbAutoRecord();
 
         dbRecord = await autoProvider.put(dbRecord);
         expect(dbRecord.id, 1);
@@ -575,10 +562,10 @@ void testMain(TestContext context) {
       });
 
       test('delete_auto', () async {
-        DbAutoRecord dbRecord = DbAutoRecord();
+        var dbRecord = DbAutoRecord();
 
         // not synced yet
-        dbRecord.setSyncInfo("1", "ver");
+        dbRecord.setSyncInfo('1', 'ver');
         dbRecord.deleted = true;
         dbRecord = await autoProvider.put(dbRecord);
         expect(dbRecord.id, 1);
@@ -593,7 +580,7 @@ void testMain(TestContext context) {
 
         // synced
         dbRecord = DbAutoRecord();
-        dbRecord.setSyncInfo("1", "ver");
+        dbRecord.setSyncInfo('1', 'ver');
         dbRecord = await autoProvider.put(dbRecord, syncing: true);
         expect(dbRecord.id, 2);
         expect(dbRecord.version, 1);
