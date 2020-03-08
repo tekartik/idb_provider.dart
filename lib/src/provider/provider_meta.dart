@@ -3,16 +3,11 @@ part of tekartik_provider;
 class ProviderDbMeta {
   final String name;
   final int version;
-  ProviderDbMeta(this.name, [int version])
-      : version = version != null ? version : 1;
+  ProviderDbMeta(this.name, [int version]) : version = version ?? 1;
 
   ProviderDbMeta overrideMeta({String name, int version}) {
-    if (name == null) {
-      name = this.name;
-    }
-    if (version == null) {
-      version = this.version;
-    }
+    name ??= this.name;
+    version ??= this.version;
     return ProviderDbMeta(name, version);
   }
 
@@ -34,7 +29,7 @@ class ProviderDbMeta {
   }
 
   @override
-  String toString() => "${name}(${version})";
+  String toString() => '${name}(${version})';
 }
 
 class ProviderDb {
@@ -44,7 +39,7 @@ class ProviderDb {
   ProviderDb(this._database);
 
   ProviderStore createStore(ProviderStoreMeta meta) {
-    ObjectStore objectStore = database.createObjectStore(meta.name,
+    var objectStore = database.createObjectStore(meta.name,
         keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
     return ProviderStore(objectStore);
   }
@@ -65,12 +60,8 @@ class ProviderDb {
   }
 
   ProviderDbMeta _meta;
-  ProviderDbMeta get meta {
-    if (_meta == null) {
-      _meta = ProviderDbMeta(database.name, database.version);
-    }
-    return _meta;
-  }
+  ProviderDbMeta get meta =>
+      _meta ??= ProviderDbMeta(database.name, database.version);
 
   int get version => meta.version;
 
@@ -82,7 +73,7 @@ class ProviderDb {
   IdbFactory get factory => _database.factory;
 
   @override
-  String toString() => "${_database}";
+  String toString() => '${_database}';
 }
 
 class StoreRow<K, V> {}
@@ -105,7 +96,7 @@ class ProviderStoresMeta {
   }
 
   @override
-  String toString() => "${stores}";
+  String toString() => '${stores}';
 }
 
 class ProviderStoreMeta {
@@ -154,16 +145,16 @@ class ProviderStoreMeta {
 
   @override
   String toString() =>
-      "${name}(${keyPath}${autoIncrement ? " auto" : ""}) ${indecies}";
+      '${name}(${keyPath}${autoIncrement ? ' auto' : ''}) ${indecies}';
 }
 
 class ProviderStore {
   ProviderStoreMeta _meta;
   ProviderStoreMeta get meta {
     if (_meta == null) {
-      List<ProviderIndexMeta> indecies = [];
-      for (String indexName in indexNames) {
-        ProviderIndex index = this.index(indexName);
+      var indecies = <ProviderIndexMeta>[];
+      for (var indexName in indexNames) {
+        var index = this.index(indexName);
         indecies.add(index.meta);
       }
       _meta = ProviderStoreMeta(objectStore.name,
@@ -177,7 +168,7 @@ class ProviderStore {
   final ObjectStore objectStore;
   ProviderStore(this.objectStore);
   ProviderIndex createIndex(ProviderIndexMeta meta) {
-    Index index = objectStore.createIndex(meta.name, meta.keyPath,
+    var index = objectStore.createIndex(meta.name, meta.keyPath,
         unique: meta.unique, multiEntry: meta.multiEntry);
     return ProviderIndex(index);
   }
@@ -185,7 +176,7 @@ class ProviderStore {
   Future<int> count() => objectStore.count();
 
   ProviderIndex index(String name) {
-    Index index = objectStore.index(name);
+    var index = objectStore.index(name);
     return ProviderIndex(index);
   }
 
@@ -236,18 +227,14 @@ class ProviderIndexMeta {
 
   @override
   String toString() =>
-      "${name} ${keyPath}${unique ? "unique" : ""}${multiEntry ? "multi" : ""}";
+      '${name} ${keyPath}${unique ? 'unique' : ''}${multiEntry ? 'multi' : ''}';
 }
 
 class ProviderIndex {
   ProviderIndexMeta _meta;
-  ProviderIndexMeta get meta {
-    if (_meta == null) {
-      _meta = ProviderIndexMeta(index.name, index.keyPath as String,
+  ProviderIndexMeta get meta =>
+      _meta ??= ProviderIndexMeta(index.name, index.keyPath as String,
           unique: index.unique, multiEntry: index.multiEntry);
-    }
-    return _meta;
-  }
 
   final Index index;
   ProviderIndex(this.index);

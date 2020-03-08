@@ -9,7 +9,7 @@ void main() {
   testMain(idbMemoryContext);
 }
 
-const String dbFieldName = "name";
+const String dbFieldName = 'name';
 
 abstract class DbBasicRecordMixin {
   dynamic id;
@@ -34,7 +34,7 @@ class DbBasicRecordBase extends DbRecordBase with DbBasicRecordMixin {
     if (entry == null) {
       return null;
     }
-    DbBasicRecordBase record = DbBasicRecordBase();
+    var record = DbBasicRecordBase();
     record.fillFromDbEntry(entry);
     return record;
   }
@@ -50,7 +50,7 @@ class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
     if (entry == null) {
       return null;
     }
-    DbBasicRecord record = DbBasicRecord()..id = id;
+    var record = DbBasicRecord()..id = id;
     record.fillFromDbEntry(entry);
     return record;
   }
@@ -71,7 +71,7 @@ class DbBasicAppProvider extends DynamicProvider
   // version 1 - initial
   static const int dbVersion = 1;
 
-  static const String basicStore = "basic";
+  static const String basicStore = 'basic';
 
   static const String defaultDbName =
       'com.tekartik.tekartik_idb_provider.record_test.db';
@@ -82,10 +82,9 @@ class DbBasicAppProvider extends DynamicProvider
   DbBasicAppProvider(IdbFactory idbFactory, String dbName, [int _dbVersion])
       : super.noMeta(idbFactory) {
     basic.provider = this;
-    if (_dbVersion == null) {
-      _dbVersion = dbVersion;
-    }
-    init(idbFactory, dbName == null ? defaultDbName : dbName, _dbVersion);
+    _dbVersion ??= dbVersion;
+
+    init(idbFactory, dbName ?? defaultDbName, _dbVersion);
 
     providerMap = {
       basicStore: basic,
@@ -107,14 +106,14 @@ class DbBasicAppProvider extends DynamicProvider
     ProjectProvider projectProvider;
     if (dbProject != null) {
       projectProvider =
-      new ProjectProvider(idbFactory, "${appPackage}-${dbProject.id}.db");
+      new ProjectProvider(idbFactory, '${appPackage}-${dbProject.id}.db');
     }
     return projectProvider;
   }
   */
   @override
   void onUpdateDatabase(VersionChangeEvent e) {
-    //devPrint("${e.newVersion}/${e.oldVersion}");
+    //devPrint('${e.newVersion}/${e.oldVersion}');
     //Database db = e.database;
     //int version = e.oldVersion;
 
@@ -129,10 +128,9 @@ class DbBasicAppProvider extends DynamicProvider
       // default erase everything, we don't care we sync
       db.deleteStore(basicStore);
 
-      ProviderIndexMeta nameIndexMeta =
-          ProviderIndexMeta(dbFieldName, dbFieldName);
+      var nameIndexMeta = ProviderIndexMeta(dbFieldName, dbFieldName);
 
-      ProviderStoreMeta basicStoreMeta = ProviderStoreMeta(basicStore,
+      var basicStoreMeta = ProviderStoreMeta(basicStore,
           autoIncrement: true, indecies: [nameIndexMeta]);
 
       // ProviderIndex fileIndex = entriesStore.createIndex(indexMeta);
@@ -153,21 +151,21 @@ class DbBasicAppProvider extends DynamicProvider
 }
 
 void testMain(TestContext context) {
-  IdbFactory idbFactory = context.factory;
+  var idbFactory = context.factory;
   group('record_provider', () {
     group('DbRecordBase', () {
       test('equality', () {
-        DbBasicRecordBase record1 = DbBasicRecordBase();
-        DbBasicRecordBase record2 = DbBasicRecordBase();
+        var record1 = DbBasicRecordBase();
+        var record2 = DbBasicRecordBase();
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
 
-        record1.name = "value";
+        record1.name = 'value';
 
         expect(record1.hashCode, isNot(record2.hashCode));
         expect(record1, isNot(record2));
 
-        record2.name = "value";
+        record2.name = 'value';
 
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
@@ -176,36 +174,36 @@ void testMain(TestContext context) {
 
     group('DbRecord', () {
       test('toString', () {
-        DbBasicRecord record1 = DbBasicRecord();
+        var record1 = DbBasicRecord();
 
-        expect(record1.toString(), "{}");
-        record1.id = "key1";
-        expect(record1.toString(), "{_id: key1}");
-        record1.name = "test";
-        expect(record1.toString(), "{name: test, _id: key1}");
+        expect(record1.toString(), '{}');
+        record1.id = 'key1';
+        expect(record1.toString(), '{_id: key1}');
+        record1.name = 'test';
+        expect(record1.toString(), '{name: test, _id: key1}');
       });
       test('equality', () {
-        DbBasicRecord record1 = DbBasicRecord();
-        DbBasicRecord record2 = DbBasicRecord();
+        var record1 = DbBasicRecord();
+        var record2 = DbBasicRecord();
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
 
-        record1.id = "key";
+        record1.id = 'key';
 
         expect(record1.hashCode, isNot(record2.hashCode));
         expect(record1, isNot(record2));
 
-        record2.id = "key";
+        record2.id = 'key';
 
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
 
-        record1.name = "value";
+        record1.name = 'value';
 
         expect(record1.hashCode, isNot(record2.hashCode));
         expect(record1, isNot(record2));
 
-        record2.name = "value";
+        record2.name = 'value';
 
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
@@ -214,8 +212,7 @@ void testMain(TestContext context) {
 
     group('access', () {
       test('version', () async {
-        DbBasicAppProvider appProvider =
-            DbBasicAppProvider(idbFactory, context.dbName);
+        var appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
         appProvider.close();
@@ -226,40 +223,37 @@ void testMain(TestContext context) {
       });
 
       test('open', () async {
-        DbBasicAppProvider appProvider =
-            DbBasicAppProvider(idbFactory, context.dbName);
+        var appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
-        DbRecordProviderReadTransaction<DbBasicRecord, String> readTxn =
-            appProvider.basic.readTransaction;
+        var readTxn = appProvider.basic.readTransaction;
         dynamic txn = readTxn;
-        expect(await appProvider.basic.txnGet(readTxn, "_1"), isNull);
+        expect(await appProvider.basic.txnGet(readTxn, '_1'), isNull);
         await readTxn.completed;
 
-        DbBasicRecord record = DbBasicRecord();
-        record.name = "test";
-        record.id = "_1";
+        var record = DbBasicRecord();
+        record.name = 'test';
+        record.id = '_1';
 
-        DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
-            appProvider.basic.writeTransaction;
+        var writeTxn = appProvider.basic.writeTransaction;
         txn = writeTxn;
 
         var key = (await txn.putRecord(record)).id;
-        expect(key, "_1");
+        expect(key, '_1');
         expect(
             (await appProvider.basic
-                    .txnGet(txn as DbRecordProviderWriteTransaction, "_1"))
+                    .txnGet(txn as DbRecordProviderWriteTransaction, '_1'))
                 .id,
-            "_1");
+            '_1');
         await txn.completed;
 
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          DbBasicRecord record = DbBasicRecord.fromDbEntry(
+          var record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String);
-          expect(record.id, "_1");
+          expect(record.id, '_1');
         }).asFuture();
 
         await txn.completed;
@@ -269,9 +263,9 @@ void testMain(TestContext context) {
         txn = appProvider.basic.txnListReadTransaction(txnList);
         expect(
             (await appProvider.basic
-                    .txnGet(txn as DbRecordProviderTransaction, "_1"))
+                    .txnGet(txn as DbRecordProviderTransaction, '_1'))
                 .id,
-            "_1");
+            '_1');
 
         await txnList.completed;
 
@@ -282,14 +276,14 @@ void testMain(TestContext context) {
         txn = appProvider.basic.txnListWriteTransaction(writeTxnList);
         expect(
             (await appProvider.basic
-                    .txnGet(txn as DbRecordProviderTransaction, "_1"))
+                    .txnGet(txn as DbRecordProviderTransaction, '_1'))
                 .id,
-            "_1");
+            '_1');
         await appProvider.basic
             .txnClear(txn as DbRecordProviderWriteTransaction);
         expect(
             (await appProvider.basic
-                .txnGet(txn as DbRecordProviderTransaction, "_1")),
+                .txnGet(txn as DbRecordProviderTransaction, '_1')),
             isNull);
 
         await txnList.completed;
@@ -298,32 +292,30 @@ void testMain(TestContext context) {
       });
 
       test('write', () async {
-        DbBasicAppProvider appProvider =
-            DbBasicAppProvider(idbFactory, context.dbName);
+        var appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
-        DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
-            appProvider.basic.writeTransaction;
+        var writeTxn = appProvider.basic.writeTransaction;
         DbRecordProviderTransaction txn = writeTxn;
 
-        DbBasicRecord record = DbBasicRecord();
-        record.name = "test";
-        record.id = "_1";
+        var record = DbBasicRecord();
+        record.name = 'test';
+        record.id = '_1';
 
         var key =
             (await (txn as DbRecordProviderWriteTransaction).putRecord(record))
                 .id;
-        expect(key, "_1");
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect(key, '_1');
+        expect((await appProvider.basic.txnGet(txn, '_1')).id, '_1');
         await txn.completed;
 
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          DbBasicRecord record = DbBasicRecord.fromDbEntry(
+          var record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String);
-          expect(record.id, "_1");
+          expect(record.id, '_1');
         }).asFuture();
 
         await txn.completed;
@@ -331,7 +323,7 @@ void testMain(TestContext context) {
         var txnList = appProvider.dbRecordProviderReadTransactionList(
             [DbBasicAppProvider.basicStore]);
         txn = appProvider.basic.txnListReadTransaction(txnList);
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect((await appProvider.basic.txnGet(txn, '_1')).id, '_1');
 
         await txnList.completed;
 
@@ -340,10 +332,10 @@ void testMain(TestContext context) {
         //txn = appProvider.basic.txnListReadTransaction(txnList);
 
         txn = appProvider.basic.txnListWriteTransaction(writeTxnList);
-        expect((await appProvider.basic.txnGet(txn, "_1")).id, "_1");
+        expect((await appProvider.basic.txnGet(txn, '_1')).id, '_1');
         await appProvider.basic
             .txnClear(txn as DbRecordProviderWriteTransaction);
-        expect((await appProvider.basic.txnGet(txn, "_1")), isNull);
+        expect((await appProvider.basic.txnGet(txn, '_1')), isNull);
 
         await txnList.completed;
         //var txn = basicRecordProvider.store;
@@ -351,18 +343,16 @@ void testMain(TestContext context) {
       });
 
       test('index', () async {
-        DbBasicAppProvider appProvider =
-            DbBasicAppProvider(idbFactory, context.dbName);
+        var appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
-        DbRecordProviderWriteTransaction<DbBasicRecord, String> writeTxn =
-            appProvider.basic.writeTransaction;
+        var writeTxn = appProvider.basic.writeTransaction;
         DbRecordProviderTransaction txn = writeTxn;
 
-        DbBasicRecord record = DbBasicRecord();
-        record.name = "test";
-        record.id = "_1";
+        var record = DbBasicRecord();
+        record.name = 'test';
+        record.id = '_1';
 
         var key =
             (await (txn as DbRecordProviderWriteTransaction).putRecord(record))
@@ -371,10 +361,10 @@ void testMain(TestContext context) {
         txn = appProvider.basic.readTransaction;
         var index = txn.index(dbFieldName);
 
-        expect((await appProvider.basic.indexGet(index, "test")).id, key);
+        expect((await appProvider.basic.indexGet(index, 'test')).id, key);
 
         //index.
-        //expect(key, "_1");
+        //expect(key, '_1');
       });
     });
   });

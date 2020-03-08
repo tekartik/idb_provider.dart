@@ -6,14 +6,14 @@ import 'package:collection/collection.dart';
 import 'package:tekartik_idb_provider/provider.dart';
 
 abstract class DbField {
-  static const String syncVersion = "syncVersion";
-  static const String version = "version";
+  static const String syncVersion = 'syncVersion';
+  static const String version = 'version';
 
   // local version (incremented)
-  static const String dirty = "dirty";
-  static const String deleted = "deleted";
-  static const String syncId = "syncId";
-  static const String kind = "kind";
+  static const String dirty = 'dirty';
+  static const String deleted = 'deleted';
+  static const String syncId = 'syncId';
+  static const String kind = 'kind';
 }
 
 abstract class DbRecordBase<K> {
@@ -25,8 +25,8 @@ abstract class DbRecordBase<K> {
 
   void fillFromDbEntry(Map entry);
 
-  Map toDbEntry() {
-    Map entry = {};
+  Map<String, dynamic> toDbEntry() {
+    var entry = <String, dynamic>{};
     fillDbEntry(entry);
 
     return entry;
@@ -77,19 +77,21 @@ abstract class DbRecord extends DbRecordBase {
 }
 
 abstract class StringIdMixin {
-  String _id;
-
-  String get id => _id;
-
-  set id(String id) => _id = id;
+//  String _id;
+//
+//  String get id => _id;
+//
+//  set id(String id) => _id = id;
+  String id;
 }
 
 abstract class IntIdMixin {
-  int _id;
-
-  int get id => _id;
-
-  set id(int id) => _id = id;
+//  int _id;
+//
+//  int get id => _id;
+//
+//  set id(int id) => _id = id;
+  int id;
 }
 
 abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
@@ -97,9 +99,12 @@ abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
 
   int _version;
 
+  // ignore: unnecessary_getters_setters
   int get version => _version;
 
   // updated on each modification
+  @deprecated
+  // ignore: unnecessary_getters_setters
   set version(int version) => _version = version;
 
   String _syncId;
@@ -239,7 +244,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
   }
 
   Future _throwError() async => throw UnsupportedError(
-      "use putRecord, deleteRecord and clearRecords API");
+      'use putRecord, deleteRecord and clearRecords API');
 
   @deprecated
   @override
@@ -280,7 +285,7 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
     // delayed notification
     return super.completed.then((_) {
       if (_hasListener && changes.isNotEmpty) {
-        for (StreamController ctlr in _provider._onChangeCtlrs) {
+        for (var ctlr in _provider._onChangeCtlrs) {
           ctlr.add(changes);
         }
       }
@@ -314,7 +319,7 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
 
   Future<T> get(K id) async {
     var txn = provider.storeTransaction(store);
-    T record = await txnGet(txn, id);
+    var record = await txnGet(txn, id);
     await txn.completed;
     return record;
   }
@@ -354,7 +359,7 @@ abstract class DbRecordBaseProvider<T extends DbRecordBase, K> {
   }
 
   void close() {
-    for (StreamController ctlr in _onChangeCtlrs) {
+    for (var ctlr in _onChangeCtlrs) {
       ctlr.close();
     }
   }
@@ -424,7 +429,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
         } else if (existing.deleted != true) {
           existing.deleted = true;
           existing.dirty = true;
-          existing.version++;
+          existing._version++;
           return txnRawPut(txn, existing);
         }
       }
@@ -433,9 +438,8 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
   }
 
   Future<T> getBySyncId(String syncId) async {
-    ProviderIndexTransaction<dynamic, dynamic> txn =
-        indexTransaction(syncIdIndex);
-    K id = await txn.getKey(syncId) as K;
+    var txn = indexTransaction(syncIdIndex);
+    var id = await txn.getKey(syncId) as K;
     T record;
     if (id != null) {
       record = await txnGet(txn.store, id);
@@ -464,7 +468,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
       record.dirty = true;
     }
     Future<T> _insert() {
-      record.version = 1;
+      record._version = 1;
       return txnRawPut(txn, record);
     }
 
@@ -476,7 +480,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
             record.setSyncInfo(
                 existingRecord.syncId, existingRecord.syncVersion);
           }
-          record.version = existingRecord.version + 1;
+          record._version = existingRecord.version + 1;
           return txnRawPut(txn, record);
         } else {
           return _insert();
@@ -489,7 +493,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
 
   Future clear({bool syncing}) async {
     if (syncing != true) {
-      throw UnimplementedError("force the syncing field to true");
+      throw UnimplementedError('force the syncing field to true');
     }
     var txn = storeTransaction(true);
     await txnClear(txn as DbRecordProviderWriteTransaction, syncing: syncing);
@@ -498,7 +502,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
 
   Future txnClear(DbRecordProviderWriteTransaction txn, {bool syncing}) {
     if (syncing != true) {
-      throw UnimplementedError("force the syncing field to true");
+      throw UnimplementedError('force the syncing field to true');
     }
     return txn.clearRecords();
   }
@@ -553,7 +557,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
     ProviderIndexTransaction index =
         ProviderIndexTransaction.fromStoreTransaction(txn, syncIdIndex);
     index.openCursor().listen((idb.CursorWithValue cwv) {
-      //print("deleting: ${cwv.primaryKey}");
+      //print('deleting: ${cwv.primaryKey}');
       cwv.delete();
     });
   }
@@ -610,16 +614,17 @@ class DbRecordProviderWriteTransactionList
 }
 
 abstract class DbRecordProvidersMapMixin {
-  Map<String, DbRecordBaseProvider> _providerMap;
-
-  Map<String, DbRecordBaseProvider> get providerMap => _providerMap;
-
-  set providerMap(Map<String, DbRecordBaseProvider> providerMap) {
-    _providerMap = providerMap;
-  }
+//  Map<String, DbRecordBaseProvider> _providerMap;
+//
+//  Map<String, DbRecordBaseProvider> get providerMap => _providerMap;
+//
+//  set providerMap(Map<String, DbRecordBaseProvider> providerMap) {
+//    _providerMap = providerMap;
+//  }
+  Map<String, DbRecordBaseProvider> providerMap;
 
   void initAll(Provider provider) {
-    for (DbRecordBaseProvider recordProvider in _providerMap.values) {
+    for (var recordProvider in providerMap.values) {
       recordProvider.provider = provider;
     }
   }
@@ -628,7 +633,7 @@ abstract class DbRecordProvidersMapMixin {
       providerMap[storeName];
 
   void closeAll() {
-    for (DbRecordBaseProvider recordProvider in recordProviders) {
+    for (var recordProvider in recordProviders) {
       recordProvider.close();
     }
   }

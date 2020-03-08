@@ -32,7 +32,7 @@ class DynamicProvider extends Provider {
 
   // to call before ready
   void addStores(ProviderStoresMeta storesMeta) {
-    for (ProviderStoreMeta storeMeta in storesMeta.stores) {
+    for (var storeMeta in storesMeta.stores) {
       addStore(storeMeta);
     }
   }
@@ -65,30 +65,30 @@ abstract class Provider {
 
   //AppProvider(this.idbFactory);
   void init(IdbFactory idbFactory, String dbName, int dbVersion) {
-    this._idbFactory = idbFactory;
+    _idbFactory = idbFactory;
     _databaseMeta = ProviderDbMeta(dbName, dbVersion);
   }
 
   // when everything ready
   void _setDatabase(Database db) {
-    this._db = ProviderDb(db);
+    _db = ProviderDb(db);
   }
 
   // must be set before being ready
   // The provider take ownership of the database
   set db(ProviderDb db) {
     if (db == null) {
-      this._db = null;
+      _db = null;
       _ready = null;
       _readyCompleter = null;
     } else {
       if (_ready != null) {
-        throw "ready should not have been called before setting the db";
+        throw 'ready should not have been called before setting the db';
       } else {
         _readyCompleter = Completer.sync();
-        this._db = db;
-        this._idbFactory = db.factory;
-        this._databaseMeta = _db.meta;
+        _db = db;
+        _idbFactory = db.factory;
+        _databaseMeta = _db.meta;
 
         _ready = _readyCompleter.future;
         _readyCompleter.complete(this);
@@ -102,17 +102,17 @@ abstract class Provider {
   // The provider take ownership of the database
   set database(Database db) {
     if (db == null) {
-      this._db = null;
+      _db = null;
       _ready = null;
       _readyCompleter = null;
     } else {
       if (_ready != null) {
-        throw "ready should not have been called before setting the db";
+        throw 'ready should not have been called before setting the db';
       } else {
         _readyCompleter = Completer.sync();
         _setDatabase(db);
-        this._idbFactory = db.factory;
-        this._databaseMeta = _db.meta;
+        _idbFactory = db.factory;
+        _databaseMeta = _db.meta;
 
         _ready = _readyCompleter.future;
         _readyCompleter.complete(this);
@@ -133,11 +133,10 @@ abstract class Provider {
 
   // delete content
   Future clear() {
-    List<String> storeNames =
-        db.database.objectStoreNames.toList(growable: false);
+    var storeNames = db.database.objectStoreNames.toList(growable: false);
     var globalTrans = ProviderTransactionList(this, storeNames, true);
-    List<Future> futures = [];
-    for (String storeName in storeNames) {
+    var futures = <Future>[];
+    for (var storeName in storeNames) {
       var trans = globalTrans.store(storeName);
       futures.add(trans.clear());
     }
@@ -160,22 +159,20 @@ abstract class Provider {
   Future<ProviderStoresMeta> _storesMeta;
 
   Future<ProviderStoresMeta> get storesMeta {
-    if (_storesMeta == null) {
-      _storesMeta = Future.sync(() {
-        List<ProviderStoreMeta> metas = [];
+    return _storesMeta ??= () {
+
+        var metas = <ProviderStoreMeta>[];
 
         var storeNames = db.storeNames.toList();
-        ProviderTransactionList txn = transactionList(storeNames);
-        for (String storeName in storeNames) {
+        var txn = transactionList(storeNames);
+        for (var storeName in storeNames) {
           metas.add(txn.store(storeName).store.meta);
         }
         return txn.completed.then((_) {
-          ProviderStoresMeta meta = ProviderStoresMeta(metas);
+          var meta = ProviderStoresMeta(metas);
           return meta;
         });
-      });
-    }
-    return _storesMeta;
+    }();
   }
 
 //      Database db = e.database;
@@ -260,8 +257,8 @@ abstract class Provider {
     return ProviderTransactionList(this, storeNames, readWrite);
   }
 
-  Map toMap() {
-    Map map = {};
+  Map<String, dynamic> toMap() {
+    var map = <String, dynamic>{};
     if (_db != null) {
       map['db'] = _db._database.name;
     }

@@ -1,4 +1,4 @@
-@TestOn("vm")
+@TestOn('vm')
 import 'package:test/test.dart';
 
 import 'io_test_common.dart';

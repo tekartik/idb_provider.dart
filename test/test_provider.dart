@@ -7,11 +7,11 @@ import 'package:tekartik_idb_provider/provider.dart';
 int dbVersion = 1;
 String databaseName = 'tekartik_app.test.app_provider';
 
-String itemsStore = "items";
-String nameIndex = "name";
-String nameField = "name";
+String itemsStore = 'items';
+String nameIndex = 'name';
+String nameField = 'name';
 
-// String NAME_FIELD = "name";
+// String NAME_FIELD = 'name';
 
 class TestProvider extends Provider {
   TestProvider(IdbFactory idbFactory) {
@@ -43,7 +43,7 @@ class TestProvider extends Provider {
 
   Future<List<String>> getNames({int limit, int offset}) {
     var trans = ProviderStoreTransaction(this, itemsStore);
-    List<String> names = [];
+    var names = <String>[];
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
@@ -58,7 +58,7 @@ class TestProvider extends Provider {
   Future<List<String>> getOrderedNames({int limit, int offset}) {
     var trans = ProviderIndexTransaction(this, itemsStore, nameIndex);
 
-    List<String> names = [];
+    var names = <String>[];
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
@@ -76,7 +76,7 @@ class TestProvider extends Provider {
   Future<int> putName(String name) {
     var trans = ProviderStoreTransaction(this, itemsStore, true);
 
-    Map data = {};
+    var data = <String, dynamic>{};
     data[nameField] = name;
 
     return trans.add(data).then((key) {
