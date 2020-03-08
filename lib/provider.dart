@@ -160,18 +160,17 @@ abstract class Provider {
 
   Future<ProviderStoresMeta> get storesMeta {
     return _storesMeta ??= () {
+      var metas = <ProviderStoreMeta>[];
 
-        var metas = <ProviderStoreMeta>[];
-
-        var storeNames = db.storeNames.toList();
-        var txn = transactionList(storeNames);
-        for (var storeName in storeNames) {
-          metas.add(txn.store(storeName).store.meta);
-        }
-        return txn.completed.then((_) {
-          var meta = ProviderStoresMeta(metas);
-          return meta;
-        });
+      var storeNames = db.storeNames.toList();
+      var txn = transactionList(storeNames);
+      for (var storeName in storeNames) {
+        metas.add(txn.store(storeName).store.meta);
+      }
+      return txn.completed.then((_) {
+        var meta = ProviderStoresMeta(metas);
+        return meta;
+      });
     }();
   }
 
