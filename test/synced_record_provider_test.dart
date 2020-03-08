@@ -1,8 +1,8 @@
-import 'package:idb_shim/idb_client.dart';
 import 'package:dev_test/test.dart';
-import 'package:tekartik_idb_provider/record_provider.dart';
+import 'package:idb_shim/idb_client.dart';
 import 'package:tekartik_idb_provider/provider.dart';
-//import 'package:tekartik_core/dev_utils.dart';
+import 'package:tekartik_idb_provider/record_provider.dart';
+
 import 'test_common.dart';
 //IdbFactory idbFactory;
 
@@ -13,7 +13,6 @@ void main() {
 const String dbFieldName = 'name';
 
 abstract class DbBasicRecordMixin<T> {
-  T id;
   String name;
 
   void mixinFillFromDbEntry(Map entry) {
@@ -28,7 +27,9 @@ abstract class DbBasicRecordMixin<T> {
 }
 
 class DbAutoRecord extends DbSyncedRecordBase<int>
-    with DbBasicRecordMixin<int>, IntIdMixin {
+    with DbBasicRecordMixin<int> {
+  @override
+  int id;
   DbAutoRecord();
 
   /// create if null
@@ -55,7 +56,7 @@ class DbAutoRecord extends DbSyncedRecordBase<int>
 }
 
 class DbBasicRecord extends DbSyncedRecordBase<String>
-    with DbBasicRecordMixin<String>, StringIdMixin {
+    with DbBasicRecordMixin<String> {
   DbBasicRecord();
 
   /// create if null
@@ -79,6 +80,9 @@ class DbBasicRecord extends DbSyncedRecordBase<String>
     super.fillDbEntry(entry);
     mixinFillDbEntry(entry);
   }
+
+  @override
+  String id;
 }
 
 class DbBasicRecordProvider

@@ -76,14 +76,6 @@ abstract class DbRecord extends DbRecordBase {
   */
 }
 
-abstract class StringIdMixin {
-  String id;
-}
-
-abstract class IntIdMixin {
-  int id;
-}
-
 abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
   //String get kind;
 
@@ -137,7 +129,7 @@ abstract class DbSyncedRecordBase<T> extends DbRecordBase<T> {
   }
 }
 
-abstract class DbSyncedRecord extends DbSyncedRecordBase<int> with IntIdMixin {}
+abstract class DbSyncedRecord extends DbSyncedRecordBase<int> {}
 
 class DbRecordProviderPutEvent extends DbRecordProviderEvent {
   DbRecordBase record;

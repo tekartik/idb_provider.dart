@@ -72,8 +72,6 @@ class ProviderStoreTransaction<K, V>
   ProviderStoreTransaction(Provider provider, String storeName,
       [bool readWrite = false])
       : super(provider, storeName, readWrite);
-  // for creating from list
-  ProviderStoreTransaction._() : super._();
 
   ProviderStoreTransaction.fromList(
       ProviderTransactionList list, String storeName)

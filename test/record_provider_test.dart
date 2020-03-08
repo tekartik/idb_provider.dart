@@ -1,7 +1,8 @@
-import 'package:idb_shim/idb_client.dart';
 import 'package:dev_test/test.dart';
-import 'package:tekartik_idb_provider/record_provider.dart';
+import 'package:idb_shim/idb_client.dart';
 import 'package:tekartik_idb_provider/provider.dart';
+import 'package:tekartik_idb_provider/record_provider.dart';
+
 import 'test_common.dart';
 //IdbFactory idbFactory;
 
@@ -12,7 +13,6 @@ void main() {
 const String dbFieldName = 'name';
 
 abstract class DbBasicRecordMixin {
-  dynamic id;
   String name;
 
   void fillFromDbEntry(Map entry) {
@@ -27,6 +27,8 @@ abstract class DbBasicRecordMixin {
 }
 
 class DbBasicRecordBase extends DbRecordBase with DbBasicRecordMixin {
+  @override
+  dynamic id;
   DbBasicRecordBase();
 
   /// create if null
@@ -41,7 +43,8 @@ class DbBasicRecordBase extends DbRecordBase with DbBasicRecordMixin {
 }
 
 class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
-  //String id;
+  @override
+  dynamic id;
 
   DbBasicRecord();
 
