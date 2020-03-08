@@ -1,6 +1,7 @@
 library tekartik_provider_meta_test;
 
 import 'package:tekartik_idb_provider/provider.dart';
+
 import 'test_common.dart';
 
 void main() {
@@ -8,12 +9,12 @@ void main() {
 }
 
 void testMain(TestContext context) {
-  var idbFactory = context.factory;
+  final idbFactory = context.factory;
   group('meta', () {
     group('raw', () {
       test('index', () {
-        var indexMeta = ProviderIndexMeta('idx', 'my_key');
-        var indexMeta2 = ProviderIndexMeta('idx', 'my_key');
+        final indexMeta = ProviderIndexMeta('idx', 'my_key');
+        final indexMeta2 = ProviderIndexMeta('idx', 'my_key');
         expect(indexMeta, indexMeta2);
         expect(
             indexMeta,
@@ -61,8 +62,8 @@ void testMain(TestContext context) {
         var storeMeta2 =
             ProviderStoreMeta('str', keyPath: 'some', autoIncrement: true);
         expect(storeMeta, storeMeta2);
-        var indexMeta = ProviderIndexMeta('idx', 'my_key');
-        var indexMeta2 = ProviderIndexMeta('idx', 'my_key');
+        final indexMeta = ProviderIndexMeta('idx', 'my_key');
+        final indexMeta2 = ProviderIndexMeta('idx', 'my_key');
 
         storeMeta = ProviderStoreMeta('str',
             keyPath: 'some', autoIncrement: true, indecies: [indexMeta]);
@@ -79,8 +80,8 @@ void testMain(TestContext context) {
       });
 
       test('stores', () {
-        var storeMeta = ProviderStoreMeta('str');
-        var storeMeta2 = ProviderStoreMeta('str2');
+        final storeMeta = ProviderStoreMeta('str');
+        final storeMeta2 = ProviderStoreMeta('str2');
         var storesMeta = ProviderStoresMeta([]);
         var storesMeta2 = ProviderStoresMeta([]);
         expect(storesMeta, storesMeta2);
@@ -97,7 +98,7 @@ void testMain(TestContext context) {
     });
     group('provider', () {
       group('more', () {
-        var providerName = 'test';
+        final providerName = 'test';
 
         DynamicProvider provider;
         ProviderTransaction transaction;
@@ -133,7 +134,7 @@ void testMain(TestContext context) {
         });
 
         test('one_store round_cirle', () {
-          var meta = ProviderStoresMeta([
+          final meta = ProviderStoresMeta([
             //)
             ProviderStoreMeta('store')
           ]);
@@ -155,7 +156,7 @@ void testMain(TestContext context) {
         });
 
         test('one_index', () {
-          var meta = ProviderStoresMeta([
+          final meta = ProviderStoresMeta([
             //)
             ProviderStoreMeta('store', indecies: //
                     [ProviderIndexMeta('idx', 'my_key')] //

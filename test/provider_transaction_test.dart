@@ -11,14 +11,14 @@ void main() {
 }
 
 void testMain(TestContext context) {
-  var idbFactory = context.factory;
+  final idbFactory = context.factory;
   //devWarning;
   // TODO Add store transaction test
   group('transaction', () {
     //String providerName = 'test';
-    var storeName = 'store';
-    var indexName = 'index';
-    var indexKey = 'my_key';
+    final storeName = 'store';
+    final indexName = 'index';
+    final indexKey = 'my_key';
 
     DynamicProvider provider;
     ProviderTransaction transaction;
@@ -26,7 +26,7 @@ void testMain(TestContext context) {
     Future _setUp() {
       provider = DynamicProvider(idbFactory, ProviderDbMeta(context.dbName));
       return provider.delete().then((_) {
-        var indexMeta = ProviderIndexMeta(indexName, indexKey);
+        final indexMeta = ProviderIndexMeta(indexName, indexKey);
         provider.addStore(ProviderStoreMeta(storeName,
             indecies: [indexMeta], autoIncrement: true));
         return provider.ready;
@@ -40,14 +40,14 @@ void testMain(TestContext context) {
 
     test('store_cursor', () async {
       await _setUp();
-      var storeTxn = provider.storeTransaction(storeName, true);
+      final storeTxn = provider.storeTransaction(storeName, true);
       // put one with a key one without
       unawaited(storeTxn.put({'value': 'value1'}));
       unawaited(storeTxn.put({'value': 'value2'}));
       await storeTxn.completed;
 
-      var txn = provider.storeTransaction(storeName, false);
-      var data = <Map>[];
+      final txn = provider.storeTransaction(storeName, false);
+      final data = <Map>[];
       //List<String> keyData = [];
       txn.openCursor().listen((CursorWithValue cwv) {
         data.add(cwv.value as Map);
@@ -63,7 +63,7 @@ void testMain(TestContext context) {
 
     test('store_index', () async {
       await _setUp();
-      var storeTxn = provider.storeTransaction(storeName, true);
+      final storeTxn = provider.storeTransaction(storeName, true);
       // put one with a key one without
       unawaited(storeTxn.put({'value': 'value1'}));
       unawaited(storeTxn.put({'my_key': 2, 'value': 'value2'}));
@@ -71,9 +71,9 @@ void testMain(TestContext context) {
       unawaited(storeTxn.put({'my_key': 1, 'value': 'value4'}));
       await storeTxn.completed;
 
-      var txn = provider.indexTransaction(storeName, indexName);
-      var data = <Map>[];
-      var keyData = <int>[];
+      final txn = provider.indexTransaction(storeName, indexName);
+      final data = <Map>[];
+      final keyData = <int>[];
       txn.openCursor().listen((CursorWithValue cwv) {
         data.add(cwv.value as Map);
       });

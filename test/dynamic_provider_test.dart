@@ -1,6 +1,7 @@
 library tekartik_dynamic_provider_test;
 
 import 'package:tekartik_idb_provider/provider.dart';
+
 import 'test_common.dart';
 
 void main() {
@@ -8,13 +9,13 @@ void main() {
 }
 
 void testMain(TestContext context) {
-  var idbFactory = context.factory;
+  final idbFactory = context.factory;
   group('provider_dynamic', () {
     group('raw', () {
       //DynamicProvider provider;
 
       test('database', () {
-        var provider = DynamicProvider(idbFactory, ProviderDbMeta('test'));
+        final provider = DynamicProvider(idbFactory, ProviderDbMeta('test'));
 
         return provider
             .delete()
@@ -28,7 +29,8 @@ void testMain(TestContext context) {
       });
 
       test('database name version', () {
-        var provider = DynamicProvider(idbFactory, ProviderDbMeta('test2', 2));
+        final provider =
+            DynamicProvider(idbFactory, ProviderDbMeta('test2', 2));
 
         return provider
             .delete()
@@ -43,7 +45,7 @@ void testMain(TestContext context) {
     });
   });
   group('more', () {
-    var providerName = 'test';
+    final providerName = 'test';
 
     DynamicProvider provider;
     ProviderTransaction transaction;
@@ -63,7 +65,7 @@ void testMain(TestContext context) {
     test('one_store', () {
       provider.addStore(ProviderStoreMeta('store'));
       return provider.ready.then((Provider readyProvider) {
-        var txn = provider.storeTransaction('store');
+        final txn = provider.storeTransaction('store');
         expect(txn.store.meta.name, 'store');
         expect(txn.store.meta.keyPath, null);
         expect(txn.store.meta.autoIncrement, false);
@@ -80,7 +82,7 @@ void testMain(TestContext context) {
           ProviderStoreMeta('store', keyPath: 'key', autoIncrement: true));
       provider.addStore(ProviderStoreMeta('store2'));
       return provider.ready.then((Provider readyProvider) {
-        var txn = provider.transactionList(['store', 'store2']);
+        final txn = provider.transactionList(['store', 'store2']);
         ProviderStoreTransactionMixin txn1 = txn.store('store');
         expect(txn1.store.meta.name, 'store');
         expect(txn1.store.meta.keyPath, 'key');
@@ -101,10 +103,10 @@ void testMain(TestContext context) {
     });
 
     test('one_index', () {
-      var indexMeta = ProviderIndexMeta('idx', 'my_key');
+      final indexMeta = ProviderIndexMeta('idx', 'my_key');
       provider.addStore(ProviderStoreMeta('store', indecies: [indexMeta]));
       return provider.ready.then((Provider readyProvider) {
-        var txn = provider.storeTransaction('store');
+        final txn = provider.storeTransaction('store');
         expect(txn.store.meta.name, 'store');
         expect(txn.store.meta.keyPath, null);
         expect(txn.store.meta.autoIncrement, false);

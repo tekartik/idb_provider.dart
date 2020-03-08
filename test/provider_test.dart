@@ -13,11 +13,11 @@ void main() {
 }
 
 void testMain(TestContext context) {
-  var idbFactory = context.factory;
+  final idbFactory = context.factory;
 
   group('provider', () {
     group('row', () {
-      var providerName = 'test';
+      final providerName = 'test';
 
       DynamicProvider provider;
       ProviderTransaction transaction;
@@ -34,18 +34,18 @@ void testMain(TestContext context) {
       test('int_map', () {
         provider.addStore(ProviderStoreMeta('store', autoIncrement: true));
         return provider.ready.then((Provider readyProvider) {
-          var txn = provider.storeTransaction('store', true);
+          final txn = provider.storeTransaction('store', true);
           // for cleanup
           transaction = txn;
 
           return txn.put({'test': 1}).then((key) {
             return txn.get(key).then((value) {
-              var row =
+              final row =
                   intMapProviderRawFactory.newRow(key as int, value as Map);
 
               // Cursor
               txn.openCursor().listen((cwv) {
-                var cursorRow =
+                final cursorRow =
                     intMapProviderRawFactory.cursorWithValueRow(cwv);
                 expect(cursorRow, row);
               });
@@ -58,11 +58,11 @@ void testMain(TestContext context) {
   group('test_provider_open', () {
     test('open', () async {
       // open normal
-      var provider = TestProvider(idbFactory);
-      var provider2 = TestProvider(idbFactory);
+      final provider = TestProvider(idbFactory);
+      final provider2 = TestProvider(idbFactory);
       await provider.delete().then((_) {
         expect(provider.isReady, isFalse);
-        var done = provider.ready.then((readyProvider) {
+        final done = provider.ready.then((readyProvider) {
           expect(readyProvider, provider);
         });
         // not ready yet when opening the db
@@ -73,7 +73,7 @@ void testMain(TestContext context) {
         expect(provider2.isReady, isFalse);
         provider2.db = provider.db;
         expect(provider2.isReady, isTrue);
-        var done = provider2.ready.then((readyProvider2) {
+        final done = provider2.ready.then((readyProvider2) {
           expect(readyProvider2, provider2);
         });
         return done;
@@ -83,7 +83,7 @@ void testMain(TestContext context) {
     });
   });
   group('test_provider', () {
-    var provider = TestProvider(idbFactory);
+    final provider = TestProvider(idbFactory);
     setUp(() {
       return provider.delete().then((_) {
         return provider.ready.then((_) {
@@ -98,7 +98,7 @@ void testMain(TestContext context) {
       //print(provider);
       expect(provider.toString(), startsWith('{'));
 
-      var anotherProvider = TestProvider(idbFactory);
+      final anotherProvider = TestProvider(idbFactory);
       expect(anotherProvider.toString(), '{}');
       //print(anotherProvider);
     });
@@ -134,7 +134,7 @@ void testMain(TestContext context) {
     });
 
     Future<int> slowCount() {
-      var trans = ProviderStoreTransaction(provider, itemsStore);
+      final trans = ProviderStoreTransaction(provider, itemsStore);
       var count = 0;
       return trans.store.objectStore
           .openCursor(
@@ -156,9 +156,9 @@ void testMain(TestContext context) {
       });
     });
     test('getNames', () {
-      var c1 = 'C1';
-      var a2 = 'A2';
-      var b3 = 'B3';
+      final c1 = 'C1';
+      final a2 = 'A2';
+      final b3 = 'B3';
       /*
       int c1;
       int a2;

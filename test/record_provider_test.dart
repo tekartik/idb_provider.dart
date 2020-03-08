@@ -1,8 +1,7 @@
-import 'package:dev_test/test.dart';
 import 'package:idb_shim/idb_client.dart';
-import 'package:tekartik_idb_provider/provider.dart';
+import 'package:dev_test/test.dart';
 import 'package:tekartik_idb_provider/record_provider.dart';
-
+import 'package:tekartik_idb_provider/provider.dart';
 import 'test_common.dart';
 //IdbFactory idbFactory;
 
@@ -13,7 +12,7 @@ void main() {
 const String dbFieldName = 'name';
 
 abstract class DbBasicRecordMixin {
-  //String id;
+  dynamic id;
   String name;
 
   void fillFromDbEntry(Map entry) {
@@ -28,8 +27,6 @@ abstract class DbBasicRecordMixin {
 }
 
 class DbBasicRecordBase extends DbRecordBase with DbBasicRecordMixin {
-  @override
-  dynamic id;
   DbBasicRecordBase();
 
   /// create if null
@@ -37,15 +34,14 @@ class DbBasicRecordBase extends DbRecordBase with DbBasicRecordMixin {
     if (entry == null) {
       return null;
     }
-    var record = DbBasicRecordBase();
+    final record = DbBasicRecordBase();
     record.fillFromDbEntry(entry);
     return record;
   }
 }
 
 class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
-  @override
-  dynamic id;
+  //String id;
 
   DbBasicRecord();
 
@@ -54,7 +50,7 @@ class DbBasicRecord extends DbRecord with DbBasicRecordMixin {
     if (entry == null) {
       return null;
     }
-    var record = DbBasicRecord()..id = id;
+    final record = DbBasicRecord()..id = id;
     record.fillFromDbEntry(entry);
     return record;
   }
@@ -132,9 +128,9 @@ class DbBasicAppProvider extends DynamicProvider
       // default erase everything, we don't care we sync
       db.deleteStore(basicStore);
 
-      var nameIndexMeta = ProviderIndexMeta(dbFieldName, dbFieldName);
+      final nameIndexMeta = ProviderIndexMeta(dbFieldName, dbFieldName);
 
-      var basicStoreMeta = ProviderStoreMeta(basicStore,
+      final basicStoreMeta = ProviderStoreMeta(basicStore,
           autoIncrement: true, indecies: [nameIndexMeta]);
 
       // ProviderIndex fileIndex = entriesStore.createIndex(indexMeta);
@@ -155,12 +151,12 @@ class DbBasicAppProvider extends DynamicProvider
 }
 
 void testMain(TestContext context) {
-  var idbFactory = context.factory;
+  final idbFactory = context.factory;
   group('record_provider', () {
     group('DbRecordBase', () {
       test('equality', () {
-        var record1 = DbBasicRecordBase();
-        var record2 = DbBasicRecordBase();
+        final record1 = DbBasicRecordBase();
+        final record2 = DbBasicRecordBase();
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
 
@@ -178,7 +174,7 @@ void testMain(TestContext context) {
 
     group('DbRecord', () {
       test('toString', () {
-        var record1 = DbBasicRecord();
+        final record1 = DbBasicRecord();
 
         expect(record1.toString(), '{}');
         record1.id = 'key1';
@@ -187,8 +183,8 @@ void testMain(TestContext context) {
         expect(record1.toString(), '{name: test, _id: key1}');
       });
       test('equality', () {
-        var record1 = DbBasicRecord();
-        var record2 = DbBasicRecord();
+        final record1 = DbBasicRecord();
+        final record2 = DbBasicRecord();
         expect(record1.hashCode, record2.hashCode);
         expect(record1, record2);
 
@@ -227,20 +223,20 @@ void testMain(TestContext context) {
       });
 
       test('open', () async {
-        var appProvider = DbBasicAppProvider(idbFactory, context.dbName);
+        final appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
-        var readTxn = appProvider.basic.readTransaction;
+        final readTxn = appProvider.basic.readTransaction;
         dynamic txn = readTxn;
         expect(await appProvider.basic.txnGet(readTxn, '_1'), isNull);
         await readTxn.completed;
 
-        var record = DbBasicRecord();
+        final record = DbBasicRecord();
         record.name = 'test';
         record.id = '_1';
 
-        var writeTxn = appProvider.basic.writeTransaction;
+        final writeTxn = appProvider.basic.writeTransaction;
         txn = writeTxn;
 
         var key = (await txn.putRecord(record)).id;
@@ -255,7 +251,7 @@ void testMain(TestContext context) {
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          var record = DbBasicRecord.fromDbEntry(
+          final record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String);
           expect(record.id, '_1');
         }).asFuture();
@@ -296,14 +292,14 @@ void testMain(TestContext context) {
       });
 
       test('write', () async {
-        var appProvider = DbBasicAppProvider(idbFactory, context.dbName);
+        final appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
 
-        var writeTxn = appProvider.basic.writeTransaction;
+        final writeTxn = appProvider.basic.writeTransaction;
         DbRecordProviderTransaction txn = writeTxn;
 
-        var record = DbBasicRecord();
+        final record = DbBasicRecord();
         record.name = 'test';
         record.id = '_1';
 
@@ -317,7 +313,7 @@ void testMain(TestContext context) {
         txn = appProvider.basic.storeReadTransaction;
         var stream = txn.openCursor(limit: 1);
         await stream.listen((CursorWithValue cwv) {
-          var record = DbBasicRecord.fromDbEntry(
+          final record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String);
           expect(record.id, '_1');
         }).asFuture();
@@ -347,14 +343,13 @@ void testMain(TestContext context) {
       });
 
       test('index', () async {
-        var appProvider = DbBasicAppProvider(idbFactory, context.dbName);
+        final appProvider = DbBasicAppProvider(idbFactory, context.dbName);
         await appProvider.delete();
         await appProvider.ready;
-
-        var writeTxn = appProvider.basic.writeTransaction;
+        final writeTxn = appProvider.basic.writeTransaction;
         DbRecordProviderTransaction txn = writeTxn;
 
-        var record = DbBasicRecord();
+        final record = DbBasicRecord();
         record.name = 'test';
         record.id = '_1';
 

@@ -43,7 +43,7 @@ class TestProvider extends Provider {
 
   Future<List<String>> getNames({int limit, int offset}) {
     var trans = ProviderStoreTransaction(this, itemsStore);
-    var names = <String>[];
+    final names = <String>[];
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
@@ -58,7 +58,7 @@ class TestProvider extends Provider {
   Future<List<String>> getOrderedNames({int limit, int offset}) {
     var trans = ProviderIndexTransaction(this, itemsStore, nameIndex);
 
-    var names = <String>[];
+    final names = <String>[];
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
@@ -76,7 +76,7 @@ class TestProvider extends Provider {
   Future<int> putName(String name) {
     var trans = ProviderStoreTransaction(this, itemsStore, true);
 
-    var data = <String, dynamic>{};
+    final data = {};
     data[nameField] = name;
 
     return trans.add(data).then((key) {

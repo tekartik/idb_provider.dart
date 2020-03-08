@@ -32,7 +32,7 @@ class DynamicProvider extends Provider {
 
   // to call before ready
   void addStores(ProviderStoresMeta storesMeta) {
-    for (var storeMeta in storesMeta.stores) {
+    for (final storeMeta in storesMeta.stores) {
       addStore(storeMeta);
     }
   }
@@ -133,10 +133,10 @@ abstract class Provider {
 
   // delete content
   Future clear() {
-    var storeNames = db.database.objectStoreNames.toList(growable: false);
+    final storeNames = db.database.objectStoreNames.toList(growable: false);
     var globalTrans = ProviderTransactionList(this, storeNames, true);
-    var futures = <Future>[];
-    for (var storeName in storeNames) {
+    final futures = <Future>[];
+    for (final storeName in storeNames) {
       var trans = globalTrans.store(storeName);
       futures.add(trans.clear());
     }
@@ -159,19 +159,21 @@ abstract class Provider {
   Future<ProviderStoresMeta> _storesMeta;
 
   Future<ProviderStoresMeta> get storesMeta {
-    return _storesMeta ??= () {
-      var metas = <ProviderStoreMeta>[];
+    _storesMeta ??= Future.sync(() {
+      final metas = <ProviderStoreMeta>[];
 
       var storeNames = db.storeNames.toList();
-      var txn = transactionList(storeNames);
-      for (var storeName in storeNames) {
+      final txn = transactionList(storeNames);
+      for (final storeName in storeNames) {
         metas.add(txn.store(storeName).store.meta);
       }
       return txn.completed.then((_) {
-        var meta = ProviderStoresMeta(metas);
+        final meta = ProviderStoresMeta(metas);
         return meta;
       });
-    }();
+    });
+
+    return _storesMeta;
   }
 
 //      Database db = e.database;
@@ -256,8 +258,8 @@ abstract class Provider {
     return ProviderTransactionList(this, storeNames, readWrite);
   }
 
-  Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{};
+  Map toMap() {
+    final map = {};
     if (_db != null) {
       map['db'] = _db._database.name;
     }
