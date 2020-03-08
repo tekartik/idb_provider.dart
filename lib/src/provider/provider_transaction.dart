@@ -5,11 +5,13 @@ class ProviderIndexTransaction<K, V> extends Object
   Future get completed => _store.completed;
 
   ProviderStoreTransaction<K, V> _store;
+
   ProviderStoreTransaction<K, V> get store => _store;
 
   ProviderIndexTransaction.fromStoreTransaction(this._store, String indexName) {
     _index = _store.store.index(indexName);
   }
+
   //ProviderIndex get index => _index;
   //ProviderStore get store => this;
   //ProviderStore get store => super._store;
@@ -24,6 +26,7 @@ class ProviderIndexTransaction<K, V> extends Object
   }
 
   ProviderIndex _index;
+
   ProviderIndexTransaction(
       Provider provider, String storeName, String indexName,
       [bool readWrite = false]) //
@@ -72,8 +75,6 @@ class ProviderStoreTransaction<K, V>
   ProviderStoreTransaction(Provider provider, String storeName,
       [bool readWrite = false])
       : super(provider, storeName, readWrite);
-  // for creating from list
-  ProviderStoreTransaction._() : super._();
 
   ProviderStoreTransaction.fromList(
       ProviderTransactionList list, String storeName)
@@ -104,7 +105,9 @@ abstract class ProviderWritableSourceTransactionMixin<K, V> {
 
 abstract class ProviderSourceTransactionMixin<K, V> {
   Future<V> get(K key);
+
   Future<int> count();
+
   Stream<CursorWithValue> openRawCursor({String direction});
 
   Stream<T> _limitOffsetStream<T extends Cursor>(Stream<T> rawStream,
@@ -147,7 +150,9 @@ abstract class ProviderSourceTransactionMixin<K, V> {
 
 abstract class ProviderWritableSourceTransaction<K, V> {
   Future<K> add(V value, [K key]);
+
   Future<K> put(V value, [K key]);
+
   Future<V> get(K key);
 }
 
@@ -230,6 +235,7 @@ class ProviderTransactionList extends ProviderTransaction {
     _transaction =
         provider.db._database.transactionList(storeNames.toList(), _mode);
   }
+
   ProviderStoreTransaction store(String storeName) {
     return ProviderStoreTransaction.fromList(this, storeName);
   }
@@ -244,7 +250,9 @@ class ProviderTransaction {
   String _mode;
 
   bool get readWrite => _mode == idbModeReadWrite;
+
   bool get readOnly => _mode == idbModeReadOnly;
+
   Future get completed => _transaction.completed;
 
 //
