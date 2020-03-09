@@ -2,7 +2,7 @@ name: tekartik_idb_provider
 version: 0.3.0
 description: Provider pattern on top of indexeddb
 environment:
-  sdk: '>=2.1.0-dev <3.0.0'
+  sdk: '>=2.7.0-dev <3.0.0'
 dependencies:
   tekartik_common_utils:
     git:
