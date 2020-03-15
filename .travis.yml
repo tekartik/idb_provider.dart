@@ -3,7 +3,6 @@ sudo: required
 dist: trusty
 dart:
   - stable
-  - 2.7.1
   - dev
 before_script:
   - source $(pub run chrome_travis:env_rc)
