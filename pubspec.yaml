@@ -1,8 +1,9 @@
 name: tekartik_idb_provider
 version: 0.3.0
 description: Provider pattern on top of indexeddb
+publish_to: none
 environment:
-  sdk: '>=2.7.0-dev <3.0.0'
+  sdk: '>=2.10.0-0 <3.0.0'
 dependencies:
   tekartik_common_utils:
     git:
@@ -13,10 +14,10 @@ dependencies:
 dev_dependencies:
   process_run: '>=0.10.1'
   test: any
-  dev_test: any
+  dev_test: '>=0.13.4'
   build_runner: '>=0.9.0'
   build_test: '>=0.10.2'
-  build_web_compilers: '>=0.4.0'
+  build_web_compilers: '>2.0.0'
   chrome_travis:
     git:
       url: git://github.com/tekartik/chrome_travis.dart

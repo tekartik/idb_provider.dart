@@ -222,7 +222,7 @@ abstract class Provider {
 
       _ready = _readyCompleter.future;
 
-      runZoned(() {
+      runZonedGuarded(() {
         return _idbFactory
             .open(_databaseMeta.name,
                 version: _databaseMeta.version,
@@ -231,7 +231,7 @@ abstract class Provider {
           _setDatabase(db);
           _readyCompleter.complete(this);
         });
-      }, onError: (e, StackTrace st) {
+      }, (e, StackTrace st) {
         print('open failed');
         print(e);
         print(st);
