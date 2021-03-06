@@ -11,7 +11,7 @@ abstract class _BaseRow<K, V> {
   int get hashCode => safeHashCode(key);
 
   @override
-  String toString() => '${key} ${value}';
+  String toString() => '$key: $value';
 
   @override
   bool operator ==(other) {
