@@ -30,7 +30,7 @@ class ProviderDbMeta {
   }
 
   @override
-  String toString() => '${name}(${version})';
+  String toString() => '$name($version)';
 }
 
 class ProviderDb {
@@ -80,7 +80,7 @@ class ProviderDb {
   IdbFactory get factory => _database.factory;
 
   @override
-  String toString() => '${_database}';
+  String toString() => '$_database';
 }
 
 class StoreRow<K, V> {}
@@ -104,7 +104,7 @@ class ProviderStoresMeta {
   }
 
   @override
-  String toString() => '${stores}';
+  String toString() => '$stores';
 }
 
 class ProviderStoreMeta {
@@ -155,7 +155,7 @@ class ProviderStoreMeta {
 
   @override
   String toString() =>
-      '${name}(${keyPath}${autoIncrement ? ' auto' : ''}) ${indecies}';
+      '$name($keyPath${autoIncrement ? ' auto' : ''}) $indecies';
 }
 
 class ProviderStore {
@@ -245,7 +245,7 @@ class ProviderIndexMeta {
 
   @override
   String toString() =>
-      '${name} ${keyPath}${unique ? 'unique' : ''}${multiEntry ? 'multi' : ''}';
+      '$name $keyPath${unique ? 'unique' : ''}${multiEntry ? 'multi' : ''}';
 }
 
 class ProviderIndex {
