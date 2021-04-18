@@ -14,13 +14,13 @@ export 'package:idb_shim/idb_client_memory.dart';
 export 'package:idb_shim/src/common/common_meta.dart';
 
 class TestContext {
-  IdbFactory factory;
+  late IdbFactory factory;
 
   String get dbName => testDescriptions.join('-') + '.db';
 }
 
 class SembastTestContext extends TestContext {
-  sdb.DatabaseFactory sdbFactory;
+  late sdb.DatabaseFactory sdbFactory;
 
   @override
   IdbFactorySembast get factory => super.factory as IdbFactorySembast;

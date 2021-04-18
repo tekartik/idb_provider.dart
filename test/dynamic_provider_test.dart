@@ -19,11 +19,11 @@ void testMain(TestContext context) {
 
         return provider
             .delete()
-            .then((_) => provider.ready.then((Provider readyProvider) {
+            .then((_) => provider.ready!.then((Provider readyProvider) {
                   expect(provider, readyProvider);
-                  expect(provider.db.meta.name, 'test');
-                  expect(provider.db.meta.version, 1);
-                  expect(provider.db.storeNames, []);
+                  expect(provider.db!.meta!.name, 'test');
+                  expect(provider.db!.meta!.version, 1);
+                  expect(provider.db!.storeNames, []);
                   provider.close();
                 }));
       });
@@ -34,11 +34,11 @@ void testMain(TestContext context) {
 
         return provider
             .delete()
-            .then((_) => provider.ready.then((Provider readyProvider) {
+            .then((_) => provider.ready!.then((Provider readyProvider) {
                   expect(provider, readyProvider);
-                  expect(provider.db.meta.name, 'test2');
-                  expect(provider.db.meta.version, 2);
-                  expect(provider.db.storeNames, []);
+                  expect(provider.db!.meta!.name, 'test2');
+                  expect(provider.db!.meta!.version, 2);
+                  expect(provider.db!.storeNames, []);
                   provider.close();
                 }));
       });
@@ -47,8 +47,8 @@ void testMain(TestContext context) {
   group('more', () {
     final providerName = 'test';
 
-    DynamicProvider provider;
-    ProviderTransaction transaction;
+    late DynamicProvider provider;
+    ProviderTransaction? transaction;
 
     setUp(() {
       transaction = null;
@@ -57,20 +57,20 @@ void testMain(TestContext context) {
     });
     tearDown(() async {
       if (transaction != null) {
-        await transaction.completed;
+        await transaction!.completed;
       }
       provider.close();
     });
 
     test('one_store', () {
       provider.addStore(ProviderStoreMeta('store'));
-      return provider.ready.then((Provider readyProvider) {
+      return provider.ready!.then((Provider readyProvider) {
         final txn = provider.storeTransaction('store');
-        expect(txn.store.meta.name, 'store');
-        expect(txn.store.meta.keyPath, null);
-        expect(txn.store.meta.autoIncrement, false);
+        expect(txn.store!.meta!.name, 'store');
+        expect(txn.store!.meta!.keyPath, null);
+        expect(txn.store!.meta!.autoIncrement, false);
 
-        expect(txn.store.meta.indecies, isEmpty);
+        expect(txn.store!.meta!.indecies, isEmpty);
 
         // for cleanup
         transaction = txn;
@@ -81,21 +81,21 @@ void testMain(TestContext context) {
       provider.addStore(
           ProviderStoreMeta('store', keyPath: 'key', autoIncrement: true));
       provider.addStore(ProviderStoreMeta('store2'));
-      return provider.ready.then((Provider readyProvider) {
+      return provider.ready!.then((Provider readyProvider) {
         final txn = provider.transactionList(['store', 'store2']);
         ProviderStoreTransactionMixin txn1 = txn.store('store');
-        expect(txn1.store.meta.name, 'store');
-        expect(txn1.store.meta.keyPath, 'key');
-        expect(txn1.store.meta.autoIncrement, true);
+        expect(txn1.store!.meta!.name, 'store');
+        expect(txn1.store!.meta!.keyPath, 'key');
+        expect(txn1.store!.meta!.autoIncrement, true);
 
-        expect(txn1.store.meta.indecies, isEmpty);
+        expect(txn1.store!.meta!.indecies, isEmpty);
 
         ProviderStoreTransactionMixin txn2 = txn.store('store2');
-        expect(txn2.store.meta.name, 'store2');
-        expect(txn2.store.meta.keyPath, null);
-        expect(txn2.store.meta.autoIncrement, false);
+        expect(txn2.store!.meta!.name, 'store2');
+        expect(txn2.store!.meta!.keyPath, null);
+        expect(txn2.store!.meta!.autoIncrement, false);
 
-        expect(txn2.store.meta.indecies, isEmpty);
+        expect(txn2.store!.meta!.indecies, isEmpty);
 
 // for cleanup
         transaction = txn;
@@ -105,13 +105,13 @@ void testMain(TestContext context) {
     test('one_index', () {
       final indexMeta = ProviderIndexMeta('idx', 'my_key');
       provider.addStore(ProviderStoreMeta('store', indecies: [indexMeta]));
-      return provider.ready.then((Provider readyProvider) {
+      return provider.ready!.then((Provider readyProvider) {
         final txn = provider.storeTransaction('store');
-        expect(txn.store.meta.name, 'store');
-        expect(txn.store.meta.keyPath, null);
-        expect(txn.store.meta.autoIncrement, false);
+        expect(txn.store!.meta!.name, 'store');
+        expect(txn.store!.meta!.keyPath, null);
+        expect(txn.store!.meta!.autoIncrement, false);
 
-        expect(txn.store.meta.indecies, [indexMeta]);
+        expect(txn.store!.meta!.indecies, [indexMeta]);
 
         // for cleanup
         transaction = txn;

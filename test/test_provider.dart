@@ -14,7 +14,7 @@ String nameField = 'name';
 // String NAME_FIELD = 'name';
 
 class TestProvider extends Provider {
-  TestProvider(IdbFactory idbFactory) {
+  TestProvider(IdbFactory? idbFactory) {
     init(idbFactory, databaseName, dbVersion);
   }
   @override
@@ -23,13 +23,13 @@ class TestProvider extends Provider {
       // delete stuff
     }
     var objectStore =
-        database.createObjectStore(itemsStore, autoIncrement: true);
+        database!.createObjectStore(itemsStore, autoIncrement: true);
     objectStore.createIndex(nameIndex, nameField, unique: false);
   }
 
   @override
   Future delete() {
-    return idbFactory.deleteDatabase(databaseName);
+    return idbFactory!.deleteDatabase(databaseName);
   }
 
   Future count() {
@@ -41,13 +41,13 @@ class TestProvider extends Provider {
     });
   }
 
-  Future<List<String>> getNames({int limit, int offset}) {
+  Future<List<String?>> getNames({int? limit, int? offset}) {
     var trans = ProviderStoreTransaction(this, itemsStore);
-    final names = <String>[];
+    final names = <String?>[];
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
-          names.add((cwv.value as Map)[nameField] as String);
+          names.add((cwv.value as Map)[nameField] as String?);
         })
         .asFuture()
         .then((_) {
@@ -55,14 +55,14 @@ class TestProvider extends Provider {
         });
   }
 
-  Future<List<String>> getOrderedNames({int limit, int offset}) {
+  Future<List<String?>> getOrderedNames({int? limit, int? offset}) {
     var trans = ProviderIndexTransaction(this, itemsStore, nameIndex);
 
-    final names = <String>[];
+    final names = <String?>[];
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
-          names.add((cwv.value as Map)[nameField] as String);
+          names.add((cwv.value as Map)[nameField] as String?);
         })
         .asFuture()
         .then((_) {
@@ -87,7 +87,7 @@ class TestProvider extends Provider {
   }
 
   // null if not found
-  Future<String> getName(int key) {
+  Future<String?> getName(int key) {
     var trans = ProviderStoreTransaction(this, itemsStore);
 
     return trans.get(key).then((var data) {
@@ -102,7 +102,7 @@ class TestProvider extends Provider {
 
   Future<int> get(int key) {
     var trans = ProviderStoreTransaction(this, itemsStore);
-    return trans.store.get(key).then((var key) {
+    return trans.store!.get(key).then((var key) {
       return trans.completed.then((_) {
         return key as int;
       });

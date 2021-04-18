@@ -1,8 +1,8 @@
 part of tekartik_provider;
 
 abstract class _BaseRow<K, V> {
-  K key;
-  V value;
+  K? key;
+  V? value;
 
   _BaseRow();
   _BaseRow.from(this.key, this.value);
@@ -14,8 +14,8 @@ abstract class _BaseRow<K, V> {
   String toString() => '$key: $value';
 
   @override
-  bool operator ==(other) {
-    if (other.runtimeType == runtimeType) {
+  bool operator ==(Object other) {
+    if (other is _BaseRow && other.runtimeType == runtimeType) {
       return (key == other.key) && (value == other.value);
     }
     return false;
@@ -24,7 +24,7 @@ abstract class _BaseRow<K, V> {
 
 abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
   @override
-  Map get value => super.value;
+  Map? get value => super.value;
 
   _BaseMapRow.from(K key, Map map) : super.from(key, map);
 
@@ -38,7 +38,7 @@ abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
     return false;
   }
 
-  dynamic operator [](String key) => value[key];
+  dynamic operator [](String key) => value![key];
 }
 
 class StringMapRow extends _BaseMapRow<String> {

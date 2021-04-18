@@ -100,8 +100,8 @@ void testMain(TestContext context) {
       group('more', () {
         final providerName = 'test';
 
-        DynamicProvider provider;
-        ProviderTransaction transaction;
+        late DynamicProvider provider;
+        ProviderTransaction? transaction;
 
         setUp(() {
           provider = DynamicProvider(idbFactory, ProviderDbMeta(providerName));
@@ -116,8 +116,8 @@ void testMain(TestContext context) {
 
         Future _roundCircle(ProviderStoresMeta storesMeta) {
           provider.addStores(storesMeta);
-          return provider.ready.then((Provider readyProvider) {
-            return provider.storesMeta.then((metas) {
+          return provider.ready!.then((Provider readyProvider) {
+            return provider.storesMeta!.then((metas) {
               expect(metas, storesMeta);
               expect(metas, isNot(same(storesMeta)));
             });
@@ -126,8 +126,8 @@ void testMain(TestContext context) {
 
         test('one_store', () {
           provider.addStore(ProviderStoreMeta('store'));
-          return provider.ready.then((Provider readyProvider) {
-            return provider.storesMeta.then((metas) {
+          return provider.ready!.then((Provider readyProvider) {
+            return provider.storesMeta!.then((metas) {
               expect(metas, ProviderStoresMeta([ProviderStoreMeta('store')]));
             });
           });
@@ -143,8 +143,8 @@ void testMain(TestContext context) {
         test('two_stores', () {
           provider.addStore(ProviderStoreMeta('store'));
           provider.addStore(ProviderStoreMeta('store1'));
-          return provider.ready.then((Provider readyProvider) {
-            return provider.storesMeta.then((metas) {
+          return provider.ready!.then((Provider readyProvider) {
+            return provider.storesMeta!.then((metas) {
               expect(
                   metas,
                   ProviderStoresMeta([
