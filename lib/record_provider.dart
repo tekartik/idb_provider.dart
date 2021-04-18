@@ -136,7 +136,7 @@ class DbRecordProviderPutEvent extends DbRecordProviderEvent {
 }
 
 class DbRecordProviderDeleteEvent extends DbRecordProviderEvent {
-  var key;
+  dynamic key;
 }
 
 // not tested

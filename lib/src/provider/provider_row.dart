@@ -14,8 +14,8 @@ abstract class _BaseRow<K, V> {
   String toString() => '$key: $value';
 
   @override
-  bool operator ==(other) {
-    if (other.runtimeType == runtimeType) {
+  bool operator ==(Object other) {
+    if (other is _BaseRow && other.runtimeType == runtimeType) {
       return (key == other.key) && (value == other.value);
     }
     return false;
