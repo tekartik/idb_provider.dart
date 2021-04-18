@@ -19,8 +19,8 @@ void testMain(TestContext context) {
     group('row', () {
       final providerName = 'test';
 
-      DynamicProvider provider;
-      ProviderTransaction transaction;
+      late DynamicProvider provider;
+      ProviderTransaction? transaction;
 
       setUp(() {
         provider = DynamicProvider(idbFactory, ProviderDbMeta(providerName));
@@ -33,7 +33,7 @@ void testMain(TestContext context) {
 
       test('int_map', () {
         provider.addStore(ProviderStoreMeta('store', autoIncrement: true));
-        return provider.ready.then((Provider readyProvider) {
+        return provider.ready!.then((Provider readyProvider) {
           final txn = provider.storeTransaction('store', true);
           // for cleanup
           transaction = txn;
@@ -62,7 +62,7 @@ void testMain(TestContext context) {
       final provider2 = TestProvider(idbFactory);
       await provider.delete().then((_) {
         expect(provider.isReady, isFalse);
-        final done = provider.ready.then((readyProvider) {
+        final done = provider.ready!.then((readyProvider) {
           expect(readyProvider, provider);
         });
         // not ready yet when opening the db
@@ -73,7 +73,7 @@ void testMain(TestContext context) {
         expect(provider2.isReady, isFalse);
         provider2.db = provider.db;
         expect(provider2.isReady, isTrue);
-        final done = provider2.ready.then((readyProvider2) {
+        final done = provider2.ready!.then((readyProvider2) {
           expect(readyProvider2, provider2);
         });
         return done;
@@ -86,7 +86,7 @@ void testMain(TestContext context) {
     final provider = TestProvider(idbFactory);
     setUp(() {
       return provider.delete().then((_) {
-        return provider.ready.then((_) {
+        return provider.ready!.then((_) {
           //print(provider.db);
         });
       });
@@ -111,7 +111,7 @@ void testMain(TestContext context) {
     test('put/get', () {
       return provider.putName('test').then((int key) {
         expect(key, 1);
-        return provider.getName(key).then((String name) {
+        return provider.getName(key).then((String? name) {
           expect(name, 'test');
         });
       });
@@ -122,7 +122,7 @@ void testMain(TestContext context) {
         expect(data, isNull);
         return provider.putName('test').then((int key) {
           expect(key, 1);
-          return provider.getName(key).then((String name) {
+          return provider.getName(key).then((String? name) {
             expect(name, 'test');
           });
         }).then((_) {
@@ -136,7 +136,7 @@ void testMain(TestContext context) {
     Future<int> slowCount() {
       final trans = ProviderStoreTransaction(provider, itemsStore);
       var count = 0;
-      return trans.store.objectStore
+      return trans.store!.objectStore
           .openCursor(
               //
               direction: idbDirectionNext,
@@ -205,7 +205,7 @@ void testMain(TestContext context) {
       return provider.putName('test').then((int key) {
         expect(key, 1);
         return provider.clear().then((_) {
-          return provider.getName(key).then((String name) {
+          return provider.getName(key).then((String? name) {
             expect(name, isNull);
           });
         });

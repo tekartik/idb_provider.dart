@@ -20,8 +20,8 @@ void testMain(TestContext context) {
     final indexName = 'index';
     final indexKey = 'my_key';
 
-    DynamicProvider provider;
-    ProviderTransaction transaction;
+    late DynamicProvider provider;
+    ProviderTransaction? transaction;
 
     Future _setUp() {
       provider = DynamicProvider(idbFactory, ProviderDbMeta(context.dbName));

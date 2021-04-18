@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:idb_shim/idb_client.dart';
+import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_common_utils/hash_code_utils.dart';
 
 part 'package:tekartik_idb_provider/src/provider/provider_meta.dart';
@@ -13,20 +14,20 @@ part 'package:tekartik_idb_provider/src/provider/provider_row.dart';
 part 'package:tekartik_idb_provider/src/provider/provider_transaction.dart';
 
 class DynamicProvider extends Provider {
-  final List<ProviderStoreMeta> _storeMetas = [];
+  final List<ProviderStoreMeta?> _storeMetas = [];
 
   @override
   void onUpdateDatabase(VersionChangeEvent e) {
     for (var meta in _storeMetas) {
-      var store = db.createStore(meta);
+      var store = db!.createStore(meta!);
       for (var indexMeta in meta.indecies) {
-        store.createIndex(indexMeta);
+        store.createIndex(indexMeta!);
       }
     }
   }
 
   // to call before ready
-  void addStore(ProviderStoreMeta storeMeta) {
+  void addStore(ProviderStoreMeta? storeMeta) {
     _storeMetas.add(storeMeta);
   }
 
@@ -37,34 +38,34 @@ class DynamicProvider extends Provider {
     }
   }
 
-  DynamicProvider.noMeta(IdbFactory idbFactory) {
+  DynamicProvider.noMeta(IdbFactory? idbFactory) {
     _idbFactory = idbFactory;
   }
 
-  DynamicProvider(IdbFactory idbFactory, [ProviderDbMeta meta]) {
+  DynamicProvider(IdbFactory? idbFactory, [ProviderDbMeta? meta]) {
     _idbFactory = idbFactory;
     _databaseMeta = meta;
   }
 }
 
 abstract class Provider {
-  IdbFactory _idbFactory;
-  ProviderDb _db;
-  ProviderDbMeta _databaseMeta;
+  IdbFactory? _idbFactory;
+  ProviderDb? _db;
+  ProviderDbMeta? _databaseMeta;
 
-  IdbFactory get idbFactory => _idbFactory;
+  IdbFactory? get idbFactory => _idbFactory;
 
-  ProviderDb get db => _db;
+  ProviderDb? get db => _db;
 
   Provider();
 
   Provider.fromIdb(Database idbDatabase) {
     _setDatabase(idbDatabase);
-    _databaseMeta = db.meta;
+    _databaseMeta = db!.meta;
   }
 
   //AppProvider(this.idbFactory);
-  void init(IdbFactory idbFactory, String dbName, int dbVersion) {
+  void init(IdbFactory? idbFactory, String dbName, int dbVersion) {
     _idbFactory = idbFactory;
     _databaseMeta = ProviderDbMeta(dbName, dbVersion);
   }
@@ -76,7 +77,7 @@ abstract class Provider {
 
   // must be set before being ready
   // The provider take ownership of the database
-  set db(ProviderDb db) {
+  set db(ProviderDb? db) {
     if (db == null) {
       _db = null;
       _ready = null;
@@ -88,19 +89,19 @@ abstract class Provider {
         _readyCompleter = Completer.sync();
         _db = db;
         _idbFactory = db.factory;
-        _databaseMeta = _db.meta;
+        _databaseMeta = _db!.meta;
 
-        _ready = _readyCompleter.future;
-        _readyCompleter.complete(this);
+        _ready = _readyCompleter!.future;
+        _readyCompleter!.complete(this);
       }
     }
   }
 
-  Database get database => db.database;
+  Database? get database => db!.database;
 
   // must be set before being ready
   // The provider take ownership of the database
-  set database(Database db) {
+  set database(Database? db) {
     if (db == null) {
       _db = null;
       _ready = null;
@@ -112,10 +113,10 @@ abstract class Provider {
         _readyCompleter = Completer.sync();
         _setDatabase(db);
         _idbFactory = db.factory;
-        _databaseMeta = _db.meta;
+        _databaseMeta = _db!.meta;
 
-        _ready = _readyCompleter.future;
-        _readyCompleter.complete(this);
+        _ready = _readyCompleter!.future;
+        _readyCompleter!.complete(this);
       }
     }
   }
@@ -124,7 +125,7 @@ abstract class Provider {
 
   void close() {
     if (db != null) {
-      db.close();
+      db!.close();
       _db = null;
       _ready = null;
       _readyCompleter = null;
@@ -133,14 +134,14 @@ abstract class Provider {
 
   // delete content
   Future clear() {
-    final storeNames = db.database.objectStoreNames.toList(growable: false);
+    final storeNames = db!.database!.objectStoreNames.toList(growable: false);
     var globalTrans = ProviderTransactionList(this, storeNames, true);
-    final futures = <Future>[];
+    final futures = <Future<Object?>>[];
     for (final storeName in storeNames) {
       var trans = globalTrans.store(storeName);
       futures.add(trans.clear());
     }
-    return Future.wait(futures).then((_) {
+    return Future.wait(futures).then<Object?>((_) {
       return globalTrans.completed;
     });
   }
@@ -156,16 +157,16 @@ abstract class Provider {
     onUpdateDatabase(e);
   }
 
-  Future<ProviderStoresMeta> _storesMeta;
+  Future<ProviderStoresMeta>? _storesMeta;
 
-  Future<ProviderStoresMeta> get storesMeta {
+  Future<ProviderStoresMeta>? get storesMeta {
     _storesMeta ??= Future.sync(() {
-      final metas = <ProviderStoreMeta>[];
+      final metas = <ProviderStoreMeta?>[];
 
-      var storeNames = db.storeNames.toList();
+      var storeNames = db!.storeNames.toList();
       final txn = transactionList(storeNames);
       for (final storeName in storeNames) {
-        metas.add(txn.store(storeName).store.meta);
+        metas.add(txn.store(storeName).store!.meta);
       }
       return txn.completed.then((_) {
         final meta = ProviderStoresMeta(metas);
@@ -208,34 +209,34 @@ abstract class Provider {
 
   Future delete() {
     close();
-    return idbFactory.deleteDatabase(_databaseMeta.name);
+    return idbFactory!.deleteDatabase(_databaseMeta!.name);
   }
 
-  Future<Provider> _ready;
-  Completer<Provider> _readyCompleter;
+  Future<Provider>? _ready;
+  Completer<Provider>? _readyCompleter;
 
-  bool get isReady => _readyCompleter != null && _readyCompleter.isCompleted;
+  bool get isReady => _readyCompleter != null && _readyCompleter!.isCompleted;
 
-  Future<Provider> get ready {
+  Future<Provider>? get ready {
     if (_ready == null) {
       _readyCompleter = Completer.sync();
 
-      _ready = _readyCompleter.future;
+      _ready = _readyCompleter!.future;
 
       runZonedGuarded(() {
-        return _idbFactory
-            .open(_databaseMeta.name,
-                version: _databaseMeta.version,
+        return _idbFactory!
+            .open(_databaseMeta!.name,
+                version: _databaseMeta!.version,
                 onUpgradeNeeded: _onUpdateDatabase)
             .then((Database db) {
           _setDatabase(db);
-          _readyCompleter.complete(this);
+          _readyCompleter!.complete(this);
         });
       }, (e, StackTrace st) {
         print('open failed');
         print(e);
         print(st);
-        _readyCompleter.completeError(e, st);
+        _readyCompleter!.completeError(e, st);
       });
     }
     return _ready;
@@ -261,7 +262,7 @@ abstract class Provider {
   Map toMap() {
     final map = {};
     if (_db != null) {
-      map['db'] = _db._database.name;
+      map['db'] = _db!._database!.name;
     }
     return map;
   }

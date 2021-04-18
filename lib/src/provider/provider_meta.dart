@@ -4,9 +4,9 @@ class ProviderDbMeta {
   final String name;
   final int version;
 
-  ProviderDbMeta(this.name, [int version]) : version = version ?? 1;
+  ProviderDbMeta(this.name, [int? version]) : version = version ?? 1;
 
-  ProviderDbMeta overrideMeta({String name, int version}) {
+  ProviderDbMeta overrideMeta({String? name, int? version}) {
     name ??= this.name;
     version ??= this.version;
     return ProviderDbMeta(name, version);
@@ -34,15 +34,15 @@ class ProviderDbMeta {
 }
 
 class ProviderDb {
-  Database _database;
+  Database? _database;
 
-  Database get database => _database;
+  Database? get database => _database;
 
   //Provider _provider;
   ProviderDb(this._database);
 
   ProviderStore createStore(ProviderStoreMeta meta) {
-    final objectStore = database.createObjectStore(meta.name,
+    final objectStore = database!.createObjectStore(meta.name,
         keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
     return ProviderStore(objectStore);
   }
@@ -52,32 +52,32 @@ class ProviderDb {
   bool deleteStore(String name) {
 // dev bug
     if (storeNames.contains(name)) {
-      database.deleteObjectStore(name);
+      database!.deleteObjectStore(name);
       return true;
     }
     return false;
   }
 
   Iterable<String> get storeNames {
-    return database.objectStoreNames;
+    return database!.objectStoreNames;
   }
 
-  ProviderDbMeta _meta;
+  ProviderDbMeta? _meta;
 
-  ProviderDbMeta get meta {
-    _meta ??= ProviderDbMeta(database.name, database.version);
+  ProviderDbMeta? get meta {
+    _meta ??= ProviderDbMeta(database!.name, database!.version);
 
     return _meta;
   }
 
-  int get version => meta.version;
+  int get version => meta!.version;
 
   void close() {
-    database.close();
+    database!.close();
     _database = null;
   }
 
-  IdbFactory get factory => _database.factory;
+  IdbFactory get factory => _database!.factory;
 
   @override
   String toString() => '$_database';
@@ -86,7 +86,7 @@ class ProviderDb {
 class StoreRow<K, V> {}
 
 class ProviderStoresMeta {
-  final Iterable<ProviderStoreMeta> stores;
+  final Iterable<ProviderStoreMeta?> stores;
 
   ProviderStoresMeta(this.stores);
 
@@ -109,17 +109,17 @@ class ProviderStoresMeta {
 
 class ProviderStoreMeta {
   final String name;
-  final String keyPath;
+  final String? keyPath;
   final bool autoIncrement;
 
   ProviderStoreMeta(this.name,
-      {this.keyPath, bool autoIncrement, List<ProviderIndexMeta> indecies})
+      {this.keyPath, bool? autoIncrement, List<ProviderIndexMeta?>? indecies})
       //
       : autoIncrement = (autoIncrement == true)
         //
         ,
         indecies = (indecies == null) ? [] : indecies;
-  final List<ProviderIndexMeta> indecies;
+  final List<ProviderIndexMeta?> indecies;
 
   ProviderStoreMeta overrideIndecies(List<ProviderIndexMeta> indecies) {
     return ProviderStoreMeta(name,
@@ -159,17 +159,17 @@ class ProviderStoreMeta {
 }
 
 class ProviderStore {
-  ProviderStoreMeta _meta;
+  ProviderStoreMeta? _meta;
 
-  ProviderStoreMeta get meta {
+  ProviderStoreMeta? get meta {
     if (_meta == null) {
-      final indecies = <ProviderIndexMeta>[];
+      final indecies = <ProviderIndexMeta?>[];
       for (final indexName in indexNames) {
         final index = this.index(indexName);
         indecies.add(index.meta);
       }
       _meta = ProviderStoreMeta(objectStore.name,
-          keyPath: objectStore.keyPath as String,
+          keyPath: objectStore.keyPath as String?,
           autoIncrement: objectStore.autoIncrement,
           indecies: indecies);
     }
@@ -193,13 +193,13 @@ class ProviderStore {
     return ProviderIndex(index);
   }
 
-  Future get(var key) => objectStore.getObject(key);
+  Future<Object?> get(Object key) => objectStore.getObject(key);
 
-  Future put(var value, [var key]) => objectStore.put(value, key);
+  Future put(Object value, [Object? key]) => objectStore.put(value, key);
 
-  Future add(var value, [var key]) => objectStore.add(value, key);
+  Future add(Object value, [Object? key]) => objectStore.add(value, key);
 
-  Future delete(var key) => objectStore.delete(key);
+  Future delete(Object key) => objectStore.delete(key);
 
   Future clear() => objectStore.clear();
 
@@ -208,11 +208,11 @@ class ProviderStore {
 
 class ProviderIndexMeta {
   final String name;
-  final String keyPath;
+  final String? keyPath;
   final bool unique;
   final bool multiEntry;
 
-  ProviderIndexMeta(this.name, this.keyPath, {bool unique, bool multiEntry})
+  ProviderIndexMeta(this.name, this.keyPath, {bool? unique, bool? multiEntry})
       //
       : unique = (unique == true),
         multiEntry = (multiEntry == true);
@@ -249,10 +249,10 @@ class ProviderIndexMeta {
 }
 
 class ProviderIndex {
-  ProviderIndexMeta _meta;
+  ProviderIndexMeta? _meta;
 
-  ProviderIndexMeta get meta {
-    _meta ??= ProviderIndexMeta(index.name, index.keyPath as String,
+  ProviderIndexMeta? get meta {
+    _meta ??= ProviderIndexMeta(index.name, index.keyPath as String?,
         unique: index.unique, multiEntry: index.multiEntry);
 
     return _meta;
