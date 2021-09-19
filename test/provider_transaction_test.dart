@@ -42,8 +42,8 @@ void testMain(TestContext context) {
       await _setUp();
       final storeTxn = provider.storeTransaction(storeName, true);
       // put one with a key one without
-      unawaited(storeTxn.put({'value': 'value1'}));
-      unawaited(storeTxn.put({'value': 'value2'}));
+      storeTxn.put({'value': 'value1'}).unawait();
+      storeTxn.put({'value': 'value2'}).unawait();
       await storeTxn.completed;
 
       final txn = provider.storeTransaction(storeName, false);
@@ -65,10 +65,10 @@ void testMain(TestContext context) {
       await _setUp();
       final storeTxn = provider.storeTransaction(storeName, true);
       // put one with a key one without
-      unawaited(storeTxn.put({'value': 'value1'}));
-      unawaited(storeTxn.put({'my_key': 2, 'value': 'value2'}));
-      unawaited(storeTxn.put({'value': 'value3'}));
-      unawaited(storeTxn.put({'my_key': 1, 'value': 'value4'}));
+      storeTxn.put({'value': 'value1'}).unawait();
+      storeTxn.put({'my_key': 2, 'value': 'value2'}).unawait();
+      storeTxn.put({'value': 'value3'}).unawait();
+      storeTxn.put({'my_key': 1, 'value': 'value4'}).unawait();
       await storeTxn.completed;
 
       final txn = provider.indexTransaction(storeName, indexName);

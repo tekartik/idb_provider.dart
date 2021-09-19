@@ -55,10 +55,10 @@ abstract class DbRecordBase<K> {
   int get hashCode => const MapEquality().hash(toDbEntry()) + id.hashCode;
 
   @override
-  bool operator ==(o) {
-    if (o is DbRecordBase) {
-      return (const MapEquality().equals(toDbEntry(), o.toDbEntry())) &&
-          id == o.id;
+  bool operator ==(Object other) {
+    if (other is DbRecordBase) {
+      return (const MapEquality().equals(toDbEntry(), other.toDbEntry())) &&
+          id == other.id;
     }
     return false;
   }
@@ -222,19 +222,19 @@ class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
   Future<K> _throwError<K>() async => throw UnsupportedError(
       'use putRecord, deleteRecord and clearRecords API');
 
-  @deprecated
+  @Deprecated('not supported, use record API')
   @override
   Future<K> add(Map value, [K? key]) => _throwError<K>();
 
-  @deprecated
+  @Deprecated('not supported, use record API')
   @override
   Future<K> put(Map value, [K? key]) => _throwError<K>();
 
-  @deprecated
+  @Deprecated('not supported, use record API')
   @override
   Future delete(K key) => _throwError();
 
-  @deprecated
+  @Deprecated('not supported, use record API')
   @override
   Future clear() => _throwError();
 
@@ -627,13 +627,6 @@ abstract class DbRecordProvidersMixin {
   DbRecordProviderWriteTransactionList dbRecordProviderWriteTransactionList(
           List<String> storeNames) =>
       writeTransactionList(storeNames);
-
-  @deprecated // 2016-02-12
-  DbRecordProviderTransactionList dbRecordProviderTransactionList(
-      List<String> storeNames,
-      [bool readWrite = false]) {
-    return DbRecordProviderTransactionList(this, storeNames, readWrite);
-  }
 
   // to implement
   DbRecordBaseProvider? getRecordProvider(String storeName);
