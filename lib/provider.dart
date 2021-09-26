@@ -1,16 +1,12 @@
 library tekartik_provider;
 
-import 'dart:async';
-
 import 'package:collection/collection.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_common_utils/hash_code_utils.dart';
 
 part 'package:tekartik_idb_provider/src/provider/provider_meta.dart';
-
 part 'package:tekartik_idb_provider/src/provider/provider_row.dart';
-
 part 'package:tekartik_idb_provider/src/provider/provider_transaction.dart';
 
 class DynamicProvider extends Provider {
