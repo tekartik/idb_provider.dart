@@ -7,8 +7,8 @@ environment:
 dependencies:
   tekartik_common_utils:
     git:
-      url: git://github.com/tekartik/common_utils.dart
-      ref: null_safety
+      url: https://github.com/tekartik/common_utils.dart
+      ref: dart2_3
   idb_shim: '>=2.0.0'
   collection: any
 dev_dependencies:
@@ -20,8 +20,8 @@ dev_dependencies:
   build_web_compilers: '>2.0.0'
   chrome_travis:
     git:
-      url: git://github.com/tekartik/chrome_travis.dart
-      ref: null_safety
+      url: https://github.com/tekartik/chrome_travis.dart
+      ref: dart2_3
 dependency_overrides:
   # idb_shim:
   #  path: ../../tekartik/idb_shim.dart/idb_shim
