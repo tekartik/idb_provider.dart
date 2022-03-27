@@ -16,7 +16,7 @@ export 'package:idb_shim/src/common/common_meta.dart';
 class TestContext {
   late IdbFactory factory;
 
-  String get dbName => testDescriptions.join('-') + '.db';
+  String get dbName => '${testDescriptions.join('-')}.db';
 }
 
 class SembastTestContext extends TestContext {

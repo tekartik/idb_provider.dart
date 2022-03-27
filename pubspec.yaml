@@ -22,6 +22,8 @@ dev_dependencies:
     git:
       url: https://github.com/tekartik/chrome_travis.dart
       ref: dart2_3
+  path:
+  sembast:
 dependency_overrides:
   # idb_shim:
   #  path: ../../tekartik/idb_shim.dart/idb_shim

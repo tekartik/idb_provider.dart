@@ -49,6 +49,7 @@ class IntMapRow extends _BaseMapRow<int> {
   IntMapRow.from(int key, Map value) : super.from(key, value);
 }
 
+// ignore: library_private_types_in_public_api
 abstract class ProviderRowFactory<T extends _BaseRow<K, V>, K, V> {
   T newRow(K key, V value);
 

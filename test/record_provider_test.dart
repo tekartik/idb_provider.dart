@@ -78,12 +78,12 @@ class DbBasicAppProvider extends DynamicProvider
   //static const String currentIndex = dbFieldCurrent;
 
   // _dbVersion for testing
-  DbBasicAppProvider(IdbFactory idbFactory, String dbName, [int? _dbVersion])
+  DbBasicAppProvider(IdbFactory idbFactory, String dbName, [int? dbVersion])
       : super.noMeta(idbFactory) {
     basic.provider = this;
-    _dbVersion ??= dbVersion;
+    dbVersion ??= DbBasicAppProvider.dbVersion;
 
-    init(idbFactory, dbName, _dbVersion);
+    init(idbFactory, dbName, dbVersion);
 
     providerMap = {
       basicStore: basic,

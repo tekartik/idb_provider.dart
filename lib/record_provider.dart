@@ -187,9 +187,9 @@ class DbRecordProviderReadTransaction<T extends DbRecordBase?, K>
       DbRecordBaseProvider provider, String storeName)
       : super._(provider, storeName, false);
 
-  DbRecordProviderReadTransaction.fromList(DbRecordBaseProvider _provider,
+  DbRecordProviderReadTransaction.fromList(DbRecordBaseProvider provider,
       ProviderTransactionList list, String storeName)
-      : super._fromList(_provider, list, storeName);
+      : super._fromList(provider, list, storeName);
 }
 
 class DbRecordProviderWriteTransaction<T extends DbRecordBase, K>
