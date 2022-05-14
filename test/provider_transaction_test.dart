@@ -23,7 +23,7 @@ void testMain(TestContext context) {
     late DynamicProvider provider;
     ProviderTransaction? transaction;
 
-    Future _setUp() {
+    Future providerSetUp() {
       provider = DynamicProvider(idbFactory, ProviderDbMeta(context.dbName));
       return provider.delete().then((_) {
         final indexMeta = ProviderIndexMeta(indexName, indexKey);
@@ -39,7 +39,7 @@ void testMain(TestContext context) {
     });
 
     test('store_cursor', () async {
-      await _setUp();
+      await providerSetUp();
       final storeTxn = provider.storeTransaction(storeName, true);
       // put one with a key one without
       storeTxn.put({'value': 'value1'}).unawait();
@@ -62,7 +62,7 @@ void testMain(TestContext context) {
     });
 
     test('store_index', () async {
-      await _setUp();
+      await providerSetUp();
       final storeTxn = provider.storeTransaction(storeName, true);
       // put one with a key one without
       storeTxn.put({'value': 'value1'}).unawait();
