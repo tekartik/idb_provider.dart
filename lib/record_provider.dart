@@ -447,7 +447,7 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
       record.setSyncInfo(null, null);
       record.dirty = true;
     }
-    Future<T?> _insert() {
+    Future<T?> doInsert() {
       record.version = 1;
       return txnRawPut(txn, record);
     }
@@ -463,11 +463,11 @@ abstract class DbSyncedRecordProvider<T extends DbSyncedRecordBase, K>
           record.version = existingRecord.version! + 1;
           return txnRawPut(txn, record);
         } else {
-          return _insert();
+          return doInsert();
         }
       });
     } else {
-      return _insert();
+      return doInsert();
     }
   }
 

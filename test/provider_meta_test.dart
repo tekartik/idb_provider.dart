@@ -114,7 +114,7 @@ void testMain(TestContext context) {
           provider.close();
         });
 
-        Future _roundCircle(ProviderStoresMeta storesMeta) {
+        Future roundCircle(ProviderStoresMeta storesMeta) {
           provider.addStores(storesMeta);
           return provider.ready!.then((Provider readyProvider) {
             return provider.storesMeta!.then((metas) {
@@ -138,7 +138,7 @@ void testMain(TestContext context) {
             //)
             ProviderStoreMeta('store')
           ]);
-          return _roundCircle(meta);
+          return roundCircle(meta);
         });
         test('two_stores', () {
           provider.addStore(ProviderStoreMeta('store'));
@@ -162,7 +162,7 @@ void testMain(TestContext context) {
                     [ProviderIndexMeta('idx', 'my_key')] //
                 )
           ]);
-          return _roundCircle(meta);
+          return roundCircle(meta);
         });
       });
     });
