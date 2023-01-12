@@ -256,7 +256,7 @@ abstract class Provider {
   }
 
   Map toMap() {
-    final map = {};
+    final map = <String, Object?>{};
     if (_db != null) {
       map['db'] = _db!._database!.name;
     }

@@ -98,7 +98,8 @@ class ProviderStoresMeta {
   @override
   bool operator ==(other) {
     if (other is ProviderStoresMeta) {
-      return const UnorderedIterableEquality().equals(stores, other.stores);
+      return const UnorderedIterableEquality<Object?>()
+          .equals(stores, other.stores);
     }
     return false;
   }
@@ -144,7 +145,7 @@ class ProviderStoreMeta {
         return false;
       }
       // order not important for index
-      if (!(const UnorderedIterableEquality()
+      if (!(const UnorderedIterableEquality<Object?>()
           .equals(indecies, other.indecies))) {
         return false;
       }

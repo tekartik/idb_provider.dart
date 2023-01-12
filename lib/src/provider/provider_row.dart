@@ -23,9 +23,6 @@ abstract class _BaseRow<K, V> {
 }
 
 abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
-  @override
-  Map? get value => super.value;
-
   _BaseMapRow.from(K key, Map map) : super.from(key, map);
 
   @override
@@ -33,7 +30,7 @@ abstract class _BaseMapRow<K> extends _BaseRow<K, Map> {
   @override
   bool operator ==(other) {
     if (other is _BaseMapRow) {
-      return const MapEquality().equals(value, other.value);
+      return const MapEquality<Object?, Object?>().equals(value, other.value);
     }
     return false;
   }
