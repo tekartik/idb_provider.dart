@@ -132,7 +132,7 @@ void testMain(TestContext context) {
     });
 
     Future<int> slowCount() {
-      final trans = ProviderStoreTransaction(provider, itemsStore);
+      final trans = RawProviderStoreTransaction(provider, itemsStore);
       var count = 0;
       return trans.store!.objectStore
           .openCursor(
@@ -142,7 +142,7 @@ void testMain(TestContext context) {
           .listen((CursorWithValue cwv) {
             count++;
           })
-          .asFuture()
+          .asFuture<void>()
           .then((_) {
             return count;
           });

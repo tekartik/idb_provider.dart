@@ -21,7 +21,6 @@ void testMain(TestContext context) {
     final indexKey = 'my_key';
 
     late DynamicProvider provider;
-    ProviderTransaction? transaction;
 
     Future providerSetUp() {
       provider = DynamicProvider(idbFactory, ProviderDbMeta(context.dbName));
@@ -34,7 +33,7 @@ void testMain(TestContext context) {
     }
 
     tearDown(() async {
-      await transaction?.completed;
+      //await transaction?.completed;
       provider.close();
     });
 

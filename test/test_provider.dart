@@ -33,7 +33,7 @@ class TestProvider extends Provider {
   }
 
   Future count() {
-    var trans = ProviderStoreTransaction(this, itemsStore);
+    var trans = RawProviderStoreTransaction(this, itemsStore);
     return trans.count().then((int count) {
       return trans.completed.then((_) {
         return count;
@@ -42,21 +42,22 @@ class TestProvider extends Provider {
   }
 
   Future<List<String?>> getNames({int? limit, int? offset}) {
-    var trans = ProviderStoreTransaction(this, itemsStore);
+    var trans = RawProviderStoreTransaction(this, itemsStore);
     final names = <String?>[];
     return trans
         .openCursor(limit: limit, offset: offset)
         .listen((CursorWithValue cwv) {
           names.add((cwv.value as Map)[nameField] as String?);
         })
-        .asFuture()
+        .asFuture<void>()
         .then((_) {
           return names;
         });
   }
 
   Future<List<String?>> getOrderedNames({int? limit, int? offset}) {
-    var trans = ProviderIndexTransaction(this, itemsStore, nameIndex);
+    var trans =
+        ProviderIndexTransaction<Object?, Object?>(this, itemsStore, nameIndex);
 
     final names = <String?>[];
     return trans
@@ -64,7 +65,7 @@ class TestProvider extends Provider {
         .listen((CursorWithValue cwv) {
           names.add((cwv.value as Map)[nameField] as String?);
         })
-        .asFuture()
+        .asFuture<void>()
         .then((_) {
           return trans.completed;
         })
@@ -74,9 +75,9 @@ class TestProvider extends Provider {
   }
 
   Future<int> putName(String name) {
-    var trans = ProviderStoreTransaction(this, itemsStore, true);
+    var trans = RawProviderStoreTransaction(this, itemsStore, true);
 
-    final data = {};
+    final data = <String, Object?>{};
     data[nameField] = name;
 
     return trans.add(data).then((key) {
@@ -88,7 +89,7 @@ class TestProvider extends Provider {
 
   // null if not found
   Future<String?> getName(int key) {
-    var trans = ProviderStoreTransaction(this, itemsStore);
+    var trans = RawProviderStoreTransaction(this, itemsStore);
 
     return trans.get(key).then((var data) {
       return trans.completed.then((_) {
@@ -101,7 +102,7 @@ class TestProvider extends Provider {
   }
 
   Future<int> get(int key) {
-    var trans = ProviderStoreTransaction(this, itemsStore);
+    var trans = RawProviderStoreTransaction(this, itemsStore);
     return trans.store!.get(key).then((var key) {
       return trans.completed.then((_) {
         return key as int;

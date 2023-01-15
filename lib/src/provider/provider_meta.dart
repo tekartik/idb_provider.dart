@@ -98,7 +98,8 @@ class ProviderStoresMeta {
   @override
   bool operator ==(other) {
     if (other is ProviderStoresMeta) {
-      return const UnorderedIterableEquality().equals(stores, other.stores);
+      return const UnorderedIterableEquality<Object?>()
+          .equals(stores, other.stores);
     }
     return false;
   }
@@ -144,7 +145,7 @@ class ProviderStoreMeta {
         return false;
       }
       // order not important for index
-      if (!(const UnorderedIterableEquality()
+      if (!(const UnorderedIterableEquality<Object?>()
           .equals(indecies, other.indecies))) {
         return false;
       }
@@ -208,7 +209,7 @@ class ProviderStore {
 
 class ProviderIndexMeta {
   final String name;
-  final String? keyPath;
+  final Object keyPath;
   final bool unique;
   final bool multiEntry;
 
@@ -252,7 +253,7 @@ class ProviderIndex {
   ProviderIndexMeta? _meta;
 
   ProviderIndexMeta? get meta {
-    _meta ??= ProviderIndexMeta(index.name, index.keyPath as String?,
+    _meta ??= ProviderIndexMeta(index.name, index.keyPath,
         unique: index.unique, multiEntry: index.multiEntry);
 
     return _meta;

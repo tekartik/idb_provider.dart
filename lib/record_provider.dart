@@ -26,14 +26,14 @@ abstract class DbRecordBase<K> {
 
   void fillFromDbEntry(Map entry);
 
-  Map toDbEntry() {
-    final entry = {};
+  Map<String, Object?> toDbEntry() {
+    final entry = <String, Object?>{};
     fillDbEntry(entry);
 
     return entry;
   }
 
-  void set(Map map, String key, value) {
+  void set(Map map, String key, Object? value) {
     if (value != null) {
       map[key] = value;
     } else {
@@ -43,7 +43,7 @@ abstract class DbRecordBase<K> {
 
   @override
   String toString() {
-    final map = {};
+    final map = <String, Object?>{};
     fillDbEntry(map);
     if (id != null) {
       map['_id'] = id.toString();
@@ -52,12 +52,14 @@ abstract class DbRecordBase<K> {
   }
 
   @override
-  int get hashCode => const MapEquality().hash(toDbEntry()) + id.hashCode;
+  int get hashCode =>
+      const MapEquality<Object?, Object?>().hash(toDbEntry()) + id.hashCode;
 
   @override
   bool operator ==(Object other) {
     if (other is DbRecordBase) {
-      return (const MapEquality().equals(toDbEntry(), other.toDbEntry())) &&
+      return (const MapEquality<String, Object?>()
+              .equals(toDbEntry(), other.toDbEntry())) &&
           id == other.id;
     }
     return false;

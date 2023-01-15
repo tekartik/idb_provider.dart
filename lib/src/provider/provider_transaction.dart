@@ -67,6 +67,13 @@ class ProviderIndexTransaction<K, V> extends Object
   }
 }
 
+class RawProviderStoreTransaction
+    extends ProviderStoreTransaction<Object, Object> {
+  RawProviderStoreTransaction(Provider provider, String storeName,
+      [bool readWrite = false])
+      : super(provider, storeName, readWrite);
+}
+
 class ProviderStoreTransaction<K, V>
     extends ProviderStoreTransactionBase<K, V> {
   @protected

@@ -23,7 +23,7 @@ void testMain(TestContext context) {
                   expect(provider, readyProvider);
                   expect(provider.db!.meta!.name, 'test');
                   expect(provider.db!.meta!.version, 1);
-                  expect(provider.db!.storeNames, []);
+                  expect(provider.db!.storeNames, isEmpty);
                   provider.close();
                 }));
       });
@@ -38,7 +38,7 @@ void testMain(TestContext context) {
                   expect(provider, readyProvider);
                   expect(provider.db!.meta!.name, 'test2');
                   expect(provider.db!.meta!.version, 2);
-                  expect(provider.db!.storeNames, []);
+                  expect(provider.db!.storeNames, isEmpty);
                   provider.close();
                 }));
       });

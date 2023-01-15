@@ -247,7 +247,7 @@ void testMain(TestContext context) {
           final record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String)!;
           expect(record.id, '_1');
-        }).asFuture();
+        }).asFuture<void>();
 
         await txn.completed;
 
@@ -299,7 +299,7 @@ void testMain(TestContext context) {
           final record = DbBasicRecord.fromDbEntry(
               cwv.value as Map, cwv.primaryKey as String)!;
           expect(record.id, '_1');
-        }).asFuture();
+        }).asFuture<void>();
 
         await txn.completed;
 
