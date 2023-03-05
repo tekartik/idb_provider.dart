@@ -101,16 +101,12 @@ void testMain(TestContext context) {
         final providerName = 'test';
 
         late DynamicProvider provider;
-        ProviderTransaction? transaction;
 
         setUp(() {
           provider = DynamicProvider(idbFactory, ProviderDbMeta(providerName));
           return provider.delete();
         });
         tearDown(() async {
-          if (transaction != null) {
-            await transaction.completed;
-          }
           provider.close();
         });
 
